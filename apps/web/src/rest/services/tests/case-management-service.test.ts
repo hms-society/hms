@@ -22,6 +22,18 @@ describe('CaseManagementService', () => {
     expect(client.post).toHaveBeenCalledWith('/cases', request)
   })
 
+  it('encodes Admin search and pagination in the request URL', async () => {
+    const restClient = makeRestClient()
+    await CaseManagementService(restClient).listAllCasesForAdmin({
+      page: 2,
+      pageSize: 20,
+      search: 'Ana & João',
+    })
+    expect(restClient.get).toHaveBeenCalledWith(
+      '/cases/admin/list?page=2&pageSize=20&search=Ana+%26+Jo%C3%A3o',
+    )
+  })
+
   it('sends team candidate filters and mutation requests to their routes', async () => {
     const restClient = makeRestClient()
     const service = CaseManagementService(restClient)

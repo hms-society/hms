@@ -2,21 +2,29 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import type {
+  CaseChecklistItem,
   LegalCase,
   LegalCaseSummary,
 } from '@hms/core/case-management/domain/entities'
 import {
   CaseChecklistGateDecision,
   type CaseChecklistGateDecision as CaseChecklistGateDecisionValue,
+  type CaseChecklistGate,
+  type CaseDossierGate,
   LegalCaseStatus,
 } from '@hms/core/case-management/domain/structures'
+import type {
+  DocumentException,
+  DocumentValidationDocument,
+} from '@hms/core/document-engine/domain/entities'
+import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 
 import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
 import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
 import { useNavigation } from '@/ui/shared/hooks/use-navigation'
 import { useCaseChecklist } from '../hooks/use-case-checklist'
 import { useRequestDocumentExceptionAction } from '@/ui/document-engine/hooks/use-request-document-exception-action'
-import type { ChecklistItem } from '../types'
+import type { ActivityItem, ChecklistItem } from '../types'
 
 export type UseChecklistDossierTabParams = {
   caseId: string
@@ -74,7 +82,8 @@ export function useChecklistDossierTab({
   checklist,
   isReviewDisabled = false,
 }: UseChecklistDossierTabParams) {
-  const { caseManagementService } = useRestContext()
+  const { caseManagementService, documentService, documentValidationService } =
+    useRestContext()
   const { navigateTo } = useNavigation()
   const queryClient = useQueryClient()
   const { currentCollaborator } = useCurrentCollaboratorQuery()
@@ -85,6 +94,24 @@ export function useChecklistDossierTab({
       if (response.isFailure) response.throwError()
       return response.body
     },
+  })
+  const documentsQuery = useQuery({
+    queryKey: ['document-validation', 'documents', { caseId }],
+    queryFn: async () => {
+      const response = await documentValidationService.listDocuments({ caseId })
+      if (response.isFailure) response.throwError()
+      return response.body
+    },
+    enabled: Boolean(caseId),
+  })
+  const documentExceptionsQuery = useQuery({
+    queryKey: ['document-engine', 'case', caseId, 'document-exceptions'],
+    queryFn: async () => {
+      const response = await documentService.listCaseExceptions(caseId)
+      if (response.isFailure) response.throwError()
+      return response.body
+    },
+    enabled: Boolean(caseId),
   })
   const pendingCountByChecklistItemId = new Map<string, number>()
   for (const pending of pendingsQuery.data ?? []) {
@@ -137,6 +164,14 @@ export function useChecklistDossierTab({
       persistedCase.status === LegalCaseStatus.LegalProduction,
   )
   const hasChecklistDecision = Boolean(checklistGateDecision)
+  const activities = buildDocumentaryActivities({
+    caseChecklistItems: persistedChecklistItems,
+    checklistGate: persistedCase?.checklistGate,
+    currentCollaborator,
+    documentExceptions: documentExceptionsQuery.data ?? [],
+    documents: documentsQuery.data ?? [],
+    dossierGate: persistedCase?.dossierGate,
+  })
   const canHomologateDossier = Boolean(
     !persistedCase?.dossierGate.homologatedAt &&
       (checklistGateDecision === CaseChecklistGateDecision.Approved ||
@@ -333,6 +368,7 @@ export function useChecklistDossierTab({
 
   return {
     actionFeedback,
+    activities,
     canStartLegalWriting,
     canHomologateDossier,
     checklistGateAuditLabel,
@@ -377,6 +413,203 @@ export function useChecklistDossierTab({
     setIsExceptionModalOpen,
     validatedItemsCount,
   }
+}
+
+type BuildDocumentaryActivitiesParams = {
+  caseChecklistItems: readonly CaseChecklistItem[]
+  checklistGate?: CaseChecklistGate
+  currentCollaborator: {
+    collaboratorId: string
+    professionalName?: string | null
+  } | null
+  documentExceptions: readonly DocumentException[]
+  documents: readonly DocumentValidationDocument[]
+  dossierGate?: CaseDossierGate
+}
+
+function buildDocumentaryActivities({
+  caseChecklistItems,
+  checklistGate,
+  currentCollaborator,
+  documentExceptions,
+  documents,
+  dossierGate,
+}: BuildDocumentaryActivitiesParams): ActivityItem[] {
+  const activities: Array<ActivityItem & { occurredAt?: Date | string }> = []
+
+  for (const item of caseChecklistItems) {
+    activities.push({
+      id: `checklist-item-created-${item.id}`,
+      icon: 'file-text',
+      title: 'Item incluído no checklist',
+      description: `${item.title} — ${getChecklistItemStatusLabel(item.status)}${formatActivityMetadata(item.createdAt)}`,
+      occurredAt: item.createdAt,
+    })
+
+    if (item.validatedAt) {
+      activities.push({
+        id: `checklist-item-validated-${item.id}`,
+        icon: 'check-circle-2',
+        title: 'Item validado',
+        description: `${item.title}${formatActivityActorAndDate(
+          item.validatedBy,
+          item.validatedAt,
+          currentCollaborator,
+        )}`,
+        occurredAt: item.validatedAt,
+      })
+    }
+  }
+
+  for (const document of documents) {
+    if (!document.reviewedAt) continue
+
+    activities.push({
+      id: `document-reviewed-${document.id}`,
+      icon:
+        document.status === DocumentValidationStatus.Valid
+          ? 'check-circle-2'
+          : 'file-text',
+      title:
+        document.status === DocumentValidationStatus.Valid
+          ? 'Documento validado'
+          : 'Documento analisado',
+      description: `${document.fileName} — ${getDocumentStatusLabel(document.status)}${formatActivityActorAndDate(
+        document.reviewedByName ?? document.reviewedBy,
+        document.reviewedAt,
+        currentCollaborator,
+      )}`,
+      occurredAt: document.reviewedAt,
+    })
+  }
+
+  if (checklistGate?.decision) {
+    activities.push({
+      id: 'checklist-gate-decision',
+      icon: 'file-text',
+      title: `Checklist ${CHECKLIST_GATE_LABELS[checklistGate.decision].toLocaleLowerCase('pt-BR')}`,
+      description: `${checklistGate.remarks ? `Ressalvas: ${checklistGate.remarks}` : 'Decisão registrada'}${formatActivityActorAndDate(
+        checklistGate.decidedBy,
+        checklistGate.decidedAt,
+        currentCollaborator,
+      )}`,
+      occurredAt: checklistGate.decidedAt,
+    })
+  }
+
+  if (dossierGate?.homologatedAt) {
+    activities.push({
+      id: 'dossier-homologated',
+      icon: 'shield-check',
+      title: 'Dossiê homologado',
+      description: `Homologação registrada${formatActivityActorAndDate(
+        dossierGate.homologatedBy,
+        dossierGate.homologatedAt,
+        currentCollaborator,
+      )}`,
+      occurredAt: dossierGate.homologatedAt,
+    })
+  }
+
+  for (const exception of documentExceptions) {
+    activities.push({
+      id: `document-exception-requested-${exception.id}`,
+      icon: 'file-text',
+      title: 'Exceção documental solicitada',
+      description: `${exception.justification}${formatActivityActorAndDate(
+        exception.createdBy,
+        exception.createdAt,
+        currentCollaborator,
+      )}`,
+      occurredAt: exception.createdAt,
+    })
+
+    if (exception.status !== 'PENDING') {
+      activities.push({
+        id: `document-exception-${exception.status.toLowerCase()}-${exception.id}`,
+        icon: exception.status === 'APPROVED' ? 'check-circle-2' : 'file-text',
+        title: `Exceção ${getDocumentExceptionStatusLabel(exception.status)}`,
+        description: `${exception.rejectionJustification ?? exception.justification}${formatActivityActorAndDate(
+          exception.reviewedBy,
+          exception.updatedAt,
+          currentCollaborator,
+        )}`,
+        occurredAt: exception.updatedAt,
+      })
+    }
+  }
+
+  return activities
+    .sort((first, second) => {
+      return (
+        getActivityTimestamp(second.occurredAt) - getActivityTimestamp(first.occurredAt)
+      )
+    })
+    .map(({ occurredAt: _occurredAt, ...activity }) => activity)
+}
+
+function getChecklistItemStatusLabel(status: CaseChecklistItem['status']) {
+  const labels: Record<CaseChecklistItem['status'], string> = {
+    pending: 'pendente',
+    in_analysis: 'em análise',
+    validated: 'validado',
+  }
+
+  return labels[status]
+}
+
+function getDocumentStatusLabel(status: DocumentValidationDocument['status']) {
+  const labels: Record<DocumentValidationDocument['status'], string> = {
+    processing: 'em processamento',
+    awaiting_validation: 'aguardando validação',
+    validated: 'validado',
+    not_linked: 'sem vínculo',
+    illegible: 'ilegível',
+    incomplete: 'incompleto',
+    duplicate: 'duplicado',
+    not_corresponding: 'não correspondente',
+    processing_failure: 'falha no processamento',
+    resend_requested: 'reenvio solicitado',
+  }
+
+  return labels[status]
+}
+
+function getDocumentExceptionStatusLabel(status: DocumentException['status']) {
+  const labels: Record<DocumentException['status'], string> = {
+    PENDING: 'pendente',
+    APPROVED: 'aprovada',
+    REJECTED: 'recusada',
+    EXPIRED: 'expirada',
+  }
+
+  return labels[status]
+}
+
+function formatActivityActorAndDate(
+  actorId: string | null | undefined,
+  occurredAt: Date | string | null | undefined,
+  currentCollaborator: BuildDocumentaryActivitiesParams['currentCollaborator'],
+) {
+  const actor = actorId
+    ? actorId === currentCollaborator?.collaboratorId
+      ? currentCollaborator.professionalName?.trim() || actorId
+      : actorId
+    : undefined
+  const date = occurredAt ? formatChecklistGateDecisionDate(occurredAt) : undefined
+  const details = [actor ? `por ${actor}` : undefined, date ? `em ${date}` : undefined]
+    .filter(Boolean)
+    .join(' ')
+
+  return details ? ` — ${details}` : ''
+}
+
+function formatActivityMetadata(occurredAt: Date | string | null | undefined) {
+  return occurredAt ? ` — ${formatChecklistGateDecisionDate(occurredAt)}` : ''
+}
+
+function getActivityTimestamp(value: Date | string | undefined) {
+  return value ? new Date(value).getTime() : Number.NEGATIVE_INFINITY
 }
 
 function getChecklistGateReviewerName(

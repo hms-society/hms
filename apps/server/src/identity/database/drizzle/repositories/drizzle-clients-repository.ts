@@ -191,4 +191,19 @@ export class DrizzleClientsRepository
       zipCode: client.address?.zipCode ?? null,
     }
   }
+  async findIdsByName(search: string): Promise<readonly string[]> {
+    const searchPattern = `%${search}%`
+    const clients = await this.database
+      .select({ id: clientModel.id })
+      .from(clientModel)
+      .where(
+        or(
+          ilike(clientModel.name, searchPattern),
+          ilike(clientModel.legalName, searchPattern),
+          ilike(clientModel.tradeName, searchPattern),
+        ),
+      )
+
+    return clients.map(({ id }) => id)
+  }
 }

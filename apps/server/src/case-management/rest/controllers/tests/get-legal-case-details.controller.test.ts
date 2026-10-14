@@ -45,4 +45,20 @@ describe('Get Legal Case Details Controller [GET /cases/:id]', () => {
       ],
     })
   })
+  it('allows an active Admin to read metadata without team membership', async () => {
+    const admin = await fixture.registerCollaborator({ profile: 'admin' })
+    const legalCase = await fixture.registerLegalCase({
+      clientId: admin.clientId,
+      legalAreaId: admin.legalAreaId,
+      legalTopicId: admin.legalTopicId,
+    })
+    const response = await request(fixture.app.getHttpServer())
+      .get(`/cases/${legalCase.id}`)
+      .expect(200)
+    expect(response.body).toMatchObject({
+      id: legalCase.id,
+      clientName: admin.clientName,
+      team: [],
+    })
+  })
 })

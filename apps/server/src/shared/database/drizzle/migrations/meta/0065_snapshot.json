@@ -1,5 +1,5 @@
 {
-  "id": "9cac315a-e041-493b-ac66-492712666b68",
+  "id": "373b261e-1819-438c-bae9-a213ad486607",
   "prevId": "8c6ac5f1-fbe4-4bdf-8207-05ab09c19bd4",
   "version": "7",
   "dialect": "postgresql",
@@ -3735,7 +3735,7 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'in_review'"
+          "default": "'draft'"
         },
         "reviewed_by_collaborator_id": {
           "name": "reviewed_by_collaborator_id",
@@ -3839,11 +3839,11 @@
         },
         "document_versions_status_check": {
           "name": "document_versions_status_check",
-          "value": "\"document_versions\".\"status\" in ('in_review', 'approved', 'rejected')"
+          "value": "\"document_versions\".\"status\" in ('draft', 'in_review', 'approved', 'rejected')"
         },
         "document_versions_review_metadata_check": {
           "name": "document_versions_review_metadata_check",
-          "value": "(\"document_versions\".\"status\" = 'in_review' AND \"document_versions\".\"reviewed_by_collaborator_id\" IS NULL AND \"document_versions\".\"reviewed_at\" IS NULL AND \"document_versions\".\"rejection_reason\" IS NULL) OR (\"document_versions\".\"status\" = 'approved' AND \"document_versions\".\"reviewed_by_collaborator_id\" IS NOT NULL AND \"document_versions\".\"reviewed_at\" IS NOT NULL AND \"document_versions\".\"rejection_reason\" IS NULL) OR (\"document_versions\".\"status\" = 'rejected' AND \"document_versions\".\"reviewed_by_collaborator_id\" IS NOT NULL AND \"document_versions\".\"reviewed_at\" IS NOT NULL AND \"document_versions\".\"rejection_reason\" IS NOT NULL AND length(btrim(\"document_versions\".\"rejection_reason\")) > 0)"
+          "value": "(\"document_versions\".\"status\" = 'draft' AND \"document_versions\".\"reviewed_by_collaborator_id\" IS NULL AND \"document_versions\".\"reviewed_at\" IS NULL AND \"document_versions\".\"rejection_reason\" IS NULL) OR (\"document_versions\".\"status\" = 'in_review' AND \"document_versions\".\"reviewed_by_collaborator_id\" IS NULL AND \"document_versions\".\"reviewed_at\" IS NULL AND \"document_versions\".\"rejection_reason\" IS NULL) OR (\"document_versions\".\"status\" = 'approved' AND \"document_versions\".\"reviewed_by_collaborator_id\" IS NOT NULL AND \"document_versions\".\"reviewed_at\" IS NOT NULL AND \"document_versions\".\"rejection_reason\" IS NULL) OR (\"document_versions\".\"status\" = 'rejected' AND \"document_versions\".\"reviewed_by_collaborator_id\" IS NOT NULL AND \"document_versions\".\"reviewed_at\" IS NOT NULL AND \"document_versions\".\"rejection_reason\" IS NOT NULL AND length(btrim(\"document_versions\".\"rejection_reason\")) > 0)"
         },
         "document_versions_content_check": {
           "name": "document_versions_content_check",
@@ -6292,94 +6292,6 @@
           "tableTo": "document_exceptions",
           "columnsFrom": ["document_exception_id"],
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.case_creation_operations": {
-      "name": "case_creation_operations",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "intake_id": {
-          "name": "intake_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "actor_id": {
-          "name": "actor_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "operation_id": {
-          "name": "operation_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "fingerprint": {
-          "name": "fingerprint",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "result": {
-          "name": "result",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "case_creation_operations_actor_key_uidx": {
-          "name": "case_creation_operations_actor_key_uidx",
-          "columns": [
-            {
-              "expression": "actor_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "operation_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "case_creation_operations_intake_id_cases_intake_id_fk": {
-          "name": "case_creation_operations_intake_id_cases_intake_id_fk",
-          "tableFrom": "case_creation_operations",
-          "tableTo": "cases",
-          "columnsFrom": ["intake_id"],
-          "columnsTo": ["intake_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

@@ -4,6 +4,7 @@ import type {
   ChecklistTemplate,
   LegalCase,
   LegalCaseSummary,
+  LegalCaseOperationalSummary,
   CaseTask,
   Pending,
   AssistedMessage,
@@ -28,6 +29,16 @@ export const CaseManagementService = (
   restClient: RestClient,
 ): CaseManagementRestService => {
   return {
+    listAllCasesForAdmin(query) {
+      const searchParams = new URLSearchParams({
+        page: String(query.page),
+        pageSize: String(query.pageSize),
+      })
+      if (query.search) searchParams.set('search', query.search)
+      return restClient.get<PaginationResponse<LegalCaseOperationalSummary>>(
+        `/cases/admin/list?${searchParams.toString()}`,
+      )
+    },
     listCaseTasks(caseId) {
       return restClient.get<readonly CaseTask[]>(`/cases/${caseId}/tasks`)
     },
