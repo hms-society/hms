@@ -1,5 +1,5 @@
 import type {
-  DocumentValidationDocument,
+  DocumentValidationRecord,
   DocumentValidationExtractedField,
 } from '../domain/entities'
 import type {
@@ -46,20 +46,20 @@ export type RecordDocumentResendRequestInput = {
 }
 
 export interface DocumentValidationsRepository {
-  list(filters?: ListDocumentValidationsFilters): Promise<DocumentValidationDocument[]>
+  list(filters?: ListDocumentValidationsFilters): Promise<DocumentValidationRecord[]>
   findDuplicateByHash(
     hashSha256: string,
     excludedDocumentFileId: string,
-  ): Promise<DocumentValidationDocument | undefined>
-  findByFileId(documentFileId: string): Promise<DocumentValidationDocument | undefined>
+  ): Promise<DocumentValidationRecord | undefined>
+  findByFileId(documentFileId: string): Promise<DocumentValidationRecord | undefined>
   recordAnalysis(
     input: RecordDocumentValidationAnalysisInput,
-  ): Promise<DocumentValidationDocument>
-  recordProcessing(documentFileId: string): Promise<DocumentValidationDocument>
+  ): Promise<DocumentValidationRecord>
+  recordProcessing(documentFileId: string): Promise<DocumentValidationRecord>
   recordDecision(
     input: RecordDocumentValidationDecisionInput,
-  ): Promise<DocumentValidationDocument>
+  ): Promise<DocumentValidationRecord>
   recordResendRequest(
     input: RecordDocumentResendRequestInput,
-  ): Promise<DocumentValidationDocument>
+  ): Promise<DocumentValidationRecord>
 }

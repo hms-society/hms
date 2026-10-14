@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common'
 
+import { CaseManagementAccessModule } from '@/case-management/access/case-management-access.module'
 import { CaseManagementDatabaseModule } from '@/case-management/database'
 import { DOCUMENT_ENGINE_PROVIDERS } from '@/document-engine/constants/document-engine-providers'
-import { CaseChecklistUpdateProvider } from '@/document-engine/provision/case-checklist-update-provider'
+import { CaseChecklistUpdateProvider } from './case-checklist-update-provider'
 
 @Module({
-  imports: [CaseManagementDatabaseModule],
+  imports: [CaseManagementDatabaseModule, CaseManagementAccessModule],
   providers: [
     CaseChecklistUpdateProvider,
     {
@@ -15,4 +16,4 @@ import { CaseChecklistUpdateProvider } from '@/document-engine/provision/case-ch
   ],
   exports: [DOCUMENT_ENGINE_PROVIDERS.caseChecklistUpdate],
 })
-export class DocumentEngineProvisionModule {}
+export class DocumentEngineChecklistAccessModule {}

@@ -7,24 +7,17 @@ import { RequestDocumentExceptionController } from '@/document-engine/rest/contr
 
 describe('Request Document Exception Controller [POST /cases/:caseId/document-exceptions]', () => {
   let fixture: DocumentEngineModuleFixture
-  let userId: string
-  let clientId: string
   let caseId: string
 
   beforeAll(async () => {
-    userId = randomUUID()
     fixture = await DocumentEngineModuleFixture.registerAuthenticated(
       RequestDocumentExceptionController,
-      userId,
     )
   })
 
   beforeEach(async () => {
-    clientId = randomUUID()
-    caseId = randomUUID()
-
     await fixture.resetDatabase()
-    await fixture.seedUserAndClient(userId, clientId)
+    caseId = (await fixture.createCaseWithCurrentCollaborator()).id
   })
 
   afterAll(async () => {

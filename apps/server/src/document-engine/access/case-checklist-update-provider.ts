@@ -1,9 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common'
 import type {
+  CaseAccessProvider,
   CaseChecklistItemsRepository,
   LegalCasesRepository,
   PendingsRepository,
 } from '@hms/core/case-management/interfaces'
+import { CaseAccessIntent } from '@hms/core/case-management/domain/structures'
 import {
   CreatePendingUseCase,
   MarkCaseChecklistItemValidatedUseCase,
@@ -16,6 +18,7 @@ import type {
 import { AppError } from '@hms/core/shared/domain/errors'
 
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
+import { CASE_MANAGEMENT_ACCESS } from '@/case-management/constants/case-management-access'
 
 @Injectable()
 export class CaseChecklistUpdateProvider implements CaseChecklistUpdateProviderContract {
@@ -29,6 +32,8 @@ export class CaseChecklistUpdateProvider implements CaseChecklistUpdateProviderC
     private readonly legalCasesRepository: LegalCasesRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.pendings)
     pendingsRepository: PendingsRepository,
+    @Inject(CASE_MANAGEMENT_ACCESS.access)
+    private readonly caseAccessProvider: CaseAccessProvider,
   ) {
     this.useCase = new MarkCaseChecklistItemValidatedUseCase(
       this.caseChecklistItemsRepository,
@@ -47,6 +52,11 @@ export class CaseChecklistUpdateProvider implements CaseChecklistUpdateProviderC
 
       if (!checklistItem) return
 
+      await this.caseAccessProvider.authorize({
+        caseId: checklistItem.caseId,
+        actorId: request.actorId,
+        intent: CaseAccessIntent.WriteContent,
+      })
       await this.useCase.executeByDocumentFileId({
         documentFileId: request.documentFileId,
         documentFileName: request.documentFileName ?? 'Documento enviado',
@@ -61,6 +71,12 @@ export class CaseChecklistUpdateProvider implements CaseChecklistUpdateProviderC
         'Vínculo do checklist inválido',
       )
     }
+
+    await this.caseAccessProvider.authorize({
+      caseId: request.caseId,
+      actorId: request.actorId,
+      intent: CaseAccessIntent.WriteContent,
+    })
 
     const legalCase = await this.legalCasesRepository.findById(request.caseId)
 
@@ -83,11 +99,26 @@ export class CaseChecklistUpdateProvider implements CaseChecklistUpdateProviderC
   async markDocumentResendRequested(
     request: MarkDocumentResendRequestedRequest,
   ): Promise<void> {
+    if (request.caseId) {
+      await this.caseAccessProvider.authorize({
+        caseId: request.caseId,
+        actorId: request.actorId,
+        intent: CaseAccessIntent.WriteContent,
+      })
+    }
     const checklistItem = await this.caseChecklistItemsRepository.findByDocumentFileId(
       request.documentFileId,
     )
 
     if (!checklistItem) return
+
+    if (checklistItem.caseId !== request.caseId) {
+      await this.caseAccessProvider.authorize({
+        caseId: checklistItem.caseId,
+        actorId: request.actorId,
+        intent: CaseAccessIntent.WriteContent,
+      })
+    }
 
     await this.caseChecklistItemsRepository.linkPendingDocument({
       checklistItemId: checklistItem.id,
@@ -97,16 +128,37 @@ export class CaseChecklistUpdateProvider implements CaseChecklistUpdateProviderC
   }
 
   async linkPendingDocumentToChecklist(request: {
+    caseId?: string
     checklistItemId: string
     documentFileId: string
     documentFileName: string
+    actorId: string
   }): Promise<void> {
+    let caseId = request.caseId
+    if (!caseId) {
+      const checklistItem = await this.caseChecklistItemsRepository.findByDocumentFileId(
+        request.documentFileId,
+      )
+      caseId = checklistItem?.caseId
+    }
+    if (caseId) {
+      await this.caseAccessProvider.authorize({
+        caseId,
+        actorId: request.actorId,
+        intent: CaseAccessIntent.WriteContent,
+      })
+    }
     await this.caseChecklistItemsRepository.linkPendingDocument(request)
   }
 
   async createDocumentPending(
     request: Parameters<CaseChecklistUpdateProviderContract['createDocumentPending']>[0],
   ) {
+    await this.caseAccessProvider.authorize({
+      caseId: request.caseId,
+      actorId: request.actorId,
+      intent: CaseAccessIntent.WriteContent,
+    })
     await this.createPendingUseCase.execute(request)
   }
 }
