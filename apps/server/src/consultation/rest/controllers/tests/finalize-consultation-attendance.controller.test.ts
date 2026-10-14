@@ -22,7 +22,7 @@ describe('Finalize Consultation Attendance Controller [PATCH /consultations/:con
 
   it('persists the completed attendance record', async () => {
     const { user, collaborator } = await fixture.registerAssociatedCollaborator()
-    const consultation = await fixture.seedConsultation(
+    const { consultation } = await fixture.seedConsultationWithAppointment(
       ConsultationFaker.fake({
         assignedLawyerId: collaborator.id,
         status: ConsultationStatus.Pending,
@@ -45,6 +45,13 @@ describe('Finalize Consultation Attendance Controller [PATCH /consultations/:con
     const saved = await fixture.consultationsRepository.findById(consultation.id)
     expect(saved?.attendanceFinalizedAt).toBeInstanceOf(Date)
     expect(saved?.primaryLegalQuestion).toBe('Qual é o prazo?')
+  })
+
+  it('requires authentication before validating the attendance request', async () => {
+    await request(fixture.app.getHttpServer())
+      .patch('/consultations/a4337a86-6835-4ca9-95b5-9259609d8cf6/attendance/finalize')
+      .send({ answers: {} })
+      .expect(401)
   })
 
   it('rejects an incomplete attendance body', async () => {
