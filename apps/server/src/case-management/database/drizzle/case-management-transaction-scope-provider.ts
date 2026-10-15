@@ -10,12 +10,14 @@ import {
   DrizzleCaseMemberMapper,
   DrizzleCaseTeamHistoryMapper,
   DrizzleCaseTeamOperationMapper,
+  DrizzleCaseCreationOperationMapper,
   DrizzleLegalCaseMapper,
 } from '@/case-management/database/drizzle/mappers'
 import {
   DrizzleCaseMembersRepository,
   DrizzleCaseTeamHistoriesRepository,
   DrizzleCaseTeamOperationsRepository,
+  DrizzleCaseCreationOperationsRepository,
   DrizzleLegalCasesRepository,
 } from '@/case-management/database/drizzle/repositories'
 
@@ -31,6 +33,7 @@ export class CaseManagementTransactionScopeProvider {
     private readonly legalCaseMapper: DrizzleLegalCaseMapper,
     private readonly historyMapper: DrizzleCaseTeamHistoryMapper,
     private readonly teamOperationMapper: DrizzleCaseTeamOperationMapper,
+    private readonly caseCreationOperationMapper: DrizzleCaseCreationOperationMapper,
     @Inject(CASE_MANAGEMENT_PROVIDERS.collaborators)
     private readonly collaboratorsProvider: CaseCollaboratorsProvider,
   ) {}
@@ -55,6 +58,11 @@ export class CaseManagementTransactionScopeProvider {
       caseTeamOperationsRepository: new DrizzleCaseTeamOperationsRepository(
         this.drizzleClient,
         this.teamOperationMapper,
+        database,
+      ),
+      caseCreationOperationsRepository: new DrizzleCaseCreationOperationsRepository(
+        this.drizzleClient,
+        this.caseCreationOperationMapper,
         database,
       ),
       caseCollaboratorsProvider: this.collaboratorsProvider,

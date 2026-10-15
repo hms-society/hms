@@ -11,6 +11,7 @@ import {
   DrizzleCaseTeamHistoryMapper,
   DrizzleCaseTeamOperationMapper,
   DrizzleCaseTaskMapper,
+  DrizzleCaseCreationOperationMapper,
 } from '@/case-management/database/drizzle/mappers'
 import {
   DrizzleCaseChecklistItemsRepository,
@@ -23,6 +24,7 @@ import {
   DrizzleCaseTeamHistoriesRepository,
   DrizzleCaseTeamOperationsRepository,
   DrizzleCaseTasksRepository,
+  DrizzleCaseCreationOperationsRepository,
 } from '@/case-management/database/drizzle/repositories'
 import { CaseManagementSeeder } from '@/case-management/database/case-management-seeder'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
@@ -36,6 +38,7 @@ import { CaseCollaboratorsProvisionModule } from '@/case-management/provision/ca
     DrizzleCaseMemberMapper,
     DrizzleCaseTeamHistoryMapper,
     DrizzleCaseTeamOperationMapper,
+    DrizzleCaseCreationOperationMapper,
     DrizzleChecklistTemplateItemMapper,
     DrizzleChecklistTemplateMapper,
     DrizzleLegalCaseMapper,
@@ -45,6 +48,7 @@ import { CaseCollaboratorsProvisionModule } from '@/case-management/provision/ca
     DrizzleCaseMembersRepository,
     DrizzleCaseTeamHistoriesRepository,
     DrizzleCaseTeamOperationsRepository,
+    DrizzleCaseCreationOperationsRepository,
     DrizzleChecklistTemplateItemsRepository,
     DrizzleChecklistTemplatesRepository,
     DrizzleLegalCasesRepository,
@@ -70,6 +74,10 @@ import { CaseCollaboratorsProvisionModule } from '@/case-management/provision/ca
     {
       provide: CASE_MANAGEMENT_REPOSITORIES.caseTeamOperations,
       useExisting: DrizzleCaseTeamOperationsRepository,
+    },
+    {
+      provide: CASE_MANAGEMENT_REPOSITORIES.caseCreationOperations,
+      useExisting: DrizzleCaseCreationOperationsRepository,
     },
     {
       provide: CASE_MANAGEMENT_REPOSITORIES.checklistTemplateItems,
@@ -99,6 +107,7 @@ import { CaseCollaboratorsProvisionModule } from '@/case-management/provision/ca
     CASE_MANAGEMENT_REPOSITORIES.caseMembers,
     CASE_MANAGEMENT_REPOSITORIES.caseTeamHistories,
     CASE_MANAGEMENT_REPOSITORIES.caseTeamOperations,
+    CASE_MANAGEMENT_REPOSITORIES.caseCreationOperations,
     CASE_MANAGEMENT_REPOSITORIES.checklistTemplateItems,
     CASE_MANAGEMENT_REPOSITORIES.checklistTemplates,
     CASE_MANAGEMENT_REPOSITORIES.legalCases,
