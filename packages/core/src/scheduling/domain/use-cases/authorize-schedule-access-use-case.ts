@@ -1,4 +1,7 @@
-import { CollaboratorProfile, type CollaboratorProfile as CollaboratorProfileValue } from '#identity/domain/structures'
+import {
+  CollaboratorProfile,
+  type CollaboratorProfile as CollaboratorProfileValue,
+} from '#identity/domain/structures'
 import type { UseCase } from '#shared/interfaces'
 
 import { AppointmentActionForbiddenError } from '../errors'
@@ -24,10 +27,19 @@ export class AuthorizeScheduleAccessUseCase implements UseCase<Request> {
       throw new AppointmentActionForbiddenError()
     }
 
-    const targetCollaboratorId = request.collaboratorId ??
-      (request.scheduleId
-        ? (await this.schedulesRepository.findById(request.scheduleId))?.collaboratorId
-        : undefined)
+    const scheduleCollaboratorId = request.scheduleId
+      ? (await this.schedulesRepository.findById(request.scheduleId))?.collaboratorId
+      : undefined
+
+    if (
+      request.collaboratorId &&
+      scheduleCollaboratorId &&
+      request.collaboratorId !== scheduleCollaboratorId
+    ) {
+      throw new AppointmentActionForbiddenError()
+    }
+
+    const targetCollaboratorId = request.collaboratorId ?? scheduleCollaboratorId
 
     if (!targetCollaboratorId) throw new AppointmentActionForbiddenError()
 

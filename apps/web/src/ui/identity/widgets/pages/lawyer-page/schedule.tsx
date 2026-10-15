@@ -167,6 +167,7 @@ export const Schedule = () => {
   const {
     schedule,
     isLoading,
+    error,
     updateDuration,
     isUpdatingDuration,
     updateTimeZone,
@@ -179,6 +180,9 @@ export const Schedule = () => {
     removeBlock,
     isRemovingBlock,
   } = useConsultation()
+
+  const isAccessDenied =
+    (error as { title?: string } | null | undefined)?.title === 'Acesso Negado'
 
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null)
@@ -388,6 +392,24 @@ export const Schedule = () => {
     return (
       <div className='flex h-64 w-full items-center justify-center'>
         <Loader2 className='size-6 animate-spin text-primary' />
+      </div>
+    )
+  }
+
+  if (isAccessDenied) {
+    return (
+      <div className='flex min-h-64 w-full items-center justify-center px-4'>
+        <div
+          role='alert'
+          className='w-full max-w-xl rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center'
+        >
+          <h1 className='font-serif text-xl font-semibold text-foreground'>
+            Acesso não permitido
+          </h1>
+          <p className='mt-2 text-sm text-muted-foreground'>
+            Você não tem permissão para visualizar ou alterar esta agenda.
+          </p>
+        </div>
       </div>
     )
   }
