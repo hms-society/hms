@@ -1,5 +1,13 @@
 import { sql } from 'drizzle-orm'
-import { check, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core'
+import {
+  check,
+  index,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from 'drizzle-orm/pg-core'
 
 export const appointmentModel = pgTable(
   'appointments',
@@ -21,6 +29,11 @@ export const appointmentModel = pgTable(
   },
   (table) => [
     uniqueIndex('appointments_intake_id_uq').on(table.intakeId),
+    index('appointments_schedule_period_idx').on(
+      table.scheduleId,
+      table.startsAt,
+      table.endsAt,
+    ),
     check(
       'appointments_status_check',
       sql`${table.status} in ('scheduled', 'cancelled')`,

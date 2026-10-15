@@ -142,12 +142,12 @@ and acceptance behavior; label earlier full-suite results historical after chang
 
 ### Test coverage reports
 
-Core, Server, and Web run Vitest with V8 coverage. The configured source globs
-include production files even when tests do not import them. Tests, test
-fixtures, Core fakers and barrels, and generated Web route metadata are excluded
-where applicable. Run all three workspaces with `pnpm test:coverage`, or run one
-with `pnpm --filter @hms/core test:coverage`, `pnpm --filter server test:coverage`,
-or `pnpm --filter web test:coverage`.
+The Core, Server, and Web `test:coverage` commands run Vitest with V8 coverage.
+The configured source globs include production files even when tests do not
+import them. Tests, test fixtures, Core fakers and barrels, and generated Web
+route metadata are excluded where applicable. Run all three workspaces with
+`pnpm test:coverage`, or run one with `pnpm --filter @hms/core test:coverage`,
+`pnpm --filter server test:coverage`, or `pnpm --filter web test:coverage`.
 
 Each workspace prints a text summary and writes ignored JSON, HTML, and LCOV
 reports under its `coverage/` directory. Floors reflect measured current `develop`
@@ -211,10 +211,11 @@ retries reuse that record. Later corrections use focused tests without coverage;
 label the original percentages historical when the measured implementation has
 changed. A separate coverage refresh requires an explicit user request.
 
-Core, Server, and Web PR workflows independently run tests with coverage and all
+Core, Server, and Web PR workflows independently run behavioral tests and all
 applicable quality gates on each current PR head. Web CI also runs its full
-integration suite. CI publishes coverage summaries, PR comments, and report
-artifacts. The local single-run policy does not limit CI. `conclude-spec`,
+integration suite. CI does not instrument tests for coverage or publish coverage
+reports; run the workspace coverage commands above when a coverage measurement is
+requested. The local single-run policy is separate. `conclude-spec`,
 `commit-code`, and `create-pr` reuse implementation evidence and run only missing
 or invalidated local checks without coverage.
 
