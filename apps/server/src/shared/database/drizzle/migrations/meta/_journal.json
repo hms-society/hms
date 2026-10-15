@@ -484,6 +484,13 @@
       "when": 1791589865453,
       "tag": "0065_document_version_draft_status",
       "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1792071191954,
+      "tag": "0066_document_version_homologations",
+      "breakpoints": true
     }
   ]
 }

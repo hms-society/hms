@@ -8,6 +8,7 @@ import {
   DrizzleDocumentPackageMapper,
   DrizzleDocumentSpecificationMapper,
   DrizzleDocumentVersionMapper,
+  DrizzleDocumentVersionHomologationMapper,
   DrizzlePackageDocumentMapper,
 } from '@/document-production/database/drizzle/mappers'
 import {
@@ -16,6 +17,7 @@ import {
   DrizzleDocumentPackagesRepository,
   DrizzleDocumentSpecificationsRepository,
   DrizzleDocumentVersionsRepository,
+  DrizzleDocumentVersionHomologationsRepository,
   DrizzlePackageDocumentsRepository,
 } from '@/document-production/database/drizzle/repositories'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
@@ -29,12 +31,14 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     DrizzleDocumentPackageMapper,
     DrizzleDocumentSpecificationMapper,
     DrizzleDocumentVersionMapper,
+    DrizzleDocumentVersionHomologationMapper,
     DrizzlePackageDocumentMapper,
     DrizzleDocumentGenerationsRepository,
     DrizzleDocumentsRepository,
     DrizzleDocumentPackagesRepository,
     DrizzleDocumentSpecificationsRepository,
     DrizzleDocumentVersionsRepository,
+    DrizzleDocumentVersionHomologationsRepository,
     DrizzlePackageDocumentsRepository,
     DocumentProductionSeeder,
     {
@@ -61,6 +65,10 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
       provide: DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments,
       useExisting: DrizzlePackageDocumentsRepository,
     },
+    {
+      provide: DOCUMENT_PRODUCTION_REPOSITORIES.versionHomologations,
+      useExisting: DrizzleDocumentVersionHomologationsRepository,
+    },
   ],
   exports: [
     DOCUMENT_PRODUCTION_REPOSITORIES.generations,
@@ -69,6 +77,7 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     DOCUMENT_PRODUCTION_REPOSITORIES.documents,
     DOCUMENT_PRODUCTION_REPOSITORIES.documentPackages,
     DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments,
+    DOCUMENT_PRODUCTION_REPOSITORIES.versionHomologations,
     DocumentProductionSeeder,
   ],
 })
