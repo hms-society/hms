@@ -7,14 +7,14 @@ status: in_progress
 prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2686977/PRD+M+dulo+de+Agendamento
 jira_tickets:
   - SCRUM-146
-updated_at: 2026-10-14
+updated_at: 2026-10-15
 ---
 
 # Evaluation
 
 Evaluation of Spec revision `13` against the current implementation.
 
-Current result: `in_progress` for the post-merge candidate. EV-094 records focused integration validation and a passing 0066 migration suite. The user explicitly waived the Spec's authenticated-flow check as a publication blocker; EV-096 records that waiver and the configured local environment, but the flow remains unverified. Role/concurrency and reference-comparison evidence remain partial. The remaining feature diff is split into two PRs under the 5,000-added-TypeScript-line limit; inherited test-integrity tooling and the generated local Playwright snapshot are excluded.
+Current result: `in_progress` for the post-merge candidate. EV-094 records focused integration validation and a passing 0066 migration suite. PR #234 was merged into `develop` on 2026-10-15; the remaining Web slice is being prepared against that updated base and stays under the 5,000-added-TypeScript-line limit. The user explicitly waived the Spec's authenticated-flow check as a publication blocker; EV-096 records that waiver, but the flow remains unverified. Role/concurrency and reference-comparison evidence remain partial. Inherited test-integrity tooling and the generated local Playwright snapshot are excluded.
 
 ## Current State
 
@@ -157,6 +157,8 @@ Current result: `in_progress` for the post-merge candidate. EV-094 records focus
 | `EV-097` | PR #234 review correction / Core and Server | After merge `5a4956c7d`: focused Core use-case tests; three Testcontainers-backed Server controller suites; Core/Server typecheck, lint and architecture; changed-file Biome and `git diff --check` | Core: 2 files/10 tests passed. Server: 3 controller files/9 PostgreSQL-backed tests passed, including release of a canceled appointment's slot, canceled calendar history, and `.369079` database precision with a `.369` API revision. Core/Server typechecks, lint and architecture pass. The same Reviewer rechecked the optional filters and found no remaining issue. | `passed` |
 | `EV-098` | Complexity baseline / Core and Server | `pnpm check:complexity -- --scope packages/core`; `pnpm check:complexity -- --scope apps/server` | Both commands exit 1 on the candidate synced with `develop` at `027cdc5e6`: the Core scope reports 25 functions over configured thresholds; the Server scope also reports candidate-wide threshold violations, including existing functions from the newly merged Case Management and Document Engine work. No baseline was updated. These failures are recorded as a candidate-wide limitation, not as a passing check. | `failed` |
 | `EV-099` | Mutation check / availability status filtering | Required mutation check for the correctness-critical availability filter | HMS has no configured mutation runner. No mutation result is claimed; the check remains blocked. | `blocked` |
+| `EV-100` | Web publication candidate | `pnpm --filter web generate-routes`; `pnpm --filter web test`; `pnpm --filter web test:integration`; Web typecheck, lint, architecture and build; scoped Biome on the corrected browser tests | Route generation, typecheck, lint, architecture (989 modules/4,125 dependencies), build and scoped Biome pass; the test-only assertion corrections were checked with scoped Biome. Unit suite: 207 files, 835 passed, 3 skipped. Integration suite: 92/92 passed, including Agenda states at 1417×900 and 390×844, mobile 409 recovery, fixed-width client filter and both Intake lawyer-selector flows. The earlier 86/92 run exposed selector-role and page-readiness assertions; six focused corrected cases passed before this full rerun. Agenda API 403/503/409 console entries are expected from mocked responses, and its captured page errors are empty. This is mocked browser coverage, not live REST/Auth validation. | `passed` |
+| `EV-101` | Web coverage attempt | `pnpm --filter web test:coverage`; isolated `pnpm --filter web exec vitest run src/ui/identity/widgets/components/collaborator-register-dialog/tests/collaborator-register-dialog.test.tsx` | The coverage run timed out one existing Identity collaborator-register test after 15s (207 files; 834 passed, 3 skipped; statement coverage 63.56%). The isolated test then passed 5/5 and the full non-coverage Web suite passed in EV-100. The coverage command was not rerun, so a current-candidate coverage pass is not claimed. | `failed` |
 | `EV-093` | Clean candidate/build and generation | `pnpm --filter server build`; Web `build`; `pnpm --filter web generate-routes`; `git diff --check` | Server webpack build and Web client/SSR build pass; generated route metadata is already current and generation creates no diff. Existing route discovery warnings for two test files beneath route folders are non-blocking and excluded from route metadata. | `passed` |
 | `EV-067` | UI layout | User screenshot of the reschedule dialog footer overflow; scoped Web typecheck and Biome; isolated Playwright CLI route with mocked Auth/REST, 32 available slots, 1280 × 834, 600 × 834 and 390 × 844 | Moved the footer outside the scroll region while keeping it inside the form. Typecheck and Biome passed. The body bottom equalled the footer top at all three sizes; the footer bottom equalled the dialog bottom. After scrolling, the last slot remained above the footer. Keyboard Enter selected a slot and Tab advanced to the next; no console errors or failed requests. Captures: `/tmp/hms-reschedule-layout-desktop-scrolled.png`, `/tmp/hms-reschedule-layout-600x834.png`, `/tmp/hms-reschedule-layout-390x844.png`. This is mocked UI evidence, not live Auth/REST or full yVAoI parity. | `passed` |
 
@@ -282,23 +284,24 @@ The Spec, Plan, source tree and route diff were checked against revision 13. The
 
 ## Final implementation conformance
 
-- **Spec and candidate:** Spec revision `13`; the integrated candidate merges the feature with current `develop`. The remaining delivery is split into two dependent PRs: Server/Core against `develop`, then Web against the Server/Core branch. Core, Validation, Server and Web scopes match the Spec tree and repository module boundaries.
+- **Spec and candidate:** Spec revision `13`; the integrated candidate merges the feature with current `develop`. Server/Core PR #234 is merged; the remaining Web delivery targets `develop` and depends on the now-merged server contract. Core, Validation, Server and Web scopes match the Spec tree and repository module boundaries.
 - **Delivered route and exclusions:** Adds `/agenda/consultas`, its REST consumers and calendar/action widgets. Removes only the blank `/atendimento/consultas` and `/consultas/` placeholders; the real `/consultas/$consultationId` route remains. The feature does not create/cancel an Intake or Consultation and does not edit schedule availability or blocks.
 - **Access and actions:** Admin calendar projection omits block cards/filter while blocks continue constraining lawyer availability; lawyers see only their own schedules. Admin/Attendant cancellation and rescheduling preserve appointment identity/history. Rescheduling can select an active lawyer and atomically synchronize the pending Consultation, appointment history and publication record. Cancellation revisions remain strictly increasing under equal/backward clocks.
 - **UI and validation:** The yVAoI reschedule flow offers lawyer/date/slot selection and before/after summary. Supplied and supplemental visual states are compared in `VIS-*`; responsive, keyboard and recovery behavior is current in EV-084/EV-091. Known exact-reference differences, shared dev overlay, unexecuted manual concurrency/role scenarios and upstream Drizzle graph issue remain explicitly `partial` in Evaluation rather than being reported as passes.
-- **Traceability and scope:** Agendamento v12 REQ-015–020, Consulta v12 REQ-001/002/007–009 and SCRUM-146 are mapped through RF/CA to current evidence above. Jira and Confluence were read only; SCRUM-146 remains `Em andamento`. The Server/Core slice adds 3,847 TypeScript lines; the Web slice adds 4,952 after excluding Vite/local tooling, unrelated test-only edits and the generated local Playwright snapshot. Test-integrity tooling is outside the delivery.
+- **Traceability and scope:** Agendamento v12 REQ-015–020, Consulta v12 REQ-001/002/007–009 and SCRUM-146 are mapped through RF/CA to current evidence above. Jira and Confluence were read only; SCRUM-146 remains `Em andamento`. The merged Server/Core slice adds 3,847 TypeScript lines; the remaining Web slice adds 4,958 against `develop`, within the workflow limit. Vite/local tooling, unrelated test-only edits, the generated local Playwright snapshot and test-integrity tooling remain outside the delivery.
 
 ## Handoff
 
 | Item | Record |
 | --- | --- |
-| Server/Core PR | [#234](https://github.com/hms-society/hms/pull/234), branch `codex/appointments-server-pr`, base `develop`. |
-| Candidate head | `5a4956c7d0fa5f047bcdba81845d47bafd62d387`; correction `174c1cf9` plus merge of `develop` at `027cdc5e6`. |
+| Server/Core PR | [#234](https://github.com/hms-society/hms/pull/234), branch `codex/appointments-server-pr`, base `develop`; merged at `dfcf13501673615954adc5baf45bb3dff322f427`. |
+| Server/Core source head | `5a4956c7d0fa5f047bcdba81845d47bafd62d387`; correction `174c1cf9` plus merge of `develop` at `027cdc5e6`. |
+| Web PR | [#235](https://github.com/hms-society/hms/pull/235), branch `codex/appointments-web-pr`, base `develop`; Server/Core dependency #234 is merged. The Web candidate adds 4,958 TypeScript lines, below the 5,000-line limit. Current PR checks are pending. |
 | Correction | Both rescheduling queries consider only scheduled appointments. Calendar reads retain canceled history. The API's millisecond revision token continues to match PostgreSQL microsecond timestamps using the existing half-open interval. |
-| Review | Both review threads received evidence-based replies and are resolved; the same Reviewer rechecked the correction with no remaining finding. |
+| Review | Both #234 review threads received evidence-based replies and were resolved; the same Reviewer rechecked the correction with no remaining finding. |
 | Local evidence | Core 10/10 focused tests; Server 9/9 real PostgreSQL controller tests; Core/Server types, lint and architecture pass. Complexity checks fail on candidate-wide threshold violations (`EV-098`). |
-| Source-head CI | All applicable checks passed on implementation head `5a4956c7d`; Supabase Preview was skipped. See `CI-01` below for run links. This Evaluation/Plan follow-up is documentation-only. |
-| Remaining | PR #234 remains open and GitHub reports `REVIEW_REQUIRED`; it has not been merged. The overall Evaluation remains `in_progress` for recorded manual/visual gaps and unavailable mutation tooling. |
+| Source-head CI | All applicable checks passed on #234 implementation head `5a4956c7d`; Supabase Preview was skipped. See `CI-01` below for run links. |
+| Remaining | Verify current-head checks for Web PR #235. The overall Evaluation remains `in_progress` for recorded manual/visual gaps and unavailable mutation tooling. |
 
 ## PR CI quality gate
 
@@ -307,7 +310,7 @@ The Spec, Plan, source tree and route diff were checked against revision 13. The
 | ID | Workflow | Head SHA | Result | Run |
 | --- | --- | --- | --- | --- |
 | `CI-01` | PR #234 source-head workflows | `5a4956c7d0fa5f047bcdba81845d47bafd62d387` | Passed: Core, Server, Web, automated review and size. Supabase Preview skipped. | [Core](https://github.com/hms-society/hms/actions/runs/38626057865), [Server](https://github.com/hms-society/hms/actions/runs/38626057076), [Web](https://github.com/hms-society/hms/actions/runs/38626057256), [Review](https://github.com/hms-society/hms/actions/runs/38626054518), [Size](https://github.com/hms-society/hms/actions/runs/38626057542) |
-| `CI-02` | Web PR workflows | `<sha>` | `pending` | `<run URL when available>` |
+| `CI-02` | [Web PR #235 workflows](https://github.com/hms-society/hms/pull/235/checks) | pending | Pending: Web, Core, Server, review and size checks; Supabase Preview skipped. | [PR #235 checks](https://github.com/hms-society/hms/pull/235/checks) |
 
 ## History
 
@@ -328,3 +331,5 @@ The Spec, Plan, source tree and route diff were checked against revision 13. The
 | `2026-09-28 14:40` | F9-T1 corrected after source review: Web suppresses cached blocks for Admin and while identity is loading; Core/Web typechecks, Web Biome and independent reviewer recheck passed. Authenticated browser evidence remains blocked by unavailable Chromium and the occupied Server port. |
 | `2026-09-28 15:26` | Clean integrated candidate passes Core/Validation/Server/Web coverage, Server/Web/Core/Validation type and architecture gates, applicable lint and the 13-test Agenda Playwright route suite. Consultation access fixture was corrected to represent an unauthorized lawyer and typechecks 4/4. Drizzle metadata collision was reproduced on the unmodified target base and recorded as FND-037. Evaluation is `ready`; four dependent ready-for-review PRs and their head-SHA CI checks remain. |
 | `2026-10-14 16:58` | PR #234 correction R2 published on `5a4956c7d` after syncing `develop`; focused Core/Server checks and independent recheck pass, both review threads are resolved, and all applicable CI checks pass on that source head. Complexity failures remain recorded in EV-098; the overall Evaluation is still `in_progress`. |
+| `2026-10-15` | PR #234 was merged into `develop`. The Web branch was refreshed onto current `develop`; corrected Intake/Agenda browser assertions pass, full Web integration is 92/92, and the Evaluation remains `in_progress` with manual/visual and mutation gaps recorded above. |
+| `2026-10-15` | Opened ready-for-review [PR #235](https://github.com/hms-society/hms/pull/235) from `codex/appointments-web-pr` against `develop`; PR-head workflows are pending. |
