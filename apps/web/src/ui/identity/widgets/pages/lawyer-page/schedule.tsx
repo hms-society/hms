@@ -16,7 +16,19 @@ import {
 } from '@/ui/shadcn/dialog'
 import { useConsultation } from './use-schedule'
 
-const DEFAULT_WEEKLY_AVAILABILITY = [
+type ScheduleSlot = {
+  start: string
+  end: string
+}
+
+type ScheduleDay = {
+  id: string
+  name: string
+  active: boolean
+  slots: ScheduleSlot[]
+}
+
+const DEFAULT_WEEKLY_AVAILABILITY: ScheduleDay[] = [
   { id: 'monday', name: 'Segunda-feira', active: true, slots: [] },
   { id: 'tuesday', name: 'Terça-feira', active: true, slots: [] },
   { id: 'wednesday', name: 'Quarta-feira', active: true, slots: [] },
@@ -36,8 +48,6 @@ const WEEKDAY_NAMES: Record<string, string> = {
   sunday: 'Domingo',
 }
 
-type ScheduleDay = (typeof DEFAULT_WEEKLY_AVAILABILITY)[number]
-
 function normalizeWeeklyAvailability(
   rawAvailability: unknown,
   useDefaultDays: boolean,
@@ -51,7 +61,7 @@ function normalizeWeeklyAvailability(
     }))
   }
 
-  const daysById = new Map(
+  const daysById = new Map<string, ScheduleDay>(
     rawDays.map((day: any) => {
       const id = day.id ?? day.weekday
       const slots =
@@ -69,7 +79,7 @@ function normalizeWeeklyAvailability(
           active: day.active ?? slots.length > 0,
           slots,
         },
-      ]
+      ] as [string, ScheduleDay]
     }),
   )
 

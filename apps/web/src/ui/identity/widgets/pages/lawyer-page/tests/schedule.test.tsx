@@ -51,6 +51,7 @@ describe('Schedule', () => {
       setDuration: vi.fn(),
       isError: false,
       error: null,
+      refetch: vi.fn(),
     })
   })
 
