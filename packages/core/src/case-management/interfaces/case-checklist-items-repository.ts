@@ -1,3 +1,9 @@
+import type {
+  ChecklistDocumentReference,
+  ChecklistDocumentWaiver,
+  CaseChecklistItemStatusCount,
+  CaseChecklistItemStatus,
+} from '../domain/structures'
 import type { CaseChecklistItem, CaseChecklistItemCreation } from '../domain/entities'
 
 export type MarkChecklistItemValidatedParams = {
@@ -15,6 +21,25 @@ export type LinkChecklistItemPendingDocumentParams = {
 }
 
 export interface CaseChecklistItemsRepository {
+  findById(
+    caseId: string,
+    checklistItemId: string,
+  ): Promise<CaseChecklistItem | undefined>
+  replace(
+    checklistItemId: string,
+    changes: {
+      status: CaseChecklistItemStatus
+      waiver?: ChecklistDocumentWaiver
+      documentReference?: ChecklistDocumentReference
+      documentFileName?: string
+      documentFileId?: string
+      validatedAt?: Date
+      validatedBy?: string
+      updatedAt: Date
+    },
+    expected: { caseId: string; updatedAt: string; clientDocumentId?: string },
+  ): Promise<CaseChecklistItem | undefined>
+
   addMany(
     checklistItems: readonly CaseChecklistItemCreation[],
   ): Promise<readonly CaseChecklistItem[]>
@@ -26,6 +51,9 @@ export interface CaseChecklistItemsRepository {
     params: LinkChecklistItemPendingDocumentParams,
   ): Promise<CaseChecklistItem | undefined>
   listByCaseId(caseId: string): Promise<readonly CaseChecklistItem[]>
+  listStatusCountsByCaseIds(
+    caseIds: readonly string[],
+  ): Promise<readonly CaseChecklistItemStatusCount[]>
   findByDocumentFileId(documentFileId: string): Promise<CaseChecklistItem | undefined>
   markAsValidatedByDocument(
     params: MarkChecklistItemValidatedParams,

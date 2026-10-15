@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
 import { LegalCaseFaker } from '../../domain/entities/fakers'
@@ -17,7 +17,9 @@ describe('Review Case Checklist Gate Use Case', () => {
     repository = mock<LegalCasesRepository>()
     checklistItemsRepository =
       mock<import('../../interfaces').CaseChecklistItemsRepository>()
-    useCase = new ReviewCaseChecklistGateUseCase(repository, checklistItemsRepository)
+    useCase = new ReviewCaseChecklistGateUseCase(repository, checklistItemsRepository, {
+      authorize: vi.fn(),
+    })
   })
 
   it('rejects full approval until required checklist items can be verified server-side', async () => {
@@ -28,9 +30,7 @@ describe('Review Case Checklist Gate Use Case', () => {
     })
 
     repository.findById.mockResolvedValue(legalCase)
-    repository.listByTeamMember.mockResolvedValue([
-      fakeLegalCase({ id: legalCase.id }),
-    ])
+    repository.listByTeamMember.mockResolvedValue([fakeLegalCase({ id: legalCase.id })])
     checklistItemsRepository.listByCaseId.mockResolvedValue([
       { isRequired: true, status: 'pending' } as never,
     ])
@@ -41,7 +41,9 @@ describe('Review Case Checklist Gate Use Case', () => {
         decision: CaseChecklistGateDecision.Approved,
         decidedBy,
       }),
-    ).rejects.toThrow('documentos obrigatórios')
+    ).rejects.toThrow(
+      'A aprovação integral exige checklist obrigatório instanciado e todos os documentos obrigatórios atendidos por validação ou dispensa.',
+    )
 
     expect(repository.reviewChecklistGate).not.toHaveBeenCalled()
   })
@@ -50,9 +52,7 @@ describe('Review Case Checklist Gate Use Case', () => {
     const legalCase = LegalCaseFaker.fake()
 
     repository.findById.mockResolvedValue(legalCase)
-    repository.listByTeamMember.mockResolvedValue([
-      fakeLegalCase({ id: legalCase.id }),
-    ])
+    repository.listByTeamMember.mockResolvedValue([fakeLegalCase({ id: legalCase.id })])
     checklistItemsRepository.listByCaseId.mockResolvedValue([
       { isRequired: true, status: 'pending' } as never,
     ])
@@ -63,12 +63,17 @@ describe('Review Case Checklist Gate Use Case', () => {
         decision: CaseChecklistGateDecision.Approved,
         decidedBy: '00000000-0000-4000-8000-000000000110',
       }),
-    ).rejects.toThrow('documentos obrigatórios')
+    ).rejects.toThrow(
+      'A aprovação integral exige checklist obrigatório instanciado e todos os documentos obrigatórios atendidos por validação ou dispensa.',
+    )
 
     expect(repository.reviewChecklistGate).not.toHaveBeenCalled()
   })
 
-  it('allows full approval when every required checklist item is validated', async () => {
+  it.each([
+    'validated',
+    'waived',
+  ] as const)('allows full approval when required items are fulfilled by %s', async (status) => {
     const decidedBy = '00000000-0000-4000-8000-000000000118'
     const legalCase = LegalCaseFaker.fake()
     const reviewedCase = LegalCaseFaker.fake({
@@ -81,11 +86,9 @@ describe('Review Case Checklist Gate Use Case', () => {
       },
     })
     repository.findById.mockResolvedValue(legalCase)
-    repository.listByTeamMember.mockResolvedValue([
-      fakeLegalCase({ id: legalCase.id }),
-    ])
+    repository.listByTeamMember.mockResolvedValue([fakeLegalCase({ id: legalCase.id })])
     checklistItemsRepository.listByCaseId.mockResolvedValue([
-      { isRequired: true, status: 'validated' } as never,
+      { isRequired: true, status } as never,
     ])
     repository.reviewChecklistGate.mockResolvedValue(reviewedCase)
 
@@ -113,9 +116,7 @@ describe('Review Case Checklist Gate Use Case', () => {
     })
 
     repository.findById.mockResolvedValue(legalCase)
-    repository.listByTeamMember.mockResolvedValue([
-      fakeLegalCase({ id: legalCase.id }),
-    ])
+    repository.listByTeamMember.mockResolvedValue([fakeLegalCase({ id: legalCase.id })])
     repository.reviewChecklistGate.mockResolvedValue(reviewedCase)
 
     await expect(
@@ -163,9 +164,7 @@ describe('Review Case Checklist Gate Use Case', () => {
     })
 
     repository.findById.mockResolvedValue(legalCase)
-    repository.listByTeamMember.mockResolvedValue([
-      fakeLegalCase({ id: legalCase.id }),
-    ])
+    repository.listByTeamMember.mockResolvedValue([fakeLegalCase({ id: legalCase.id })])
     repository.reviewChecklistGate.mockResolvedValue(reviewedCase)
 
     await expect(
@@ -194,9 +193,7 @@ describe('Review Case Checklist Gate Use Case', () => {
     const legalCase = LegalCaseFaker.fake()
 
     repository.findById.mockResolvedValue(legalCase)
-    repository.listByTeamMember.mockResolvedValue([
-      fakeLegalCase({ id: legalCase.id }),
-    ])
+    repository.listByTeamMember.mockResolvedValue([fakeLegalCase({ id: legalCase.id })])
 
     await expect(
       useCase.execute({
@@ -224,9 +221,7 @@ describe('Review Case Checklist Gate Use Case', () => {
     })
 
     repository.findById.mockResolvedValue(legalCase)
-    repository.listByTeamMember.mockResolvedValue([
-      fakeLegalCase({ id: legalCase.id }),
-    ])
+    repository.listByTeamMember.mockResolvedValue([fakeLegalCase({ id: legalCase.id })])
 
     await expect(
       useCase.execute({
@@ -250,9 +245,7 @@ describe('Review Case Checklist Gate Use Case', () => {
     })
 
     repository.findById.mockResolvedValue(legalCase)
-    repository.listByTeamMember.mockResolvedValue([
-      fakeLegalCase({ id: legalCase.id }),
-    ])
+    repository.listByTeamMember.mockResolvedValue([fakeLegalCase({ id: legalCase.id })])
 
     await expect(
       useCase.execute({
@@ -272,9 +265,7 @@ describe('Review Case Checklist Gate Use Case', () => {
     })
 
     repository.findById.mockResolvedValue(legalCase)
-    repository.listByTeamMember.mockResolvedValue([
-      fakeLegalCase({ id: legalCase.id }),
-    ])
+    repository.listByTeamMember.mockResolvedValue([fakeLegalCase({ id: legalCase.id })])
     repository.reviewChecklistGate.mockResolvedValue(undefined)
 
     await expect(
@@ -291,7 +282,9 @@ describe('Review Case Checklist Gate Use Case', () => {
     const legalCase = LegalCaseFaker.fake()
 
     repository.findById.mockResolvedValue(legalCase)
-    repository.listByTeamMember.mockResolvedValue([])
+    useCase = new ReviewCaseChecklistGateUseCase(repository, checklistItemsRepository, {
+      authorize: vi.fn().mockRejectedValue(new Error('O caso não foi encontrado.')),
+    })
 
     await expect(
       useCase.execute({
