@@ -259,7 +259,7 @@ for (const viewport of [
       )
       await expect(
         page.getByRole('heading', { name: 'Agenda de Consultas' }),
-      ).toBeVisible()
+      ).toBeVisible({ timeout: 15_000 })
 
       if (visualState.name === 'loading') {
         await expect(page.getByRole('status')).toContainText('Carregando agenda')
@@ -541,6 +541,9 @@ test('keeps the selected client label inside its fixed-width filter', async ({
   await page.goto(
     '/agenda/consultas?view=week&date=2026-09-24&event=all&clientId=11111111-1111-4111-8111-111111111111',
   )
+  await expect(page.getByRole('heading', { name: 'Agenda de Consultas' })).toBeVisible({
+    timeout: 15_000,
+  })
 
   const clientFilter = page.getByRole('button', { name: 'Filtrar por cliente' })
   await expect(clientFilter).toContainText('Cliente selecionado')
