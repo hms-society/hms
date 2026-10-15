@@ -1,4 +1,4 @@
-import { CaseManagementAccessModule } from '@/case-management/access/case-management-access.module'
+import { CaseManagementAccessModule } from '@/case-management/access'
 import type { INestApplication, Type } from '@nestjs/common'
 import type { TestingModuleBuilder } from '@nestjs/testing'
 import type {

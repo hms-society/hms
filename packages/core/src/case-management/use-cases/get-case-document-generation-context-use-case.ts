@@ -58,7 +58,7 @@ export class GetCaseDocumentGenerationContextUseCase
     await this.caseAccessProvider.authorize({
       caseId: legalCase.id,
       actorId: request.collaboratorId,
-      intent: CaseAccessIntent.ReadContent,
+      intent: CaseAccessIntent.ReadDocument,
     })
 
     const [checklistItems, validationPage, specificationPage] = await Promise.all([

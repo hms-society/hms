@@ -33,6 +33,7 @@ export class CaseAccessService implements CaseAccessProvider {
     caseId: string
     actorId: string
     intent: CaseAccessIntent
+    expectedClientId?: string
   }): Promise<void> {
     return this.useCase.execute(params)
   }

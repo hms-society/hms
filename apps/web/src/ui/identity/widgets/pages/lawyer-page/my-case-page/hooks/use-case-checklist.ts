@@ -1,52 +1,34 @@
-import { useQuery } from '@tanstack/react-query'
-
 import type { CaseChecklistItem as PersistedChecklistItem } from '@hms/core/case-management/domain/entities'
 import type { DocumentValidationDocument } from '@hms/core/document-engine/domain/entities'
 
-import { useRestContext } from '@/ui/shared/hooks/use-rest-context'
+import { usePersistedChecklistQuery } from '@/ui/case-management/hooks/use-persisted-checklist-query'
+import { useCaseDocumentValidationQuery } from '@/ui/document-engine/hooks/use-case-document-validation-query'
+import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
 import { getChecklistDocumentStatusView } from '../checklist-document-status'
 import type { ChecklistItem } from '../types'
 
 export type UseCaseChecklistParams = {
   caseId: string
   fallbackChecklist?: ChecklistItem[]
+  enabled?: boolean
 }
 
 export function useCaseChecklist({
   caseId,
   fallbackChecklist = [],
+  enabled = true,
 }: UseCaseChecklistParams) {
-  const { caseManagementService, documentValidationService } = useRestContext()
+  const { currentCollaborator } = useCurrentCollaboratorQuery()
   const {
-    data: persistedChecklistItems = [],
-    error: checklistError,
-    isLoading: isLoadingChecklist,
-  } = useQuery({
-    queryKey: ['case-management', 'cases', caseId, 'checklist'],
-    queryFn: async () => {
-      const response = await caseManagementService.listCaseChecklist(caseId)
-
-      if (response.isFailure) response.throwError()
-
-      return response.body
-    },
-    enabled: Boolean(caseId),
-  })
+    persistedChecklistItems,
+    persistedChecklistError,
+    isLoadingPersistedChecklist,
+  } = usePersistedChecklistQuery(caseId, currentCollaborator?.collaboratorId, enabled)
   const {
-    data: documentValidationDocuments = [],
-    error: documentsError,
-    isLoading: isLoadingDocuments,
-  } = useQuery({
-    queryKey: ['document-validation', 'documents', { caseId }],
-    queryFn: async () => {
-      const response = await documentValidationService.listDocuments({ caseId })
-
-      if (response.isFailure) response.throwError()
-
-      return response.body
-    },
-    enabled: Boolean(caseId),
-  })
+    documentValidationDocuments,
+    documentValidationError,
+    isLoadingDocumentValidationDocuments,
+  } = useCaseDocumentValidationQuery(caseId, currentCollaborator?.collaboratorId, enabled)
   const checklistItems =
     persistedChecklistItems.length > 0
       ? persistedChecklistItems.map((item) =>
@@ -67,11 +49,12 @@ export function useCaseChecklist({
       : 0
 
   return {
-    checklistError: checklistError ?? documentsError,
+    checklistError: persistedChecklistError ?? documentValidationError,
     checklistItems,
     completionPercentage,
     isChecklistComplete: mandatoryItemsCount > 0 && pendingItemsCount === 0,
-    isLoadingChecklist: isLoadingChecklist || isLoadingDocuments,
+    isLoadingChecklist:
+      isLoadingPersistedChecklist || isLoadingDocumentValidationDocuments,
     mandatoryItemsCount,
     pendingItemsCount,
     persistedChecklistItems,

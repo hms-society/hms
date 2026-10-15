@@ -36,7 +36,7 @@ export class ListCaseDocumentsUseCase
     await this.caseAccessProvider.authorize({
       caseId,
       actorId,
-      intent: CaseAccessIntent.ReadContent,
+      intent: CaseAccessIntent.ReadDocument,
     })
 
     const legalCase = await this.cases.findById(caseId)
