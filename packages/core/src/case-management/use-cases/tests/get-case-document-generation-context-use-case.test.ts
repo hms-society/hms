@@ -159,7 +159,7 @@ describe('Get Case Document Generation Context Use Case', () => {
     expect(access.authorize).toHaveBeenCalledWith({
       caseId,
       actorId: 'admin-id',
-      intent: 'read_content',
+      intent: 'read_document',
     })
     expect(checklist.listByCaseId).not.toHaveBeenCalled()
     expect(validations.list).not.toHaveBeenCalled()

@@ -49,7 +49,7 @@ describe('List Case Documents Use Case', () => {
     expect(access.authorize).toHaveBeenCalledWith({
       caseId: 'case-1',
       actorId: 'collaborator-1',
-      intent: 'read_content',
+      intent: 'read_document',
     })
     expect(access.authorize.mock.invocationCallOrder[0]).toBeLessThan(
       cases.findById.mock.invocationCallOrder[0],

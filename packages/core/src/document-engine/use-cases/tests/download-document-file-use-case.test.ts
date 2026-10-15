@@ -54,7 +54,7 @@ describe('Download Document File Use Case', () => {
     expect(access.authorize).toHaveBeenCalledWith({
       caseId: 'case-1',
       actorId: 'collaborator-1',
-      intent: 'read_content',
+      intent: 'read_document',
       expectedClientId: 'client-1',
     })
     expect(access.authorize.mock.invocationCallOrder[0]).toBeLessThan(
