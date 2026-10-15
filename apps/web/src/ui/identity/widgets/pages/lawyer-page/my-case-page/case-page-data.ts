@@ -111,12 +111,32 @@ export const CASE_STAGES: CaseStage[] = [
   { icon: 'check', label: 'Encerramento' },
 ]
 
-export const getCaseStages = (caseStatus?: string): CaseStage[] => {
-  const isInLegalProduction = caseStatus === LegalCaseStatus.LegalProduction
-  const activeStageIndex = isInLegalProduction ? 1 : 0
+const CASE_STATUS_LABELS: Record<LegalCaseStatus, string> = {
+  [LegalCaseStatus.Documentation]: 'Documentação em formação',
+  [LegalCaseStatus.ReadyForLegalProduction]: 'Em andamento',
+  [LegalCaseStatus.LegalProduction]: 'Em produção jurídica',
+  [LegalCaseStatus.ProtocolDelivery]: 'Protocolo e entrega',
+  [LegalCaseStatus.Execution]: 'Execução',
+  [LegalCaseStatus.Closed]: 'Encerrado',
+}
+
+export const getCaseStages = (
+  caseStatus?: string,
+  isClosureActive = false,
+): CaseStage[] => {
+  if (isClosureActive) {
+    return CASE_STAGES.map((stage, index) => ({
+      ...stage,
+      icon: index < CASE_STAGES.length - 1 ? 'check' : stage.icon,
+      status: index < CASE_STAGES.length - 1 ? 'Concluída' : 'Em andamento — 2º dia',
+      isActive: index === CASE_STAGES.length - 1,
+    }))
+  }
+  const activeStageIndex = getActiveStageIndex(caseStatus)
+  const isCaseClosed = caseStatus === LegalCaseStatus.Closed
 
   return CASE_STAGES.map((stage, index) => {
-    if (index === 0 && isInLegalProduction) {
+    if (index < activeStageIndex) {
       return {
         ...stage,
         icon: 'check',
@@ -125,8 +145,43 @@ export const getCaseStages = (caseStatus?: string): CaseStage[] => {
       }
     }
 
-    return { ...stage, isActive: index === activeStageIndex }
+    if (index === activeStageIndex) {
+      return {
+        ...stage,
+        icon: isCaseClosed ? 'check' : stage.icon,
+        status: isCaseClosed ? 'Concluído' : stage.status,
+        isActive: true,
+      }
+    }
+
+    return { ...stage, isActive: false }
   })
+}
+
+export const getCaseStatusLabel = (
+  caseStatus?: string,
+  isClosureActive = false,
+): string => {
+  if (isClosureActive) return 'Encerramento em andamento'
+  if (!caseStatus) return 'Carregando status…'
+
+  return CASE_STATUS_LABELS[caseStatus as LegalCaseStatus] ?? 'Status indisponível'
+}
+
+function getActiveStageIndex(caseStatus?: string) {
+  switch (caseStatus) {
+    case LegalCaseStatus.ReadyForLegalProduction:
+    case LegalCaseStatus.LegalProduction:
+      return 1
+    case LegalCaseStatus.ProtocolDelivery:
+      return 2
+    case LegalCaseStatus.Execution:
+      return 3
+    case LegalCaseStatus.Closed:
+      return 4
+    default:
+      return 0
+  }
 }
 
 export const TEAM_MEMBERS = CASE_TEAM.map(({ className, initials }) => ({

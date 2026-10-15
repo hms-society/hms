@@ -1,8 +1,10 @@
+import { LegalCaseStatus } from '@hms/core/case-management/domain/structures'
 import { Avatar, AvatarFallback } from '@/ui/shadcn/avatar'
 import { Badge } from '@/ui/shadcn/badge'
 import { LawyerCaseHeaderActions } from '../lawyer-case-header-actions'
 import { CaseStageProgress } from '../case-stage-progress'
 import { CaseSummaryFacts } from '../case-summary-facts'
+import { getCaseStatusLabel } from '../case-page-data'
 
 export type LawyerCaseHeaderProps = {
   title: string
@@ -14,6 +16,7 @@ export type LawyerCaseHeaderProps = {
   onOpenPortal: () => void
   dossierApproved: boolean
   caseStatus?: string
+  isClosureActive?: boolean
   onOpenNewPiece: () => void
 }
 
@@ -25,9 +28,16 @@ export const LawyerCaseHeader = (props: LawyerCaseHeaderProps) => (
           <h1 className='font-serif text-2xl font-semibold text-foreground'>
             {props.title}
           </h1>
-          <Badge variant='attention' className='h-6 rounded-full px-3 text-[12px]'>
+          <Badge
+            variant={
+              props.caseStatus === LegalCaseStatus.Documentation && !props.isClosureActive
+                ? 'attention'
+                : 'secondary'
+            }
+            className='h-6 rounded-full px-3 text-[12px]'
+          >
             <span className='size-1.5 rounded-full bg-brand-accent' />
-            Documentação em formação
+            {getCaseStatusLabel(props.caseStatus, props.isClosureActive)}
           </Badge>
         </div>
         <CaseSummaryFacts
@@ -62,6 +72,9 @@ export const LawyerCaseHeader = (props: LawyerCaseHeaderProps) => (
         />
       </div>
     </div>
-    <CaseStageProgress caseStatus={props.caseStatus} />
+    <CaseStageProgress
+      caseStatus={props.caseStatus}
+      isClosureActive={props.isClosureActive}
+    />
   </section>
 )

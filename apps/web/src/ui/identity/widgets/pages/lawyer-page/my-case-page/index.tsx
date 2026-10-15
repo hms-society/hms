@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { LegalCaseStatus } from '@hms/core/case-management/domain/structures'
 import { Tabs } from '@/ui/shadcn/tabs'
 import { CasePageHeader } from './case-page-header'
 import { CaseTabNavigation } from './case-tab-navigation'
@@ -26,6 +27,7 @@ export const CasoDetalheChecklistPage = ({
       <CasePageHeader
         isAdministrator={isAdministrator}
         state={state}
+        isClosureActive={state.activeTab === 'encerramento'}
         onOpenPortal={() => setIsPortalPickerOpen(true)}
         onOpenNewPiece={() => {
           state.setActiveTab('pecas')
@@ -42,6 +44,11 @@ export const CasoDetalheChecklistPage = ({
           isAdministrator={isAdministrator}
           caseUuid={state.caseUuid}
           caseDetails={state.caseDetails}
+          canManageClosure={Boolean(
+            state.caseTeam?.canManage &&
+              state.caseTeam.status !== LegalCaseStatus.Closed &&
+              !isAdministrator,
+          )}
           currentCollaboratorId={state.currentCollaboratorId}
           checklistItems={state.checklistItems}
           completionPercentage={state.completionPercentage}

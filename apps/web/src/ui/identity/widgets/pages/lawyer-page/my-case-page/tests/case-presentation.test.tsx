@@ -289,6 +289,7 @@ describe('Case detail presentation widgets', () => {
         team={[{ collaboratorId: 'member-1', name: 'Beatriz Oliveira' }]}
         isGeneratingPortalLink={false}
         dossierApproved={false}
+        caseStatus='legal_production'
         onOpenPortal={onOpenPortal}
         onOpenNewPiece={vi.fn()}
       />,
@@ -298,6 +299,7 @@ describe('Case detail presentation widgets', () => {
     expect(screen.getByText('Cível')).toBeTruthy()
     expect(screen.getAllByText('Documentação').length).toBeGreaterThan(0)
     expect(screen.getByText('Produção Jurídica')).toBeTruthy()
+    expect(screen.getByText('Em produção jurídica')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Gerar link para terceiro' }))
     expect(onOpenPortal).toHaveBeenCalledOnce()
 
@@ -332,6 +334,7 @@ describe('Case detail presentation widgets', () => {
     const { rerender } = render(
       <CasePageHeader
         isAdministrator
+        isClosureActive={false}
         state={casePageState}
         onOpenPortal={onOpenPortal}
         onOpenNewPiece={vi.fn()}
@@ -341,6 +344,7 @@ describe('Case detail presentation widgets', () => {
     rerender(
       <CasePageHeader
         isAdministrator={false}
+        isClosureActive={false}
         state={casePageState}
         onOpenPortal={onOpenPortal}
         onOpenNewPiece={vi.fn()}
@@ -354,6 +358,7 @@ describe('Case detail presentation widgets', () => {
     rerender(
       <CasePageHeader
         isAdministrator={false}
+        isClosureActive={false}
         state={
           {
             caseDetails: undefined,
@@ -383,11 +388,13 @@ describe('Case detail presentation widgets', () => {
     )
     expect(screen.getByRole('tab', { name: 'Peças' }).hasAttribute('disabled')).toBe(true)
     expect(screen.getByRole('tab', { name: 'Equipe' })).toBeTruthy()
+    expect(screen.getByRole('tab', { name: 'Encerramento' })).toBeTruthy()
   })
 
   it('renders all supported administrator panels without granting editing', () => {
     const props = {
       isAdministrator: true,
+      canManageClosure: false,
       caseUuid: 'case-1',
       caseDetails: legalCase,
       checklistItems: checklist,

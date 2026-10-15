@@ -7,11 +7,13 @@ import { ChecklistDossierTab } from '../checklist-dossier-tab'
 import { CaseTeamRoster } from '@/ui/case-management/widgets/components/case-team-roster'
 import { CASE_TASKS, CASE_TIMELINE, MOCK_ACTIVITIES } from '../case-page-data'
 import type { ChecklistItem } from '../types'
+import { CaseClosureTab } from '@/ui/case-management/widgets/pages/case-closure-tab'
 
 export type CaseTabPanelsProps = {
   isAdministrator: boolean
   caseUuid: string
   caseDetails?: LegalCaseSummary
+  canManageClosure: boolean
   currentCollaboratorId?: string
   checklistItems: ChecklistItem[]
   completionPercentage: number
@@ -79,6 +81,9 @@ export const CaseTabPanels = (props: CaseTabPanelsProps) => (
     </TabsContent>
     <TabsContent value='equipe' className='mt-4 flex flex-col gap-4'>
       <CaseTeamRoster caseId={props.caseUuid} />
+    </TabsContent>
+    <TabsContent value='encerramento' className='mt-4 flex flex-col gap-4'>
+      <CaseClosureTab canManage={props.canManageClosure} />
     </TabsContent>
   </>
 )

@@ -8,6 +8,7 @@ const LAWYER_TABS = [
   { value: 'pecas', label: 'Peças', locked: true },
   { value: 'prazos', label: 'Prazos & Tarefas' },
   { value: 'equipe', label: 'Equipe', users: true },
+  { value: 'encerramento', label: 'Encerramento' },
 ] as const
 
 export type CaseTabNavigationProps = {
