@@ -18,6 +18,11 @@ type AppointmentFacetScope = {
   lawyerId?: string
 }
 
+type AppointmentOverlapFilters = {
+  clientId?: string
+  statuses?: readonly Appointment['status'][]
+}
+
 export interface CalendarAppointmentsRepository extends AppointmentsRepository {
   findById(id: string): Promise<Appointment | undefined>
   findByIdForUpdate(id: string): Promise<Appointment | undefined>
@@ -25,7 +30,7 @@ export interface CalendarAppointmentsRepository extends AppointmentsRepository {
     startsAt: Date,
     endsAt: Date,
     scheduleIds: readonly string[],
-    clientId?: string,
+    filters?: AppointmentOverlapFilters,
   ): Promise<readonly Appointment[]>
   listChanges(appointmentId: string): Promise<readonly AppointmentChange[]>
   addChange(change: AppointmentChange): Promise<AppointmentChange>

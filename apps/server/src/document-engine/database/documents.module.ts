@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { IdentityModule } from '@/identity/identity.module'
+import { IdentityDatabaseModule } from '@/identity/database/identity-database.module'
+import { CaseManagementDatabaseModule } from '@/case-management/database'
+import { CaseManagementAccessModule } from '@/case-management/access/case-management-access.module'
 import { CommunicationModule } from '@/shared/communication/communication.module'
 import { SharedMessagingModule } from '@/shared/messaging/shared-messaging.module'
 import { DocumentEngineMessagingModule } from '../messaging/document-engine-messaging.module'
-import { DocumentEngineProvisionModule } from '../provision/document-engine-provision.module'
+import { DocumentEngineChecklistAccessModule } from '../access/document-engine-checklist-access.module'
 import { DocumentsDatabaseModule } from './documents-database.module'
 import { InternalUploadController } from '../rest/controllers/internal-upload.controller'
 import { ListClientDocumentController } from '../rest/controllers/list-client-document-batch.controller'
@@ -12,6 +15,7 @@ import { ListClientDocumentBatchUseCase } from '@hms/core/document-engine/use-ca
 import type { DocumentBatchesRepository } from '@hms/core/document-engine/interfaces'
 import { DOCUMENT_ENGINE } from './drizzle/constants/documents-repositories'
 import { GetDocumentFileController } from '../rest/controllers/get-document-file.controller'
+import { DownloadDocumentFileController } from '../rest/controllers/download-document-file.controller'
 import { GetDocumentValidationController } from '../rest/controllers/get-document-validation.controller'
 import { ListDocumentValidationsController } from '../rest/controllers/list-document-validations.controller'
 import { ListDocumentValidationLogsController } from '../rest/controllers/list-document-validation-logs.controller'
@@ -28,16 +32,20 @@ import { ListCaseDocumentExceptionsController } from '../rest/controllers/list-c
     DocumentsDatabaseModule,
     ProvisionModule,
     IdentityModule,
+    IdentityDatabaseModule,
+    CaseManagementDatabaseModule,
+    CaseManagementAccessModule,
     CommunicationModule,
     SharedMessagingModule,
     DocumentEngineMessagingModule,
-    DocumentEngineProvisionModule,
+    DocumentEngineChecklistAccessModule,
   ],
   controllers: [
     InternalUploadController,
     ListClientDocumentController,
     ListTriageDocumentBatchesController,
     GetDocumentFileController,
+    DownloadDocumentFileController,
     GetDocumentValidationController,
     ListDocumentValidationsController,
     ListDocumentValidationLogsController,

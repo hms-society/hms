@@ -17,7 +17,7 @@ describe('Complete Consultation Controller [PATCH /consultations/:consultationId
 
   it('completes a consultation with finalized attendance and confirmed documents', async () => {
     const { user, collaborator } = await fixture.registerAssociatedCollaborator()
-    const consultation = await fixture.seedConsultation(
+    const { consultation } = await fixture.seedConsultationWithAppointment(
       ConsultationFaker.fake({
         assignedLawyerId: collaborator.id,
         status: ConsultationStatus.Pending,

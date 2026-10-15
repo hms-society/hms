@@ -9,6 +9,8 @@ import {
   AuthorizeAdminUseCase,
   UpdateCollaboratorUseCase,
 } from '@hms/core/identity/use-cases'
+import type { CaseIdentityTransaction } from '@hms/core/shared/interfaces'
+import { EnsureCaseManagerContinuityUseCase } from '@hms/core/case-management/use-cases'
 import type { AuthUser } from '@hms/core/identity/domain/structures'
 import { updateCollaboratorSchema } from '@hms/validation/identity'
 import { ZodValidationPipe } from 'nestjs-zod'
@@ -22,6 +24,9 @@ import {
   UpdateCollaboratorRequestDto,
 } from '@/identity/rest/dtos'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
+import { CASE_IDENTITY_TRANSACTION } from '@/shared/database/constants/case-identity-transaction'
+import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { IdProvider } from '@/shared/provision/id/id-provider'
 
 type ExecuteRequest = Parameters<UpdateCollaboratorUseCase['execute']>[0]
 type RequestBody = ExecuteRequest['changes']
@@ -38,11 +43,18 @@ export class UpdateCollaboratorController {
     @Inject(IDENTITY_REPOSITORIES.users) usersRepository: UsersRepository,
     @Inject(LEGAL_CATALOG_PROVIDERS.legalExpertiseCatalog)
     legalExpertiseCatalogProvider: LegalExpertiseCatalogProvider,
+    @Inject(CASE_IDENTITY_TRANSACTION)
+    caseIdentityTransaction: CaseIdentityTransaction,
+    datetimeProvider: DatetimeProvider,
+    idProvider: IdProvider,
   ) {
     this.useCase = new UpdateCollaboratorUseCase(
       collaboratorsRepository,
       new AuthorizeAdminUseCase(usersRepository, collaboratorsRepository),
       legalExpertiseCatalogProvider,
+      caseIdentityTransaction,
+      new EnsureCaseManagerContinuityUseCase(caseIdentityTransaction, datetimeProvider),
+      idProvider,
     )
   }
 

@@ -12,6 +12,7 @@ import type {
   ClientsRepository,
   CollaboratorRegistrationAttemptsRepository,
   CollaboratorsRepository,
+  ThirdPartiesRepository,
   UsersRepository,
 } from '@hms/core/identity/interfaces'
 
@@ -267,6 +268,8 @@ export class IdentitySeeder {
     private readonly clientsRepository: ClientsRepository,
     @Inject(IDENTITY_REPOSITORIES.users)
     private readonly usersRepository: UsersRepository,
+    @Inject(IDENTITY_REPOSITORIES.thirdParties)
+    private readonly thirdPartiesRepository: ThirdPartiesRepository,
     @Inject(IDENTITY_REPOSITORIES.collaborators)
     private readonly collaboratorsRepository: CollaboratorsRepository,
     @Inject(IDENTITY_REPOSITORIES.registrationAttempts)
@@ -292,6 +295,7 @@ export class IdentitySeeder {
 
     await this.clientsRepository.removeAll()
     await this.registrationAttemptsRepository.removeAll()
+    await this.thirdPartiesRepository.removeAll()
     await this.collaboratorsRepository.removeAll()
     await this.usersRepository.removeAll()
   }

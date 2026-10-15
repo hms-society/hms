@@ -13,7 +13,7 @@ scope:
   - packages/validation
   - apps/server
   - apps/web
-last_updated_at: 2026-09-28
+last_updated_at: 2026-10-14
 ---
 
 # 1. Context and scope
@@ -516,10 +516,10 @@ interface SchedulingDatabase {
 
 | Path | Change | Declaration/operation | Schema/mapping | Integrity/query contract | Migration/transaction | Registration/consumers |
 | --- | --- | --- | --- | --- | --- | --- |
-| `apps/server/src/scheduling/database/drizzle/models/appointment-model.ts` | Modify | `appointmentModel` | Campos existentes preservados; índice de período | Índice `(schedule_id,starts_at,ends_at)` para overlap/período; cancelados legíveis | Migração 0053; escrita no scope | Repo |
-| `apps/server/src/shared/database/drizzle/schema/scheduling.ts` | Modify | `schedules`, `blockedPeriods` | `time_zone text not null default 'America/Sao_Paulo'`; índice de bloqueio | Fuso IANA validado no limite; datas finais inclusivas | Backfill/default e índice na 0053 | Schedules repo |
-| `apps/server/src/scheduling/database/drizzle/models/appointment-change-model.ts` | Modify | `appointmentChangeModel` | Adiciona `previous_schedule_id,new_schedule_id` UUID opcionais para mudanças legadas | FKs a `schedules`; novo reschedule grava ambos; constraint exige o par | Migração 0055 | Repo/job |
-| `apps/server/src/consultation/database/drizzle/models/consultation-outbox-event-model.ts` | Create | `consultationOutboxEventModel` | Tabela abaixo, envelope sem PII | FK, ID único, índice de pendências | Migração 0053 | Repository/job |
+| `apps/server/src/scheduling/database/drizzle/models/appointment-model.ts` | Modify | `appointmentModel` | Campos existentes preservados; índice de período | Índice `(schedule_id,starts_at,ends_at)` para overlap/período; cancelados legíveis | Migração 0066; escrita no scope | Repo |
+| `apps/server/src/shared/database/drizzle/schema/scheduling.ts` | Modify | `schedules`, `blockedPeriods` | `time_zone text not null default 'America/Sao_Paulo'`; índice de bloqueio | Fuso IANA validado no limite; datas finais inclusivas | Backfill/default e índice na 0066 | Schedules repo |
+| `apps/server/src/scheduling/database/drizzle/models/appointment-change-model.ts` | Modify | `appointmentChangeModel` | Adiciona `previous_schedule_id,new_schedule_id` UUID opcionais para mudanças legadas | FKs a `schedules`; novo reschedule grava ambos; constraint exige o par | Migração 0066 | Repo/job |
+| `apps/server/src/consultation/database/drizzle/models/consultation-outbox-event-model.ts` | Create | `consultationOutboxEventModel` | Tabela abaixo, envelope sem PII | FK, ID único, índice de pendências | Migração 0066 | Repository/job |
 | `apps/server/src/consultation/database/drizzle/models/index.ts` | Modify | export do model de outbox | — | — | — | Drizzle schema/repo |
 | `apps/server/src/consultation/database/drizzle/types/entities/drizzle-consultation-outbox-event.ts` | Create | `DrizzleConsultationOutboxEvent` | Inferência do model | Sem `any` | — | Mapper |
 | `apps/server/src/consultation/database/drizzle/types/entities/index.ts` | Modify | export row type | — | — | — | Mapper |
@@ -550,13 +550,12 @@ interface SchedulingDatabase {
 | `apps/server/src/consultation/database/consultation-database.module.ts` | Modify | provider e export | Injeta DatabaseTransactionContext no adapter de remarcação | Sem import de Scheduling; executor compartilhado | DI | ConsultationModule |
 | `apps/server/src/consultation/constants/consultation-repositories.ts` | Modify | tokens `calendarProvider`, `outbox` | DI de projeção e persistência de eventos | — | — | ConsultationDatabaseModule |
 | `apps/server/src/consultation/database/drizzle/repositories/drizzle-consultations-repository.ts` | Modify | `add`, `replace`, `findById`, `findByIntakeId` existentes | Usa `DatabaseTransactionContext.get()` quando ativo, senão conexão normal; não importa tabela de Agendamento | Leituras/escritas do callback no mesmo executor | Sem efeito externo dentro | Casos de Consulta |
-| `apps/server/src/consultation/database/drizzle/repositories/drizzle-consultation-outbox-repository.ts` | Create | `DrizzleConsultationOutboxRepository` | `add/listPending/markPublished` via executor ativo quando presente | Enqueue transacional; lote pendente limitado; markPublished condicional | Migração 0053 | Casos de Consulta/job |
+| `apps/server/src/consultation/database/drizzle/repositories/drizzle-consultation-outbox-repository.ts` | Create | `DrizzleConsultationOutboxRepository` | `add/listPending/markPublished` via executor ativo quando presente | Enqueue transacional; lote pendente limitado; markPublished condicional | Migração 0066 | Casos de Consulta/job |
 | `apps/server/src/consultation/database/drizzle/repositories/index.ts` | Modify | export do repo de outbox | — | — | — | DB module |
 | `apps/server/src/consultation/database/consultation-database.module.ts` | Modify | repository/provider/outbox | Injeta contexto compartilhado nos repos; exporta projection provider e outbox | Sem import de Scheduling, sem ciclo | DI | ConsultationModule/MessagingModule |
-| `apps/server/src/shared/database/drizzle/migrations/0053_appointment_calendar_history.sql` | Generate | Migração de fuso/índices/histórico e outbox da Consulta | Tabelas abaixo | Compatibilidade de dados existentes | Já entregue; preservar sem reescrever | DB deploy |
-| `apps/server/src/shared/database/drizzle/migrations/0055_faulty_red_hulk.sql` | Generate | Colunas/FKs de agenda anterior e nova no histórico | Duas colunas UUID nullable para compatibilidade legada | FK RESTRICT; pares nulos para legado/cancelamento ou preenchidos para remarcação | Gerar, revisar e registrar no journal; não reescrever migração aplicada | DB deploy |
-| `apps/server/src/shared/database/drizzle/migrations/meta/0053_snapshot.json` | Generate | Snapshot Drizzle da migração | Estado de modelos resultante | Gerado, sem edição manual | `db:migration:generate` | journal/migrate |
-| `apps/server/src/shared/database/drizzle/migrations/meta/_journal.json` | Generate | entrada 0053 | Versão sequencial | Não editar manualmente fora do fluxo de migração | `pnpm --filter server db:migration:generate`; ajustar nome gerado/journal juntos | migrate |
+| `apps/server/src/shared/database/drizzle/migrations/0066_even_captain_america.sql` | Generate | Migração de fuso/índices/histórico e outbox da Consulta | Tabelas abaixo | Compatibilidade de dados existentes | Já entregue; preservar sem reescrever | DB deploy |
+| `apps/server/src/shared/database/drizzle/migrations/meta/0066_snapshot.json` | Generate | Snapshot Drizzle da migração | Estado de modelos resultante | Gerado, sem edição manual | `db:migration:generate` | journal/migrate |
+| `apps/server/src/shared/database/drizzle/migrations/meta/_journal.json` | Generate | entrada 0066 | Versão sequencial | Não editar manualmente fora do fluxo de migração | `pnpm --filter server db:migration:generate`; ajustar nome gerado/journal juntos | migrate |
 | `apps/server/src/scheduling/database/drizzle/repositories/tests/scheduling-database.test.ts` | Remove | Teste direto do adapter | Cobertura deslocada para os fluxos HTTP com banco real | Sem testes de repositório/adapter conforme Database Rule | — | Controller integration |
 
 ### Migration data model — `schedules` (delta)
@@ -659,7 +658,7 @@ O insert do envelope ocorre pelo mesmo `DatabaseTransactionContext` do write de 
 
 A revisão resultante deve ser monotônica mesmo com duas ações no mesmo milissegundo: usar instante persistido estritamente posterior a `previousRevision` e à hora atual do provider, sob lock. O mesmo valor é escrito em `appointments.updated_at` e `appointment_changes.resulting_revision`. Consultas de histórico usam `occurred_at,id` para ordem estável.
 
-**Migration delivery.** A migração inicial 0053 já está no worktree. Gerar a extensão a partir dos modelos com `pnpm --filter server db:migration:generate`, revisar o SQL produzido e registrar a migração gerada `0055_faulty_red_hulk.sql` e `meta/0055_snapshot.json` com journal correspondente; 0054 já foi consumida pelo outbox da Consulta. Preservar todas as linhas legadas: `previous_schedule_id` e `new_schedule_id` são nulos em mudanças antigas e cancelamentos; ambos são escritos em novas remarcações. O deploy do esquema precede os escritores atualizados. Não alterar migrações anteriores. Se o journal corrente indicar outro número, usar o próximo número real sem sobrescrever migração existente.
+**Migration delivery.** The three feature-branch migrations were based on an older journal and collide with names already used on `develop`. The integrated schema is delivered by generated migration `0066_even_captain_america.sql`, snapshot `meta/0066_snapshot.json`, and journal entry 66, chained after the current `develop` migration 0065. Preserve the develop migration history. The migration creates the consultation outbox and appointment history, adds the schedule timezone and indexes, and keeps legacy change rows valid: previous/new schedule IDs are nullable as a pair; new reschedules write both. Deploy the schema before the updated writers.
 
 ## apps/server — Messaging
 
@@ -754,7 +753,7 @@ O job junta cada linha pendente ao Agendamento para obter o `clientId`. O evento
 | `apps/web/src/ui/scheduling/widgets/pages/appointments-page/appointment-details-dialog/cancel-appointment-dialog/tests/use-cancel-appointment-dialog.test.ts` | Create | `useCancelAppointmentDialog` | owning hook test | Submissão/revisão/409 | Preserva contexto e recupera | — | Vitest |
 | `apps/web/src/ui/scheduling/widgets/pages/appointments-page/appointment-details-dialog/reschedule-appointment-dialog/tests/reschedule-appointment-dialog.test.tsx` | Create | `RescheduleAppointmentDialog` | widget test | Data, slots, resumo e confirmação | Empty/pending/conflict/error | yVAoI/390 × 844 | Vitest |
 | `apps/web/src/ui/scheduling/widgets/pages/appointments-page/appointment-details-dialog/reschedule-appointment-dialog/tests/use-reschedule-appointment-dialog.test.ts` | Create | `useRescheduleAppointmentDialog` | owning hook test | RHF, slot, data, revisão | Preserva seleção em 409 | — | Vitest |
-| `apps/web/tests/agenda/consultas.test.ts` | Create | rota com hooks reais e HTTP mockado | route test | Search, queries e mutações reais no cliente | Request/query/body, cache/refetch e UI sem stale de outro escopo | 390 × 844 | Playwright CLI |
+| `apps/web/tests/routes/agenda/consultas.test.ts` | Create | rota com hooks reais e HTTP mockado | route test | Search, queries e mutações reais no cliente | Request/query/body, cache/refetch e UI sem stale de outro escopo | 390 × 844 | Playwright CLI |
 
 **UI file/widget tree.** Cada linha abaixo é um caminho relativo ao repositório; o recuo mostra o widget pai, sem transferir a propriedade do estado ao filho.
 
@@ -874,7 +873,7 @@ Testes de widget/rota com page.route são cobertura isolada, não prova de integ
 | apps/web/src/ui/scheduling/widgets/pages/appointments-page/appointment-details-dialog/cancel-appointment-dialog/tests/use-cancel-appointment-dialog.test.ts | owning hook | Cancelamento | Revisão, submissão única, 409 e recovery |
 | apps/web/src/ui/scheduling/widgets/pages/appointments-page/appointment-details-dialog/reschedule-appointment-dialog/tests/reschedule-appointment-dialog.test.tsx | widget | Remarcação | Slots, resumo, pending/conflict/error, teclado |
 | apps/web/src/ui/scheduling/widgets/pages/appointments-page/appointment-details-dialog/reschedule-appointment-dialog/tests/use-reschedule-appointment-dialog.test.ts | owning hook | Remarcação | RHF, data/slot/revisão e preservação em 409 |
-| apps/web/tests/agenda/consultas.test.ts | route, HTTP mocked | URL/rota/hooks reais | Search/back/forward, requests, invalidação/refetch, viewport/teclado isolados |
+| apps/web/tests/routes/agenda/consultas.test.ts | route, HTTP mocked | URL/rota/hooks reais | Search/back/forward, requests, invalidação/refetch, viewport/teclado isolados |
 
 | Test file | Test case | Description | Assertions |
 | --- | --- | --- | --- |
@@ -960,7 +959,7 @@ Testes de widget/rota com page.route são cobertura isolada, não prova de integ
 | pnpm --filter @hms/core test | Unit de Agendamento/Consulta e regressão de reserva. |
 | pnpm --filter server test | Controller de Agendamento/Consulta com PostgreSQL real, acesso GET por ID/Intake e jobs de outbox. |
 | pnpm --filter web test -- src/ui/scheduling | Widgets/hooks. |
-| pnpm --filter web exec playwright test tests/agenda/consultas.test.ts | Rota isolada; mocks rotulados. |
+| pnpm --filter web exec playwright test tests/routes/agenda/consultas.test.ts | Rota isolada; mocks rotulados. |
 | pnpm --filter web test:integration | Suíte browser; não substitui MV real. |
 | pnpm --filter web generate-routes | Gerar routeTree.gen.ts. |
 | pnpm --filter @hms/core check-types; pnpm --filter @hms/validation check-types; pnpm --filter server check:types; pnpm --filter web check:types | Typecheck dos quatro workspaces, sequencial. |

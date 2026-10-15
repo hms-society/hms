@@ -3,16 +3,16 @@ import {
   Get,
   HttpStatus,
   Inject,
-  Logger,
-  NotFoundException,
   Param,
   ParseUUIDPipe,
-  Query,
-  StreamableFile,
   UseGuards,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger'
-import type { LegalCasesRepository } from '@hms/core/case-management/interfaces'
+import type {
+  LegalCasesRepository,
+  CaseAccessProvider,
+} from '@hms/core/case-management/interfaces'
+import type { CollaboratorsRepository } from '@hms/core/identity/interfaces'
 import type {
   DocumentGenerationsRepository,
   DocumentPackagesRepository,
@@ -21,21 +21,20 @@ import type {
   PackageDocumentsRepository,
 } from '@hms/core/document-production/interfaces'
 import { ListCaseDocumentsUseCase } from '@hms/core/document-production/use-cases'
-
+import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
+import { CurrentCollaborator } from '@/identity/decorators'
+import { CASE_MANAGEMENT_ACCESS } from '@/case-management/constants/case-management-access'
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
 import { CaseDocumentResponseDto } from '@/document-production/rest/dtos'
 import { AuthGuard, ActiveCollaboratorGuard } from '@/identity/guards'
-import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
-import type { StorageProvider } from '@hms/core/shared/interfaces'
-import { selectDocumentFileVersion } from './select-document-file-version'
+import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 
 @Controller('cases')
 @ApiTags('Case Document Production')
 @ApiBearerAuth()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class ListCaseDocumentsController {
-  private readonly logger = new Logger(ListCaseDocumentsController.name)
   private readonly useCase: ListCaseDocumentsUseCase
 
   constructor(
@@ -49,10 +48,13 @@ export class ListCaseDocumentsController {
     versions: DocumentVersionsRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.generations)
     generations: DocumentGenerationsRepository,
-    @Inject(STORAGE_PROVIDER) private readonly storageProvider: StorageProvider,
+    @Inject(CASE_MANAGEMENT_ACCESS.access) caseAccessProvider: CaseAccessProvider,
+    @Inject(IDENTITY_REPOSITORIES.collaborators)
+    private readonly collaborators: CollaboratorsRepository,
   ) {
     this.useCase = new ListCaseDocumentsUseCase(
       cases,
+      caseAccessProvider,
       packages,
       packageDocuments,
       documents,
@@ -61,42 +63,39 @@ export class ListCaseDocumentsController {
     )
   }
 
-  @Get(':caseId/documents/:documentId/file')
-  @ApiResponse({ status: HttpStatus.OK, description: 'Arquivo da peça documental' })
-  async handleFile(
-    @Param('caseId', new ParseUUIDPipe()) caseId: string,
-    @Param('documentId', new ParseUUIDPipe()) documentId: string,
-    @Query('versionId') versionId?: string,
-  ) {
-    this.logger.log(`Solicitando arquivo da peça ${documentId} do caso ${caseId}`)
-    const item = (await this.useCase.execute({ caseId })).find(
-      ({ document }) => document.id === documentId,
-    )
-    const version = selectDocumentFileVersion(item?.versions ?? [], versionId)
-    if (!version?.storagePath) {
-      this.logger.warn(
-        `Versão ${version?.id ?? 'inexistente'} sem storagePath para peça ${documentId}`,
-      )
-      throw new NotFoundException(
-        'O arquivo desta versão ainda não está associado ao Storage.',
-      )
-    }
-
-    this.logger.log(`Baixando ${version.storagePath}`)
-    const content = await this.storageProvider.download(version.storagePath)
-    this.logger.log(`Arquivo lido do Storage (${content.byteLength} bytes)`)
-    const mimeType = version.storagePath.endsWith('.pdf')
-      ? 'application/pdf'
-      : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    return new StreamableFile(Buffer.from(content), { type: mimeType })
-  }
-
   @Get(':caseId/documents')
   @ApiResponse({ status: HttpStatus.OK, type: [CaseDocumentResponseDto] })
-  handle(@Param('caseId', new ParseUUIDPipe()) caseId: string) {
+  handle(
+    @Param('caseId', new ParseUUIDPipe()) caseId: string,
+    @CurrentCollaborator() collaborator: CollaboratorSummary,
+  ) {
     return this.useCase
-      .execute({ caseId })
-      .then((documents) => documents.map(CaseDocumentResponseDto.fromDomain))
+      .execute({ caseId, actorId: collaborator.collaboratorId })
+      .then(async (documents) => {
+        const collaboratorIds = [
+          ...new Set(
+            documents.flatMap(({ versions }) =>
+              versions.flatMap((version) => [
+                version.createdByCollaboratorId,
+                ...(version.reviewedByCollaboratorId
+                  ? [version.reviewedByCollaboratorId]
+                  : []),
+              ]),
+            ),
+          ),
+        ]
+        const summaries = await Promise.all(
+          collaboratorIds.map((id) => this.collaborators.findSummaryById(id)),
+        )
+        const names = new Map(
+          summaries.flatMap((summary) =>
+            summary ? [[summary.collaboratorId, summary.professionalName] as const] : [],
+          ),
+        )
+        return documents.map((document) =>
+          CaseDocumentResponseDto.fromDomain({ ...document, collaboratorNames: names }),
+        )
+      })
   }
 
   @Get(':caseId/documents/:documentId')
@@ -104,10 +103,31 @@ export class ListCaseDocumentsController {
   async handleDocument(
     @Param('caseId', new ParseUUIDPipe()) caseId: string,
     @Param('documentId', new ParseUUIDPipe()) documentId: string,
+    @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    const document = (await this.useCase.execute({ caseId })).find(
-      ({ document: item }) => item.id === documentId,
+    const document = (
+      await this.useCase.execute({
+        caseId,
+        actorId: collaborator.collaboratorId,
+      })
+    ).find(({ document: item }) => item.id === documentId)
+    if (!document) return undefined
+    const collaboratorIds = [
+      ...new Set(
+        document.versions.flatMap((version) => [
+          version.createdByCollaboratorId,
+          ...(version.reviewedByCollaboratorId ? [version.reviewedByCollaboratorId] : []),
+        ]),
+      ),
+    ]
+    const summaries = await Promise.all(
+      collaboratorIds.map((id) => this.collaborators.findSummaryById(id)),
     )
-    return document ? CaseDocumentResponseDto.fromDomain(document) : undefined
+    const names = new Map(
+      summaries.flatMap((summary) =>
+        summary ? [[summary.collaboratorId, summary.professionalName] as const] : [],
+      ),
+    )
+    return CaseDocumentResponseDto.fromDomain({ ...document, collaboratorNames: names })
   }
 }

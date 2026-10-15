@@ -1,3 +1,4 @@
+import { CaseManagementAccessModule } from '@/case-management/access'
 import { Module } from '@nestjs/common'
 
 import { CaseManagementDatabaseModule } from '@/case-management/database'
@@ -7,6 +8,7 @@ import {
   CreateLegalCaseController,
   ListCaseChecklistController,
   ListMyLegalCasesController,
+  ListAllLegalCasesForAdminController,
   ReplaceChecklistTemplateController,
   ReviewCaseChecklistGateController,
   GetLegalCaseDetailsController,
@@ -23,19 +25,37 @@ import {
   ApprovePendingMessageController,
   CancelPendingController,
   HomologateCaseDossierController,
+  GetCaseTeamController,
+  ListCaseTeamCandidatesController,
+  AddCaseTeamMemberController,
+  ChangeCaseTeamMemberRoleController,
+  RemoveCaseTeamMemberController,
+  ListCaseTeamHistoryController,
+  CreateCaseTaskController,
+  ListCaseTasksController,
+  UpdateCaseTaskController,
+  DeleteCaseTaskController,
+  GetCaseOpeningSourceController,
 } from '@/case-management/rest/controllers'
 import { DocumentsDatabaseModule } from '@/document-engine/database/documents-database.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { IdentityModule } from '@/identity/identity.module'
 import { IntakeDatabaseModule } from '@/intake/database'
+import { CaseIdentityTransactionModule } from '@/shared/database/case-identity-transaction.module'
+import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
+import { CaseManagementProvisionModule } from '@/case-management/provision/case-management-provision.module'
 
 @Module({
   imports: [
     IdentityModule,
     CaseManagementDatabaseModule,
+    CaseManagementAccessModule,
     IntakeDatabaseModule,
     DocumentsDatabaseModule,
     ProvisionModule,
+    CaseIdentityTransactionModule,
+    LegalCatalogModule,
+    CaseManagementProvisionModule,
   ],
   controllers: [
     AddCaseChecklistComplementaryItemController,
@@ -43,6 +63,8 @@ import { IntakeDatabaseModule } from '@/intake/database'
     CreateLegalCaseController,
     ListCaseChecklistController,
     ListMyLegalCasesController,
+    ListAllLegalCasesForAdminController,
+    ListCaseTeamCandidatesController,
     ReplaceChecklistTemplateController,
     ReviewCaseChecklistGateController,
     HomologateCaseDossierController,
@@ -59,6 +81,16 @@ import { IntakeDatabaseModule } from '@/intake/database'
     EditPendingMessageController,
     ApprovePendingMessageController,
     CancelPendingController,
+    GetCaseTeamController,
+    AddCaseTeamMemberController,
+    ChangeCaseTeamMemberRoleController,
+    RemoveCaseTeamMemberController,
+    ListCaseTeamHistoryController,
+    CreateCaseTaskController,
+    ListCaseTasksController,
+    UpdateCaseTaskController,
+    DeleteCaseTaskController,
+    GetCaseOpeningSourceController,
   ],
   exports: [CaseManagementDatabaseModule],
 })

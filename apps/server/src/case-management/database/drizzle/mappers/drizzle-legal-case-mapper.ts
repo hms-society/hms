@@ -1,3 +1,5 @@
+import type { LegalCaseOperationalRecord } from '@hms/core/case-management/domain/entities'
+import type { DrizzleLegalCaseOperationalRecord } from '@/case-management/database/drizzle/types'
 import { Injectable } from '@nestjs/common'
 import type { LegalCase } from '@hms/core/case-management/domain/entities'
 
@@ -16,6 +18,7 @@ export class DrizzleLegalCaseMapper {
       title: record.title,
       description: record.description ?? undefined,
       status: record.status,
+      teamVersion: record.teamVersion,
       checklistCompletedAt: record.checklistCompletedAt ?? undefined,
       checklistCompletedBy: record.checklistCompletedBy ?? undefined,
       checklistGate: {
@@ -31,6 +34,21 @@ export class DrizzleLegalCaseMapper {
       openedAt: record.openedAt,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
+    }
+  }
+  toOperationalRecord(
+    record: DrizzleLegalCaseOperationalRecord,
+  ): LegalCaseOperationalRecord {
+    return {
+      id: record.id,
+      publicCode: record.publicCode,
+      title: record.title,
+      status: record.status,
+      clientId: record.clientId,
+      legalAreaId: record.legalAreaId,
+      legalTopicId: record.legalTopicId,
+      updatedAt: record.updatedAt,
+      managerCollaboratorIds: record.managerCollaboratorIds,
     }
   }
 }

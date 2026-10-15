@@ -27,8 +27,7 @@ describe('ReserveIntakeAppointmentJob', () => {
         createFunctions(client) {
           const job = new ReserveIntakeAppointmentJob(
             client,
-            schedulingFixture.schedulesRepository,
-            schedulingFixture.appointmentsRepository,
+            schedulingFixture.database,
             new IdProvider(),
             new DatetimeProvider(),
           )

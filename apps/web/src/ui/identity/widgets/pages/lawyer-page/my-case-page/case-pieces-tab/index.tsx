@@ -18,12 +18,16 @@ export type CasePiecesTabProps = {
   dossierApproved: boolean
   caseId?: string
   openNewPieceDialog?: boolean
+  onNewPieceDialogOpenChange?: (open: boolean) => void
+  readOnly?: boolean
 }
 
 export function CasePiecesTab({
   dossierApproved,
   caseId,
   openNewPieceDialog = false,
+  onNewPieceDialogOpenChange,
+  readOnly = false,
 }: CasePiecesTabProps) {
   const queryClient = useQueryClient()
   const { navigateTo } = useNavigation()
@@ -36,7 +40,7 @@ export function CasePiecesTab({
     refetch,
   } = useQuery({
     queryKey: ['case-documents', caseId],
-    enabled: dossierApproved && Boolean(caseId),
+    enabled: (readOnly || dossierApproved) && Boolean(caseId),
     queryFn: async () => {
       if (!caseId) return []
       const response = await caseDocumentProductionService.listDocuments(caseId)
@@ -71,8 +75,8 @@ export function CasePiecesTab({
     'adjustments' | 'block' | 'approval' | null
   >(null)
   useEffect(() => {
-    if (openNewPieceDialog) setIsNewPieceOpen(true)
-  }, [openNewPieceDialog])
+    if (openNewPieceDialog && !readOnly) setIsNewPieceOpen(true)
+  }, [openNewPieceDialog, readOnly])
   return (
     <div className='flex flex-col gap-4'>
       <div>
@@ -84,7 +88,7 @@ export function CasePiecesTab({
         </p>
       </div>
       <DossierGateBanner approved={dossierApproved} />
-      {dossierApproved ? (
+      {readOnly || dossierApproved ? (
         <>
           {isLoading ? (
             <p className='rounded-md border border-border p-4 text-sm text-muted-foreground'>
@@ -116,7 +120,8 @@ export function CasePiecesTab({
                 <CasePieceCard
                   key={piece.id}
                   piece={piece}
-                  onRetry={() => retryMutation.mutate(piece.id)}
+                  readOnly={readOnly}
+                  onRetry={() => !readOnly && retryMutation.mutate(piece.id)}
                   isRetrying={
                     retryMutation.isPending && retryMutation.variables === piece.id
                   }
@@ -126,6 +131,7 @@ export function CasePiecesTab({
                       : undefined
                   }
                   onOpenReview={() => {
+                    if (readOnly) return
                     if (caseId) {
                       void navigateTo('lawyerCasePieceReview', {
                         params: { caseId, documentId: piece.id },
@@ -135,6 +141,7 @@ export function CasePiecesTab({
                     setIsViewerOpen(true)
                   }}
                   onOpenEditor={() => {
+                    if (readOnly) return
                     if (caseId) {
                       void navigateTo('lawyerCasePieceEditor', {
                         params: { caseId, documentId: piece.id },
@@ -163,7 +170,7 @@ export function CasePiecesTab({
                 />
               ))
             : null}
-          <NewCasePieceCard onOpen={() => setIsNewPieceOpen(true)} />
+          {!readOnly && <NewCasePieceCard onOpen={() => setIsNewPieceOpen(true)} />}
           <p className='flex items-start gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground'>
             <Icon name='shield-check' className='mt-0.5 size-3.5 shrink-0 text-primary' />
             A IA gera e sugere minutas, mas nenhuma peça é protocolada ou entregue sem
@@ -171,40 +178,49 @@ export function CasePiecesTab({
           </p>
         </>
       ) : null}
-      <NewPieceDialog
-        open={isNewPieceOpen}
-        caseId={caseId}
-        onOpenChange={setIsNewPieceOpen}
-        onGenerated={() => {
-          if (caseId) {
-            void queryClient.invalidateQueries({ queryKey: ['case-documents', caseId] })
-          }
-        }}
-      />
-      <PieceViewerDialog
-        open={isViewerOpen}
-        onOpenChange={setIsViewerOpen}
-        onOpenEditor={() => {
-          setIsViewerOpen(false)
-          setWorkflow('editor')
-        }}
-        onOpenReview={() => {
-          setIsViewerOpen(false)
-          setWorkflow('review')
-        }}
-      />
-      <PieceWorkflowDialog
-        mode={workflow ?? 'editor'}
-        open={workflow !== null}
-        onOpenChange={(open) => !open && setWorkflow(null)}
-        onRequestAdjustments={() => setReviewAction('adjustments')}
-        onBlock={() => setReviewAction('block')}
-      />
-      <ReviewActionDialog
-        kind={reviewAction ?? 'adjustments'}
-        open={reviewAction !== null}
-        onOpenChange={(open) => !open && setReviewAction(null)}
-      />
+      {!readOnly && (
+        <>
+          <NewPieceDialog
+            open={isNewPieceOpen}
+            caseId={caseId}
+            onOpenChange={(open) => {
+              setIsNewPieceOpen(open)
+              onNewPieceDialogOpenChange?.(open)
+            }}
+            onGenerated={() => {
+              if (caseId) {
+                void queryClient.invalidateQueries({
+                  queryKey: ['case-documents', caseId],
+                })
+              }
+            }}
+          />
+          <PieceViewerDialog
+            open={isViewerOpen}
+            onOpenChange={setIsViewerOpen}
+            onOpenEditor={() => {
+              setIsViewerOpen(false)
+              setWorkflow('editor')
+            }}
+            onOpenReview={() => {
+              setIsViewerOpen(false)
+              setWorkflow('review')
+            }}
+          />
+          <PieceWorkflowDialog
+            mode={workflow ?? 'editor'}
+            open={workflow !== null}
+            onOpenChange={(open) => !open && setWorkflow(null)}
+            onRequestAdjustments={() => setReviewAction('adjustments')}
+            onBlock={() => setReviewAction('block')}
+          />
+          <ReviewActionDialog
+            kind={reviewAction ?? 'adjustments'}
+            open={reviewAction !== null}
+            onOpenChange={(open) => !open && setReviewAction(null)}
+          />
+        </>
+      )}
     </div>
   )
 }
@@ -218,13 +234,21 @@ function formatDate(value?: string) {
 }
 
 export function mapCaseDocumentToPiece(document: CaseDocumentResponse): CasePiece {
+  const currentVersion =
+    document.versions.find((version) => version.id === document.currentVersionId) ??
+    document.versions.reduce<(typeof document.versions)[number] | undefined>(
+      (latest, version) =>
+        !latest || version.versionNumber > latest.versionNumber ? version : latest,
+      undefined,
+    )
+
   return {
     id: document.id,
     title: document.title,
     template: 'Modelo documental',
-    author: 'Solicitante atual',
+    author: currentVersion?.createdByCollaboratorName?.trim() || 'Solicitante atual',
     reviewer: document.versions.length ? 'Aguardando revisão humana' : '—',
-    updatedAt: formatDate(document.versions[0]?.createdAt),
+    updatedAt: formatDate(currentVersion?.createdAt),
     status:
       document.generation?.status === 'pending' ||
       document.generation?.status === 'running'
@@ -232,28 +256,28 @@ export function mapCaseDocumentToPiece(document: CaseDocumentResponse): CasePiec
         : document.generation?.status === 'failed' ||
             document.generation?.status === 'cancelled'
           ? 'Falha na geração'
-          : document.versions[0]?.status === 'approved'
-            ? 'Aprovada'
-            : 'Em revisão técnica',
+          : formatVersionStatus(currentVersion?.status),
     versions: document.versions.map((version) => ({
       id: version.id,
       label: `v${version.versionNumber}`,
-      title: formatVersionStatus(version.status),
-      author: 'Colaborador responsável',
+      title: formatVersionStatus(version.status, version.id !== currentVersion?.id),
+      author: version.createdByCollaboratorName ?? 'Colaborador responsável',
       timestamp: formatDate(version.createdAt),
       meta: version.rejectionReason,
     })),
   }
 }
 
-function formatVersionStatus(status: string) {
-  return (
+function formatVersionStatus(status: string | undefined, historical = false) {
+  const normalizedStatus = status ?? 'draft'
+  const label =
     {
       approved: 'Aprovada',
+      draft: 'Em elaboração',
       in_review: 'Em revisão',
-      rejected: 'Rejeitada',
+      rejected: 'Requer ajustes',
       generating: 'Gerando',
       generation_failed: 'Falha na geração',
-    }[status] ?? status
-  )
+    }[normalizedStatus] ?? normalizedStatus
+  return historical ? 'Histórica' : label
 }
