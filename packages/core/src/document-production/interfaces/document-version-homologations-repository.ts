@@ -9,4 +9,13 @@ export interface DocumentVersionHomologationsRepository {
   findByDocumentVersionId(
     documentVersionId: string,
   ): Promise<DocumentVersionHomologation | undefined>
+  attachArtifact(
+    homologationId: string,
+    artifact: {
+      fileId: string
+      storagePath: string
+      contentType: string
+      createdAt: Date
+    },
+  ): Promise<DocumentVersionHomologation | undefined>
 }

@@ -14,6 +14,10 @@ export class DrizzleDocumentVersionHomologationMapper {
       approvedByCollaboratorProfile:
         record.approvedByCollaboratorProfile as DocumentVersionHomologation['approvedByCollaboratorProfile'],
       approvedAt: record.approvedAt,
+      artifactFileId: record.artifactFileId ?? undefined,
+      artifactStoragePath: record.artifactStoragePath ?? undefined,
+      artifactContentType: record.artifactContentType ?? undefined,
+      artifactCreatedAt: record.artifactCreatedAt ?? undefined,
     }
   }
 }

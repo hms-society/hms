@@ -491,6 +491,13 @@
       "when": 1792071191954,
       "tag": "0066_document_version_homologations",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1792078512061,
+      "tag": "0067_document_homologation_artifact",
+      "breakpoints": true
     }
   ]
 }

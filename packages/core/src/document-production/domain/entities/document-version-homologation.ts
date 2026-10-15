@@ -9,4 +9,8 @@ export type DocumentVersionHomologation = Entity & {
   approvedByCollaboratorName: string
   approvedByCollaboratorProfile: CollaboratorProfile
   approvedAt: Date
+  artifactFileId?: string
+  artifactStoragePath?: string
+  artifactContentType?: string
+  artifactCreatedAt?: Date
 }

@@ -50,4 +50,27 @@ export class DrizzleDocumentVersionHomologationsRepository
 
     return record ? this.mapper.toDomain(record) : undefined
   }
+
+  async attachArtifact(
+    homologationId: string,
+    artifact: {
+      fileId: string
+      storagePath: string
+      contentType: string
+      createdAt: Date
+    },
+  ) {
+    const [record] = await this.database
+      .update(documentVersionHomologationModel)
+      .set({
+        artifactFileId: artifact.fileId,
+        artifactStoragePath: artifact.storagePath,
+        artifactContentType: artifact.contentType,
+        artifactCreatedAt: artifact.createdAt,
+      })
+      .where(eq(documentVersionHomologationModel.id, homologationId))
+      .returning()
+
+    return record ? this.mapper.toDomain(record) : undefined
+  }
 }
