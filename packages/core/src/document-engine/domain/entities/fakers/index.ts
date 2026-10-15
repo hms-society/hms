@@ -1,1 +1,5 @@
 export * from './document-validation-document-faker'
+export * from './client-document-faker'
+export * from './client-document-upload-faker'
+export * from './document-batch-file-faker'
+export * from './document-batch-faker'
