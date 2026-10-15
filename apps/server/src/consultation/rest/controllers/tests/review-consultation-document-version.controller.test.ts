@@ -108,10 +108,19 @@ describe('Review Consultation Document Version Controller [PATCH /consultations/
       legalTopicId: consultation.legalTopicId,
     })
     const schedulingSeed = await fixture.app.get(SchedulingSeeder).run({
-      intakeId: intakeSeed.documentProductionIntake.id,
+      appointments: [
+        {
+          intakeId: intakeSeed.documentProductionIntake.id,
+          clientId: consultation.clientId,
+        },
+        {
+          intakeId: intakeSeed.pendingMarkersIntake.id,
+          clientId: consultation.clientId,
+        },
+      ],
       pendingMarkersIntakeId: intakeSeed.pendingMarkersIntake.id,
-      clientId: consultation.clientId,
       assignedLawyerId: collaborator.id,
+      lawyerIds: [collaborator.id],
     })
     if (!schedulingSeed.pendingMarkersAppointment) {
       throw new Error('The pending-data appointment must exist')
