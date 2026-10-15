@@ -7,16 +7,16 @@ evaluation: ./evaluation.md
 jira_tickets:
   - SCRUM-146
 prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2686977/PRD+M+dulo+de+Agendamento
-updated_at: 2026-10-14
+updated_at: 2026-10-15
 ---
 
 # Execution status
 
 - **Spec:** [spec.md](spec.md), revision 13, `in_progress`.
 - **Rationale:** Plan-backed execution is required by the Core/Validation/Server/Web ownership boundaries, transactional database and outbox integration, migration risk, and multi-viewport authenticated validation.
-- **Current phase:** F7 — Integrated validation and publication handoff; F8/F9 and PR #234 correction R2 are complete. R2 is pushed on source head `5a4956c7d`; both review threads are resolved, the independent recheck passed, and all applicable CI checks passed.
-- **Next action:** Publish this Evaluation/Plan update and refresh the PR description for the resulting head; verify its CI, then hand off the Server/Core slice. The dependent Web slice follows after Server/Core integration; the authenticated calendar flow remains explicitly unverified under the user's waiver of that Spec gate.
-- **Active blockers:** Evaluation remains `in_progress`: role/concurrency cases and exact reference comparisons are partial. The user explicitly waived the Spec's authenticated-flow check as a publication blocker; no authenticated browser run is claimed. The current feature diff is split into a 3,847-line Server/Core PR and a 4,952-line Web PR. Exclude test-integrity tooling, Vite/local tooling changes, two unrelated Identity/Intake test-only edits, and the generated local Playwright snapshot. Preserve other unrelated user work outside those PRs.
+- **Current phase:** F7 — Integrated validation and publication handoff; F8/F9 and PR #234 correction R2 are complete. PR #234 was merged into `develop` on 2026-10-15; its source-head checks passed and its two review threads were resolved.
+- **Next action:** Publish the remaining Web slice from `codex/appointments-web-pr` against `develop`, run and inspect its PR-head checks, and record the handoff. The authenticated calendar flow remains explicitly unverified under the user's waiver of that Spec gate.
+- **Active blockers:** Evaluation remains `in_progress`: role/concurrency cases and exact reference comparisons are partial. The user explicitly waived the Spec's authenticated-flow check as a publication blocker; no authenticated browser run is claimed. Server/Core PR #234 is merged; the remaining Web diff is within the 5,000-added-TypeScript-line limit. Exclude test-integrity tooling, Vite/local tooling changes, unrelated Identity/Intake test-only edits, and the generated local Playwright snapshot. Preserve other unrelated user work outside those PRs.
 - **Builders:** Core, Validation, Server and Web ownership Builders are complete; `reviewer` found and rechecked FND-036. Clean-candidate coverage passes for all four workspaces (Core 124/404, Validation 6/18, Server 87/201, Web 122/406 with 3 skips); focused Agenda Playwright passes 13/13. Current-source Admin/Lawyer block checks, cross-lawyer transfer and 11 supplemental state/recovery captures are recorded in Evaluation.
 - **Shared coordination:** `builder_core` owns Core contracts/use cases; `builder_validation` owns shared schemas; `builder_server` owns server persistence/REST/messaging and migration artifacts; `builder_web` owns web REST consumers, route, widgets and browser tests. The Orchestrator owns integration, generated route metadata, lockfile/root configuration, evaluation, and final evidence.
 
@@ -48,12 +48,12 @@ updated_at: 2026-10-14
 
 ## Publication slices
 
-The reviewed TypeScript addition count uses `.github/workflows/check-pr-size.yml`: added `.ts`, `.tsx`, `.mts` and `.cts` lines in each PR diff against its declared base. Core foundation PR #180 is already merged into `develop`; earlier Server and Web PRs were merged into intermediate agenda branches. The remaining delivery is two dependent PRs with concrete layer boundaries.
+The reviewed TypeScript addition count uses `.github/workflows/check-pr-size.yml`: added `.ts`, `.tsx`, `.mts` and `.cts` lines in each PR diff against its declared base. Core foundation PR #180 and Server/Core PR #234 are merged into `develop`; the only remaining delivery is the Web slice, which depends on the now-merged #234.
 
 | Order | Implementation slice | Scope | TypeScript additions | Base / dependency | Criteria and outcome |
 | --- | --- | --- | ---: | --- | --- |
-| 1 | `codex/appointments-server-pr` | Scheduling/Consultation/Identity adapters, remaining Core compatibility changes, REST, transactions/outbox, migration 0066, fixtures, seed and feature Spec/Plan/Evaluation | 3,847 | `develop`; Core foundation is already present | `CA-02`–`CA-07`, `CA-09`; persisted scheduling and API behavior. |
-| 2 | `codex/appointments-web-pr` | `/agenda/consultas`, shared lawyer selector and Intake integration, typed REST consumers, calendar/dialog widgets and route tests | 4,952 | Base on PR 1 | `RF-01`–`RF-08`; `CA-01`–`CA-09`; UI and route delivery. |
+| 1 | [PR #234](https://github.com/hms-society/hms/pull/234), `codex/appointments-server-pr` | Scheduling/Consultation/Identity adapters, remaining Core compatibility changes, REST, transactions/outbox, migration 0066, fixtures, seed and feature Spec/Plan/Evaluation | 3,847 | `develop`; merged 2026-10-15 | `CA-02`–`CA-07`, `CA-09`; persisted scheduling and API behavior. |
+| 2 | `codex/appointments-web-pr` | `/agenda/consultas`, shared lawyer selector and Intake integration, typed REST consumers, calendar/dialog widgets and route tests | 4,958 | `develop`; dependency PR #234 is merged | `RF-01`–`RF-08`; `CA-01`–`CA-09`; UI and route delivery. |
 
 Both slices remain under the 5,000-line limit. Exclude `.github/workflows/test-integrity-ci.yaml`, `scripts/check-test-integrity.mjs`, `test-integrity.config.mjs`, related package/lockfile/tooling edits, unrelated Identity/Intake test-only edits and `apps/web/tests/routes/agenda/consultas.real.test-snapshots/agenda-consultas-real-390x844-chromium-linux.png`. Historical PRs #181, #191, #183 and #197 do not target `develop`; do not create duplicates of them.
 
