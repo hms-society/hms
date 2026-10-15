@@ -296,12 +296,12 @@ The Spec, Plan, source tree and route diff were checked against revision 13. The
 | --- | --- |
 | Server/Core PR | [#234](https://github.com/hms-society/hms/pull/234), branch `codex/appointments-server-pr`, base `develop`; merged at `dfcf13501673615954adc5baf45bb3dff322f427`. |
 | Server/Core source head | `5a4956c7d0fa5f047bcdba81845d47bafd62d387`; correction `174c1cf9` plus merge of `develop` at `027cdc5e6`. |
-| Web PR | Pending publication from `codex/appointments-web-pr` against `develop`; Server/Core dependency #234 is merged. The Web candidate remains below the 5,000-line TypeScript limit. |
+| Web PR | [#235](https://github.com/hms-society/hms/pull/235), branch `codex/appointments-web-pr`, base `develop`; Server/Core dependency #234 is merged. The Web candidate adds 4,958 TypeScript lines, below the 5,000-line limit. Current PR checks are pending. |
 | Correction | Both rescheduling queries consider only scheduled appointments. Calendar reads retain canceled history. The API's millisecond revision token continues to match PostgreSQL microsecond timestamps using the existing half-open interval. |
 | Review | Both #234 review threads received evidence-based replies and were resolved; the same Reviewer rechecked the correction with no remaining finding. |
 | Local evidence | Core 10/10 focused tests; Server 9/9 real PostgreSQL controller tests; Core/Server types, lint and architecture pass. Complexity checks fail on candidate-wide threshold violations (`EV-098`). |
 | Source-head CI | All applicable checks passed on #234 implementation head `5a4956c7d`; Supabase Preview was skipped. See `CI-01` below for run links. |
-| Remaining | Open the Web PR and verify its current-head CI. The overall Evaluation remains `in_progress` for recorded manual/visual gaps and unavailable mutation tooling. |
+| Remaining | Verify current-head checks for Web PR #235. The overall Evaluation remains `in_progress` for recorded manual/visual gaps and unavailable mutation tooling. |
 
 ## PR CI quality gate
 
@@ -310,7 +310,7 @@ The Spec, Plan, source tree and route diff were checked against revision 13. The
 | ID | Workflow | Head SHA | Result | Run |
 | --- | --- | --- | --- | --- |
 | `CI-01` | PR #234 source-head workflows | `5a4956c7d0fa5f047bcdba81845d47bafd62d387` | Passed: Core, Server, Web, automated review and size. Supabase Preview skipped. | [Core](https://github.com/hms-society/hms/actions/runs/38626057865), [Server](https://github.com/hms-society/hms/actions/runs/38626057076), [Web](https://github.com/hms-society/hms/actions/runs/38626057256), [Review](https://github.com/hms-society/hms/actions/runs/38626054518), [Size](https://github.com/hms-society/hms/actions/runs/38626057542) |
-| `CI-02` | Web PR workflows | `<sha>` | `pending` | `<run URL when available>` |
+| `CI-02` | [Web PR #235 workflows](https://github.com/hms-society/hms/pull/235/checks) | pending | Pending: Web, Core, Server, review and size checks; Supabase Preview skipped. | [PR #235 checks](https://github.com/hms-society/hms/pull/235/checks) |
 
 ## History
 
@@ -332,3 +332,4 @@ The Spec, Plan, source tree and route diff were checked against revision 13. The
 | `2026-09-28 15:26` | Clean integrated candidate passes Core/Validation/Server/Web coverage, Server/Web/Core/Validation type and architecture gates, applicable lint and the 13-test Agenda Playwright route suite. Consultation access fixture was corrected to represent an unauthorized lawyer and typechecks 4/4. Drizzle metadata collision was reproduced on the unmodified target base and recorded as FND-037. Evaluation is `ready`; four dependent ready-for-review PRs and their head-SHA CI checks remain. |
 | `2026-10-14 16:58` | PR #234 correction R2 published on `5a4956c7d` after syncing `develop`; focused Core/Server checks and independent recheck pass, both review threads are resolved, and all applicable CI checks pass on that source head. Complexity failures remain recorded in EV-098; the overall Evaluation is still `in_progress`. |
 | `2026-10-15` | PR #234 was merged into `develop`. The Web branch was refreshed onto current `develop`; corrected Intake/Agenda browser assertions pass, full Web integration is 92/92, and the Evaluation remains `in_progress` with manual/visual and mutation gaps recorded above. |
+| `2026-10-15` | Opened ready-for-review [PR #235](https://github.com/hms-society/hms/pull/235) from `codex/appointments-web-pr` against `develop`; PR-head workflows are pending. |
