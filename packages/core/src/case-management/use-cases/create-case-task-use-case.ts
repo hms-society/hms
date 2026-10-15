@@ -1,3 +1,13 @@
+import type {
+  CaseHistoriesRepository,
+  CaseHistoryTransactionProvider,
+} from '../interfaces'
+import type { CaseHistoryTaskSnapshot } from '../domain/structures'
+import {
+  CaseHistoryCategory,
+  CaseHistoryKind,
+  CaseTaskType as HistoryTaskType,
+} from '../domain/structures'
 import type { UseCase } from '#shared/interfaces/use-case'
 import { BadRequestError, ForbiddenError } from '#shared/domain/errors'
 import type { CaseMembersRepository, CaseTasksRepository } from '../interfaces'
@@ -33,9 +43,15 @@ export class CreateCaseTaskUseCase implements UseCase<Request, CaseTask> {
     private readonly caseTasksRepository: CaseTasksRepository,
     private readonly caseMembersRepository: CaseMembersRepository,
     private readonly datetimeProvider: DatetimeProvider,
+    private readonly histories: CaseHistoriesRepository,
+    private readonly transaction: CaseHistoryTransactionProvider,
   ) {}
 
   async execute(request: Request): Promise<CaseTask> {
+    return this.transaction.runInTransaction(() => this.persistWithHistory(request))
+  }
+
+  private async persistWithHistory(request: Request): Promise<CaseTask> {
     const description = request.description.trim()
     const title = request.title.trim()
     const customType = request.customType?.trim() || undefined
@@ -53,7 +69,30 @@ export class CreateCaseTaskUseCase implements UseCase<Request, CaseTask> {
       assigneeIds = [...activeCaseMemberIds]
     }
 
-    return this.caseTasksRepository.add({
+    const creation = this.prepareCreation(request, {
+      description,
+      title,
+      customType,
+      plannedTime,
+      assigneeIds,
+    })
+    const createdTask = await this.caseTasksRepository.add(creation)
+    await this.appendHistory(createdTask, request.createdById, now)
+    return createdTask
+  }
+
+  private prepareCreation(
+    request: Request,
+    values: {
+      description: string
+      title: string
+      customType?: string
+      plannedTime?: string
+      assigneeIds: readonly string[]
+    },
+  ): import('../domain/entities').CaseTaskCreation {
+    const { description, title, customType, plannedTime, assigneeIds } = values
+    return {
       caseId: request.caseId,
       type: request.type,
       title,
@@ -69,7 +108,7 @@ export class CreateCaseTaskUseCase implements UseCase<Request, CaseTask> {
       completionNote: request.completionNote?.trim() || undefined,
       assigneeIds,
       reminders: request.reminders ?? [],
-    })
+    }
   }
 
   private async ensureActiveCaseMembers(
@@ -125,5 +164,56 @@ export class CreateCaseTaskUseCase implements UseCase<Request, CaseTask> {
     }
 
     assertValidCaseTaskDate(request.plannedDate, now)
+  }
+
+  private async appendHistory(
+    task: CaseTask,
+    actorId: string,
+    now: Date,
+    before?: CaseTask,
+  ): Promise<void> {
+    const isDeadline = task.type === HistoryTaskType.ProcessDeadline
+    const kind = isDeadline
+      ? CaseHistoryKind.DeadlineCreated
+      : CaseHistoryKind.TaskCreated
+    await this.histories.add({
+      caseId: task.caseId,
+      kind,
+      category: isDeadline ? CaseHistoryCategory.Deadlines : CaseHistoryCategory.Tasks,
+      occurredAt: now,
+      recordedAt: now,
+      actorId,
+      title: isDeadline ? 'Prazo criado' : 'Tarefa criada',
+      description: task.title,
+      documents: [],
+      sourceKey: `task:${task.id}:${task.version}:${kind}`,
+      taskChange: {
+        before: before ? this.snapshotTask(before) : undefined,
+        after: this.snapshotTask(task),
+      },
+    })
+  }
+  private snapshotTask(task: CaseTask): CaseHistoryTaskSnapshot {
+    return {
+      taskId: task.id,
+      version: task.version,
+      type: task.type,
+      title: task.title,
+      description: task.description,
+      customType: task.customType,
+      reminders: task.reminders.map((reminder) => ({
+        value: reminder.value,
+        unit: reminder.unit,
+      })),
+      completedAt: task.completedAt?.toISOString(),
+      completedById: task.completedById,
+      plannedDate: task.plannedDate,
+      plannedTime: task.plannedTime,
+      status: task.status,
+      assigneeIds: [...task.assigneeIds],
+      blocksCaseClosure: task.blocksCaseClosure,
+      completionNote: task.completionNote,
+      deletedAt: task.deletedAt?.toISOString(),
+    }
   }
 }
