@@ -71,6 +71,7 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     },
   ],
   exports: [
+    SharedDatabaseModule,
     DOCUMENT_PRODUCTION_REPOSITORIES.generations,
     DOCUMENT_PRODUCTION_REPOSITORIES.specifications,
     DOCUMENT_PRODUCTION_REPOSITORIES.versions,
