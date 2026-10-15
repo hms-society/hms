@@ -190,6 +190,7 @@ describe('Authorize Case Access Use Case', () => {
     ).rejects.toBeInstanceOf(ForbiddenError)
 
     for (const intent of [
+      CaseAccessIntent.ReadDocument,
       CaseAccessIntent.WriteContent,
       CaseAccessIntent.ManageTeam,
       CaseAccessIntent.ManageDocumentException,
@@ -198,6 +199,47 @@ describe('Authorize Case Access Use Case', () => {
         useCase.execute({ caseId: TEST_CASE_ID, actorId: TEST_ACTOR_ID, intent }),
       ).rejects.toBeInstanceOf(ForbiddenError)
     }
+  })
+
+  it('requires current case-team membership to read documents, including on closed cases', async () => {
+    legalCases.findById.mockResolvedValue(
+      LegalCaseFaker.fake({
+        id: TEST_CASE_ID,
+        clientId: 'case-client',
+        status: LegalCaseStatus.Closed,
+      }),
+    )
+    collaborators.findById.mockResolvedValue({
+      collaboratorId: TEST_ACTOR_ID,
+      professionalName: 'Lawyer',
+      email: 'lawyer@example.com',
+      profile: CollaboratorProfile.Lawyer,
+      status: UserStatus.Active,
+    })
+    members.findByCaseAndCollaborator.mockResolvedValue(undefined)
+
+    await expect(
+      useCase.execute({
+        caseId: TEST_CASE_ID,
+        actorId: TEST_ACTOR_ID,
+        intent: CaseAccessIntent.ReadDocument,
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenError)
+
+    members.findByCaseAndCollaborator.mockResolvedValue(
+      CaseMemberFaker.fake({
+        caseId: TEST_CASE_ID,
+        collaboratorId: TEST_ACTOR_ID,
+        role: CaseMemberRole.Collaborator,
+      }),
+    )
+    await expect(
+      useCase.execute({
+        caseId: TEST_CASE_ID,
+        actorId: TEST_ACTOR_ID,
+        intent: CaseAccessIntent.ReadDocument,
+      }),
+    ).resolves.toBeUndefined()
   })
 
   it('denies writing when the expected client does not own the Case', async () => {

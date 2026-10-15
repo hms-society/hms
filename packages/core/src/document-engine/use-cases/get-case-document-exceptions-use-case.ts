@@ -27,7 +27,7 @@ export class GetCaseDocumentExceptionsUseCase {
     await this.caseAccessProvider.authorize({
       caseId,
       actorId: params.actorId,
-      intent: CaseAccessIntent.ReadContent,
+      intent: CaseAccessIntent.ReadDocument,
     })
     return this.documentExceptionsRepository.findByCaseId(caseId)
   }

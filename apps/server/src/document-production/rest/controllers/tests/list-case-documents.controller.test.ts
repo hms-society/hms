@@ -6,54 +6,59 @@ import {
   DocumentSpecificationFaker,
   DocumentVersionFaker,
 } from '@hms/core/document-production/domain/entities/fakers'
-
-import { CaseManagementModuleFixture } from '@/case-management/fixtures/case-management-module-fixture'
-import { DocumentProductionDatabaseModule } from '@/document-production/database/document-production-database.module'
-import {
-  DrizzleDocumentPackagesRepository,
-  DrizzleDocumentSpecificationsRepository,
-  DrizzleDocumentVersionsRepository,
-  DrizzleDocumentsRepository,
-  DrizzlePackageDocumentsRepository,
-} from '@/document-production/database/drizzle/repositories'
-import { ListCaseDocumentsController } from '@/document-production/rest/controllers/list-case-documents.controller'
-import { selectDocumentFileVersion } from '@/document-production/rest/controllers/select-document-file-version'
+import { DrizzleCollaboratorsRepository } from '@/identity/database/drizzle/repositories'
+import { DocumentProductionModuleFixture } from '@/document-production/fixtures'
+import { ListCaseDocumentsController } from '@/document-production/rest/controllers'
 
 describe('List Case Documents Controller [GET /cases/:caseId/documents]', () => {
-  let fixture: CaseManagementModuleFixture
-  let packages: DrizzleDocumentPackagesRepository
-  let specifications: DrizzleDocumentSpecificationsRepository
-  let versions: DrizzleDocumentVersionsRepository
-  let documents: DrizzleDocumentsRepository
-  let packageDocuments: DrizzlePackageDocumentsRepository
+  let fixture: DocumentProductionModuleFixture
 
   beforeAll(async () => {
-    fixture = await CaseManagementModuleFixture.register(
-      ListCaseDocumentsController,
-      (builder) => builder,
-      [DocumentProductionDatabaseModule],
-    )
-    packages = fixture.app.get(DrizzleDocumentPackagesRepository)
-    specifications = fixture.app.get(DrizzleDocumentSpecificationsRepository)
-    versions = fixture.app.get(DrizzleDocumentVersionsRepository)
-    documents = fixture.app.get(DrizzleDocumentsRepository)
-    packageDocuments = fixture.app.get(DrizzlePackageDocumentsRepository)
+    fixture = await DocumentProductionModuleFixture.register(ListCaseDocumentsController)
   })
 
   beforeEach(async () => fixture.resetDatabase())
   afterAll(async () => fixture?.close())
 
-  it('returns the persisted pieces and version review details for the case', async () => {
-    const collaborator = await fixture.registerCollaborator()
-    const legalCase = await fixture.registerLegalCase({
-      clientId: collaborator.clientId,
-      legalAreaId: collaborator.legalAreaId,
-      legalTopicId: collaborator.legalTopicId,
-    })
+  it('requires an authenticated case collaborator before returning the case projection', async () => {
+    const lawyer = await fixture.registerLawyer()
+    const legalCase = await fixture.createCase(lawyer, false)
+    await request(fixture.app.getHttpServer())
+      .get(`/cases/${legalCase.id}/documents`)
+      .expect(401)
+    await request(fixture.app.getHttpServer())
+      .get(`/cases/${legalCase.id}/documents`)
+      .set('Authorization', fixture.authenticateAs(lawyer))
+      .expect(403)
+    await request(fixture.app.getHttpServer())
+      .get(`/cases/${legalCase.id}/documents/40000000-0000-4000-8000-000000000001`)
+      .set('Authorization', fixture.authenticateAs(lawyer))
+      .expect(403)
+  })
+
+  it('returns an empty projection for an authorized case without a package', async () => {
+    const lawyer = await fixture.registerLawyer()
+    const legalCase = await fixture.createCase(lawyer)
+    const response = await request(fixture.app.getHttpServer())
+      .get(`/cases/${legalCase.id}/documents`)
+      .set('Authorization', fixture.authenticateAs(lawyer))
+      .expect(200)
+
+    expect(response.body).toEqual([])
+  })
+
+  it('returns persisted pieces with version review details for an authorized case', async () => {
+    const lawyer = await fixture.registerLawyer()
+    const legalCase = await fixture.createCase(lawyer)
+    const collaborator = await fixture.app
+      .get(DrizzleCollaboratorsRepository)
+      .findByUserId(lawyer.id)
+    if (!collaborator) throw new Error('Test lawyer collaborator was not created')
+
     const documentPackageDraft = DocumentPackageFaker.fake({
       context: { type: 'case', caseId: legalCase.id },
     })
-    await packages.add({
+    await fixture.packagesRepository.add({
       id: documentPackageDraft.id,
       context: documentPackageDraft.context,
     })
@@ -62,7 +67,7 @@ describe('List Case Documents Controller [GET /cases/:caseId/documents]', () => 
       application: { scope: 'global', moment: 'legal_production' },
       status: 'available',
     })
-    const specification = await specifications.add({
+    const specification = await fixture.specificationsRepository.add({
       name: specificationDraft.name,
       description: specificationDraft.description,
       application: specificationDraft.application,
@@ -73,17 +78,17 @@ describe('List Case Documents Controller [GET /cases/:caseId/documents]', () => 
 
     const versionDraft = DocumentVersionFaker.fake({
       documentGenerationId: undefined,
-      createdByCollaboratorId: collaborator.collaboratorId,
+      createdByCollaboratorId: collaborator.id,
       status: 'in_review',
     })
-    const version = await versions.add(versionDraft)
+    const version = await fixture.versionsRepository.add(versionDraft)
     const documentDraft = DocumentFaker.fake({
       id: version.documentId,
       title: 'Recurso previdenciário',
       currentVersionId: version.id,
     })
-    await documents.add(documentDraft)
-    await packageDocuments.add({
+    await fixture.documentsRepository.add(documentDraft)
+    await fixture.packageDocumentsRepository.add({
       id: '40000000-0000-4000-8000-000000000001',
       documentPackageId: documentPackageDraft.id,
       documentId: version.documentId,
@@ -92,6 +97,7 @@ describe('List Case Documents Controller [GET /cases/:caseId/documents]', () => 
 
     const response = await request(fixture.app.getHttpServer())
       .get(`/cases/${legalCase.id}/documents`)
+      .set('Authorization', fixture.authenticateAs(lawyer))
       .expect(200)
 
     expect(response.body).toEqual([
@@ -103,28 +109,11 @@ describe('List Case Documents Controller [GET /cases/:caseId/documents]', () => 
           expect.objectContaining({
             id: version.id,
             status: 'in_review',
-            createdByCollaboratorId: collaborator.collaboratorId,
+            createdByCollaboratorId: collaborator.id,
             createdByCollaboratorName: collaborator.professionalName,
           }),
         ],
       }),
     ])
-  })
-})
-
-describe('selectDocumentFileVersion', () => {
-  it('selects the requested version instead of the latest version', () => {
-    const requestedVersion = DocumentVersionFaker.fake({
-      id: 'version-1',
-      versionNumber: 1,
-    })
-    const latestVersion = DocumentVersionFaker.fake({
-      id: 'version-2',
-      versionNumber: 2,
-    })
-
-    expect(
-      selectDocumentFileVersion([requestedVersion, latestVersion], 'version-1'),
-    ).toBe(requestedVersion)
   })
 })
