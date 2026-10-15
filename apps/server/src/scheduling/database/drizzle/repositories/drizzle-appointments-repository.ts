@@ -136,7 +136,7 @@ export class DrizzleAppointmentsRepository
         and(
           eq(appointmentModel.scheduleId, scheduleId),
           eq(appointmentModel.status, 'scheduled'),
-          gt(appointmentModel.endsAt, from),
+          gt(appointmentModel.startsAt, from),
         ),
       )
       .limit(1)
