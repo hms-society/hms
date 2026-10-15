@@ -132,15 +132,21 @@ export class DrizzleAppointmentsRepository
     startsAt: Date,
     endsAt: Date,
     scheduleIds: readonly string[],
-    clientId?: string,
+    filters: {
+      clientId?: string
+      statuses?: readonly Appointment['status'][]
+    } = {},
   ) {
-    if (scheduleIds.length === 0) return []
+    if (scheduleIds.length === 0 || filters.statuses?.length === 0) return []
 
     const conditions = [
       inArray(appointmentModel.scheduleId, [...scheduleIds]),
       lt(appointmentModel.startsAt, endsAt),
       gt(appointmentModel.endsAt, startsAt),
-      ...(clientId ? [eq(appointmentModel.clientId, clientId)] : []),
+      ...(filters.clientId ? [eq(appointmentModel.clientId, filters.clientId)] : []),
+      ...(filters.statuses
+        ? [inArray(appointmentModel.status, [...filters.statuses])]
+        : []),
     ]
 
     const records = await this.executor

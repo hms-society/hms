@@ -20,14 +20,12 @@ describe.each([
 }) => {
   let fixture: DocumentEngineModuleFixture
   let repository: DocumentExceptionsRepository
-  let actorId: string
 
   beforeAll(async () => {
     fixture = await DocumentEngineModuleFixture.registerAuthenticated(
       ReviewDocumentExceptionController,
       randomUUID(),
     )
-    actorId = fixture.authCollaboratorId ?? ''
     repository = fixture.app.get<DocumentExceptionsRepository>(
       DOCUMENT_ENGINE_REPOSITORIES.documentExceptions,
     )
@@ -42,12 +40,13 @@ describe.each([
   })
 
   it(`persists a ${status.toLowerCase()} decision and reviewer`, async () => {
+    const caseId = (await fixture.createCaseWithCurrentCollaborator()).id
     const exception = await repository.create({
-      caseId: randomUUID(),
+      caseId,
       type: DocumentExceptionType.DISPENSA_DEFINITIVA,
       status: DocumentExceptionStatus.PENDING,
       justification: 'Missing document',
-      createdBy: actorId,
+      createdBy: fixture.authenticatedUserId ?? '',
     })
 
     const response = await request(fixture.app.getHttpServer())
@@ -58,19 +57,26 @@ describe.each([
     expect(response.body).toMatchObject({
       id: exception.id,
       status,
-      reviewedBy: actorId,
+      reviewedBy: fixture.authCollaboratorId,
       ...(action === 'reject' ? { rejectionJustification: 'Review reason' } : {}),
     })
     expect(await repository.findById(exception.id)).toMatchObject({
       status,
-      reviewedBy: actorId,
+      reviewedBy: fixture.authCollaboratorId,
     })
   })
 
-  it('forbids a paralegal from reviewing an exception', async () => {
-    await fixture.setCollaboratorProfile('paralegal')
+  it('forbids reviewing an exception for a Case without current membership', async () => {
+    const caseId = (await fixture.createCaseWithCurrentCollaborator(false)).id
+    const exception = await repository.create({
+      caseId,
+      type: DocumentExceptionType.DISPENSA_DEFINITIVA,
+      status: DocumentExceptionStatus.PENDING,
+      justification: 'Missing document',
+      createdBy: fixture.authenticatedUserId ?? '',
+    })
     await request(fixture.app.getHttpServer())
-      .post(`/documents/exceptions/${randomUUID()}/${action}`)
+      .post(`/documents/exceptions/${exception.id}/${action}`)
       .send({})
       .expect(403)
   })

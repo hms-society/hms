@@ -22,6 +22,7 @@ import {
 import type {
   CalendarAppointmentsRepository,
   CalendarSchedulesRepository,
+  SchedulingDatabase,
 } from '@hms/core/scheduling/interfaces'
 import { vi, type Mock } from 'vitest'
 
@@ -42,6 +43,7 @@ export class SchedulingModuleFixture {
     readonly broker: { publish: Mock },
     readonly schedulesRepository: CalendarSchedulesRepository,
     readonly appointmentsRepository: CalendarAppointmentsRepository,
+    readonly database: SchedulingDatabase,
     readonly clientsRepository: ClientsRepository,
     readonly intakesRepository: IntakesRepository,
     private readonly usersRepository: UsersRepository,
@@ -82,6 +84,7 @@ export class SchedulingModuleFixture {
       broker,
       restFixture.get(SCHEDULING_REPOSITORIES.schedules),
       restFixture.get(SCHEDULING_REPOSITORIES.appointments),
+      restFixture.get(SCHEDULING_REPOSITORIES.database),
       restFixture.get(IDENTITY_REPOSITORIES.clients),
       restFixture.get(INTAKE_REPOSITORIES.intakes),
       restFixture.get(IDENTITY_REPOSITORIES.users),

@@ -2,8 +2,9 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { ChecklistDossierTab } from '..'
-import { useChecklistDossierTab } from '../use-checklist-dossier-tab'
 import { useListCaseDocumentExceptionsQuery } from '@/ui/document-engine/hooks/use-list-case-document-exceptions-query'
+import { useCurrentCollaboratorQuery } from '@/ui/identity/hooks/use-current-collaborator-query'
+import { useChecklistDossierTab } from '../use-checklist-dossier-tab'
 
 vi.mock('../use-checklist-dossier-tab', () => ({
   useChecklistDossierTab: vi.fn(),
@@ -32,10 +33,17 @@ vi.mock('@/ui/document-engine/hooks/use-reject-document-exception-action', () =>
 }))
 
 const useChecklistDossierTabMock = vi.mocked(useChecklistDossierTab)
+const useListCaseDocumentExceptionsQueryMock = vi.mocked(
+  useListCaseDocumentExceptionsQuery,
+)
+const useCurrentCollaboratorQueryMock = vi.mocked(useCurrentCollaboratorQuery)
 
 function createController(
   overrides: Partial<ReturnType<typeof useChecklistDossierTab>> = {},
 ): ReturnType<typeof useChecklistDossierTab> {
+  const mandatoryItemsCount = overrides.mandatoryItemsCount ?? 2
+  const validatedItemsCount = overrides.validatedItemsCount ?? 1
+  const isChecklistComplete = overrides.isChecklistComplete ?? false
   return {
     actionFeedback: null,
     activities: [],
@@ -68,6 +76,8 @@ function createController(
     handleFilterByCase: vi.fn(),
     handleHomologateDossier: vi.fn(),
     hasChecklistDecision: false,
+    isChecklistApproved: false,
+    isDossierHomologated: false,
     handleOpenChecklistItemDetail: vi.fn(),
     handleOpenValidationDesk: vi.fn(),
     handleRejectOnMerit: vi.fn(),
@@ -75,26 +85,33 @@ function createController(
     handleRequestDocumentException: vi.fn(),
     handleValidateChecklistItem: vi.fn(),
     isDecisionReasonDialogOpen: false,
-    isChecklistComplete: false,
+    isChecklistComplete,
     isExceptionModalOpen: false,
     isRequestingException: false,
     isReviewDisabled: false,
     isReviewingChecklistGate: false,
     isHomologatingDossier: false,
-    mandatoryItemsCount: 2,
+    mandatoryItemsCount,
     pendingItemsCount: 1,
     reasonError: null,
     remarks: '',
     requestException: vi.fn(),
     setIsExceptionModalOpen: vi.fn(),
-    validatedItemsCount: 1,
+    validatedItemsCount,
     ...overrides,
   }
 }
 
 describe('ChecklistDossierTab', () => {
-  beforeEach(() => vi.clearAllMocks())
+  beforeEach(() => {
+    vi.clearAllMocks()
+    useListCaseDocumentExceptionsQueryMock.mockReturnValue({ exceptions: [] } as never)
+    useCurrentCollaboratorQueryMock.mockReturnValue({
+      currentCollaborator: null,
+    } as never)
+  })
   afterEach(cleanup)
+  afterEach(() => vi.useRealTimers())
 
   it('renders sequential checklist and dossier gates and delegates lawyer decisions', () => {
     const handleApproveWithException = vi.fn()
@@ -113,8 +130,9 @@ describe('ChecklistDossierTab', () => {
     )
 
     expect(screen.getByText('Checklist pendente')).toBeTruthy()
-    expect(screen.getAllByText('Dossiê pendente')).toHaveLength(3)
+    expect(screen.getByText('Dossiê pendente')).toBeTruthy()
     expect(screen.getByText('Escrita bloqueada')).toBeTruthy()
+    expect(screen.getByRole('img', { name: 'Checklist aprovado: Pendente' })).toBeTruthy()
     expect(screen.getByText('1 de 2 obrigatórios - 50%')).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: /aprovar com exceção/i }))
@@ -135,6 +153,7 @@ describe('ChecklistDossierTab', () => {
       createController({
         canHomologateDossier: true,
         checklistGateLabel: 'Aprovado com exceção',
+        isChecklistApproved: true,
       }),
     )
 
@@ -149,6 +168,9 @@ describe('ChecklistDossierTab', () => {
       />,
     )
 
+    expect(
+      screen.getByRole('img', { name: 'Checklist aprovado: Concluído' }),
+    ).toBeTruthy()
     expect(
       screen.queryByText(/itens ainda exigem validação ou exceção autorizada/i),
     ).toBeNull()
@@ -178,6 +200,59 @@ describe('ChecklistDossierTab', () => {
     expect(useChecklistDossierTabMock).toHaveBeenCalledWith({
       caseId: 'case-1',
       checklist: [{ id: '1', title: 'Procuração', status: 'validado' }],
+      isReviewDisabled: true,
+    })
+  })
+
+  it('keeps case content readable while hiding checklist mutations in read-only mode', () => {
+    useChecklistDossierTabMock.mockReturnValue(
+      createController({
+        checklistItems: [
+          {
+            documentFileId: 'file-1',
+            id: '1',
+            status: 'solicitado',
+            title: 'CNIS',
+          },
+        ],
+      }),
+    )
+
+    render(
+      <ChecklistDossierTab
+        activities={[]}
+        caseId='case-1'
+        checklist={[
+          {
+            documentFileId: 'file-1',
+            id: '1',
+            status: 'solicitado',
+            title: 'CNIS',
+          },
+        ]}
+        readOnly
+      />,
+    )
+
+    expect(screen.getByText('CNIS')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Ver documento' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Abrir CNIS' })).toBeNull()
+    expect(screen.queryByRole('button', { name: /aprovar checklist/i })).toBeNull()
+    expect(screen.queryByRole('button', { name: /adicionar item/i })).toBeNull()
+    expect(
+      screen.queryByRole('button', { name: /solicitar exceção documental/i }),
+    ).toBeNull()
+    expect(screen.queryByRole('button', { name: /mesa de validação/i })).toBeNull()
+    expect(useChecklistDossierTabMock).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      checklist: [
+        {
+          documentFileId: 'file-1',
+          id: '1',
+          status: 'solicitado',
+          title: 'CNIS',
+        },
+      ],
       isReviewDisabled: true,
     })
   })
@@ -380,5 +455,97 @@ describe('ChecklistDossierTab', () => {
     expect(handleRemarksChange).toHaveBeenCalledWith('Exceção documental aprovada.')
     expect(handleCancelDecisionReason).toHaveBeenCalledOnce()
     expect(handleConfirmDecisionReason).toHaveBeenCalledOnce()
+  })
+
+  it('renders exception cards, authorized decisions, and rejection details', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-10-08T12:00:00.000Z'))
+    useListCaseDocumentExceptionsQueryMock.mockReturnValue({
+      exceptions: [
+        {
+          deadlineDate: '2026-10-09T12:00:00.000Z',
+          documentId: 'missing-document',
+          id: 'pending-exception',
+          rejectionJustification: null,
+          status: 'PENDING',
+          type: 'ACEITE_PROVISORIO',
+        },
+        {
+          deadlineDate: null,
+          documentId: 'missing-document',
+          id: 'rejected-exception',
+          rejectionJustification: 'Documento ilegível.',
+          status: 'REJECTED',
+          type: 'DISPENSA_DEFINITIVA',
+        },
+      ],
+    } as never)
+    useCurrentCollaboratorQueryMock.mockReturnValue({
+      currentCollaborator: { collaboratorId: 'supervisor-1', profile: 'supervisor' },
+    } as never)
+    useChecklistDossierTabMock.mockReturnValue(createController())
+
+    render(<ChecklistDossierTab activities={[]} caseId='case-1' checklist={[]} />)
+
+    expect(screen.getAllByText('Documento não identificado')).toHaveLength(2)
+    expect(screen.getByText('Aceite provisório')).toBeTruthy()
+    expect(screen.getByText('Dispensa definitiva')).toBeTruthy()
+    expect(screen.getByText(/No prazo até/)).toBeTruthy()
+    expect(screen.getByText('Reprovado')).toBeTruthy()
+    expect(screen.getAllByRole('button', { name: 'Aprovar' })).toHaveLength(1)
+    expect(screen.getAllByRole('button', { name: 'Recusar' })).toHaveLength(1)
+    fireEvent.click(screen.getByRole('button', { name: 'Aprovar' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Recusar' }))
+
+    fireEvent.click(screen.getAllByText('Documento não identificado')[1])
+
+    expect(screen.getByRole('dialog', { name: 'Motivo da Recusa' })).toBeTruthy()
+    expect(screen.getByText('Documento ilegível.')).toBeTruthy()
+  })
+
+  it('hides pending exception decisions from collaborators without approval access', () => {
+    useListCaseDocumentExceptionsQueryMock.mockReturnValue({
+      exceptions: [
+        {
+          deadlineDate: null,
+          documentId: '2',
+          id: 'pending-exception',
+          rejectionJustification: null,
+          status: 'PENDING',
+          type: 'DISPENSA_DEFINITIVA',
+        },
+      ],
+    } as never)
+    useChecklistDossierTabMock.mockReturnValue(createController())
+
+    render(<ChecklistDossierTab activities={[]} caseId='case-1' checklist={[]} />)
+
+    expect(screen.getByText('Dispensa definitiva')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Aprovar' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Recusar' })).toBeNull()
+  })
+
+  it('renders the empty checklist state and gate service error', () => {
+    useChecklistDossierTabMock.mockReturnValue(
+      createController({
+        checklistItems: [],
+        error: new Error('Falha ao revisar gate.'),
+        mandatoryItemsCount: 0,
+        pendingItemsCount: 0,
+        validatedItemsCount: 0,
+      }),
+    )
+
+    render(<ChecklistDossierTab activities={[]} caseId='case-1' checklist={[]} />)
+
+    expect(
+      screen.getByText('Nenhum checklist documental foi encontrado para este caso'),
+    ).toBeTruthy()
+    expect(
+      screen.getByText(
+        'Nenhum item de checklist documental foi encontrado para este caso.',
+      ),
+    ).toBeTruthy()
+    expect(screen.getByText('Falha ao revisar gate.')).toBeTruthy()
   })
 })

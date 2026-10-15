@@ -3,6 +3,8 @@ import type { DocumentException } from '../domain/entities/document-exception'
 import { DocumentExceptionStatus } from '../domain/structures'
 import type { DocumentExceptionAuditLogsRepository } from '../interfaces/document-exception-audit-logs-repository'
 import type { DocumentExceptionsRepository } from '../interfaces/document-exceptions-repository'
+import type { CaseAccessProvider } from '../../case-management/interfaces/case-access-provider'
+import { CaseAccessIntent } from '../../case-management/domain/structures/case-access-intent'
 
 export type ReviewDocumentExceptionUseCaseParams = {
   documentExceptionId: string
@@ -15,6 +17,7 @@ export class ReviewDocumentExceptionUseCase {
   constructor(
     private readonly documentExceptionsRepository: DocumentExceptionsRepository,
     private readonly auditLogsRepository: DocumentExceptionAuditLogsRepository,
+    private readonly caseAccessProvider: CaseAccessProvider,
   ) {}
 
   async execute(
@@ -35,6 +38,12 @@ export class ReviewDocumentExceptionUseCase {
     if (!exception) {
       throw new AppError('Exceção documental não encontrada', 'Não Encontrado')
     }
+
+    await this.caseAccessProvider.authorize({
+      caseId: exception.caseId,
+      actorId,
+      intent: CaseAccessIntent.ManageDocumentException,
+    })
 
     if (exception.status !== DocumentExceptionStatus.PENDING) {
       throw new AppError(

@@ -20,6 +20,8 @@ import { LegalCaseResponseDto } from '@/case-management/rest/dtos'
 import { CurrentCollaborator } from '@/identity/decorators'
 import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
+import { CASE_MANAGEMENT_ACCESS } from '@/case-management/constants/case-management-access'
+import type { CaseAccessProvider } from '@hms/core/case-management/interfaces'
 
 @CasesController()
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
@@ -31,10 +33,12 @@ export class HomologateCaseDossierController {
     legalCasesRepository: LegalCasesRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems)
     checklistItemsRepository: CaseChecklistItemsRepository,
+    @Inject(CASE_MANAGEMENT_ACCESS.access) accessProvider: CaseAccessProvider,
   ) {
     this.useCase = new HomologateCaseDossierUseCase(
       legalCasesRepository,
       checklistItemsRepository,
+      accessProvider,
     )
   }
 

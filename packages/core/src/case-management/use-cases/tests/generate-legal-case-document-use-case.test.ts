@@ -4,7 +4,10 @@ import { mock, type MockProxy } from 'vitest-mock-extended'
 import { DocumentValidationDocumentFaker } from '../../../document-engine/domain/entities/fakers'
 import { DocumentValidationStatus } from '../../../document-engine/domain/structures'
 import { DocumentSpecificationFaker } from '../../../document-production/domain/entities/fakers'
-import { DocumentSpecificationStatus } from '../../../document-production/domain/structures'
+import {
+  DocumentGenerationMoment,
+  DocumentSpecificationStatus,
+} from '../../../document-production/domain/structures'
 import type {
   DocumentPackagesRepository,
   DocumentsRepository,
@@ -19,9 +22,14 @@ import {
   CaseChecklistItemStatus,
   LegalCaseStatus,
 } from '../../domain/structures'
-import type { CaseChecklistItemsRepository, LegalCasesRepository } from '../../interfaces'
+import type {
+  CaseAccessProvider,
+  CaseChecklistItemsRepository,
+  LegalCasesRepository,
+} from '../../interfaces'
 import type { DocumentValidationsRepository } from '../../../document-engine/interfaces'
 import type { Broker, DatetimeProvider, IdProvider } from '../../../shared/interfaces'
+import { ForbiddenError } from '../../../shared/domain/errors/forbidden-error'
 import { GenerateLegalCaseDocumentUseCase } from '../generate-legal-case-document-use-case'
 
 describe('Generate Legal Case Document Use Case', () => {
@@ -36,6 +44,7 @@ describe('Generate Legal Case Document Use Case', () => {
   let broker: MockProxy<Broker>
   let datetime: MockProxy<DatetimeProvider>
   let ids: MockProxy<IdProvider>
+  let access: MockProxy<CaseAccessProvider>
   let useCase: GenerateLegalCaseDocumentUseCase
 
   beforeEach(() => {
@@ -50,6 +59,8 @@ describe('Generate Legal Case Document Use Case', () => {
     broker = mock<Broker>()
     datetime = mock<DatetimeProvider>()
     ids = mock<IdProvider>()
+    access = mock<CaseAccessProvider>()
+    access.authorize.mockResolvedValue()
     useCase = new GenerateLegalCaseDocumentUseCase(
       cases,
       checklist,
@@ -62,6 +73,7 @@ describe('Generate Legal Case Document Use Case', () => {
       broker,
       datetime,
       ids,
+      access,
     )
   })
 
@@ -85,8 +97,18 @@ describe('Generate Legal Case Document Use Case', () => {
       variables: [
         { label: 'Nome do requerente', technicalName: 'nome_requerente' },
         { label: 'CPF do requerente', technicalName: 'cpf_requerente' },
+        { label: 'NIT', technicalName: 'nit_requerente' },
+        { label: 'Endereço', technicalName: 'endereco_requerente' },
+        { label: 'Benefício', technicalName: 'beneficio_requerido' },
+        { label: 'Períodos contributivos', technicalName: 'periodos_contributivos' },
         { label: 'Município', technicalName: 'municipio' },
+        { label: 'Data do documento', technicalName: 'data_documento' },
         { label: 'Número do caso', technicalName: 'numero_caso' },
+        { label: 'Documentos apresentados', technicalName: 'documentos_apresentados' },
+        { label: 'Nome do representante', technicalName: 'nome_representante' },
+        { label: 'UF OAB', technicalName: 'uf_oab' },
+        { label: 'Número OAB', technicalName: 'numero_oab' },
+        { label: 'Campo não mapeado', technicalName: 'campo_nao_mapeado' },
       ],
       status: DocumentSpecificationStatus.Available,
       application: {
@@ -98,6 +120,7 @@ describe('Generate Legal Case Document Use Case', () => {
     })
     const validation = DocumentValidationDocumentFaker.fake({
       id: fileId,
+      fileName: 'conta-luz.pdf',
       status: DocumentValidationStatus.Valid,
       reviewedBy: actorId,
       reviewedAt: generatedAt,
@@ -119,13 +142,26 @@ describe('Generate Legal Case Document Use Case', () => {
         },
         { label: 'CPF/CNPJ', value: '123.456.789-09', confidence: 0.98 },
         { label: 'Cidade/UF', value: 'São José dos Campos / SP', confidence: 0.98 },
+        { label: 'NIT', value: '123.45678.90-1', confidence: 0.98 },
+        { label: 'Endereço', value: 'Rua Central, 100', confidence: 0.98 },
+        { label: 'Benefício', value: 'Aposentadoria especial', confidence: 0.98 },
+        { label: 'Período de contribuição', value: '2001 a 2020', confidence: 0.98 },
+        { label: 'Outorgado', value: 'Maria Advogada', confidence: 0.98 },
+        { label: 'Estado OAB', value: 'SP', confidence: 0.98 },
+        { label: 'Número OAB', value: '123456', confidence: 0.98 },
+        { label: 'Campo ausente', value: '  ', confidence: 0.98 },
+        {
+          label: 'Campo marcado como ausente',
+          value: 'não usar',
+          confidence: 0.1,
+          isMissing: true,
+        },
       ],
     })
     const generationId = '55555555-5555-4555-8555-555555555555'
     const documentId = '66666666-6666-4666-8666-666666666666'
     const packageId = '77777777-7777-4777-8777-777777777777'
     cases.findById.mockResolvedValue(legalCase)
-    cases.listByTeamMember.mockResolvedValue([{ id: caseId } as never])
     checklist.listByCaseId.mockResolvedValue([
       {
         id: checklistItemId,
@@ -192,8 +228,16 @@ describe('Generate Legal Case Document Use Case', () => {
       expect.objectContaining({
         nome_requerente: 'Helena Maria de Albuquerque Costa',
         cpf_requerente: '123.456.789-09',
+        nit_requerente: '123.45678.90-1',
+        endereco_requerente: 'Rua Central, 100',
+        beneficio_requerido: 'Aposentadoria especial',
+        periodos_contributivos: '2001 a 2020',
         municipio: 'São José dos Campos',
+        numero_oab: '123456',
         numero_caso: legalCase.publicCode,
+        documentos_apresentados: 'conta-luz.pdf',
+        nome_representante: 'Maria Advogada',
+        uf_oab: 'SP',
       }),
     )
     expect(broker.publish).toHaveBeenCalledWith(
@@ -237,7 +281,6 @@ describe('Generate Legal Case Document Use Case', () => {
         },
       }),
     )
-    cases.listByTeamMember.mockResolvedValue([{ id: 'case-id' } as never])
 
     await expect(
       useCase.execute({
@@ -266,7 +309,6 @@ describe('Generate Legal Case Document Use Case', () => {
         dossierGate: { homologatedAt: undefined, homologatedBy: undefined },
       }),
     )
-    cases.listByTeamMember.mockResolvedValue([{ id: 'case-id' } as never])
 
     await expect(
       useCase.execute({
@@ -279,6 +321,148 @@ describe('Generate Legal Case Document Use Case', () => {
     ).rejects.toThrow('dossiê documental')
 
     expect(broker.publish).not.toHaveBeenCalled()
+    expect(documents.add).not.toHaveBeenCalled()
+  })
+
+  it('denies an Admin when current case access rejects before document reads or writes', async () => {
+    const legalCase = LegalCaseFaker.fake({ id: 'case-id' })
+    cases.findById.mockResolvedValue(legalCase)
+    access.authorize.mockRejectedValue(
+      new ForbiddenError('Acesso jurídico ao Caso não autorizado.'),
+    )
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        documentSpecificationId: 'spec-id',
+        documentFileIds: ['file-id'],
+        requestedByCollaboratorId: 'admin-id',
+        requestedByCollaboratorProfile: 'admin',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenError)
+
+    expect(access.authorize).toHaveBeenCalledWith({
+      caseId: legalCase.id,
+      actorId: 'admin-id',
+      intent: 'write_content',
+    })
+    expect(cases.listByTeamMember).not.toHaveBeenCalled()
+    expect(checklist.listByCaseId).not.toHaveBeenCalled()
+    expect(validations.list).not.toHaveBeenCalled()
+    expect(packages.findByContext).not.toHaveBeenCalled()
+    expect(packages.add).not.toHaveBeenCalled()
+    expect(documents.add).not.toHaveBeenCalled()
+    expect(packageDocuments.add).not.toHaveBeenCalled()
+    expect(broker.publish).not.toHaveBeenCalled()
+  })
+
+  it('rejects missing inputs, unavailable models, incomplete checklists, and invalid references', async () => {
+    const legalCase = LegalCaseFaker.fake({
+      id: 'case-flow',
+      status: LegalCaseStatus.LegalProduction,
+      checklistGate: { decision: CaseChecklistGateDecision.Approved },
+      dossierGate: { homologatedAt: new Date('2026-09-14T12:00:00.000Z') },
+    })
+    const request = {
+      caseId: legalCase.id,
+      documentSpecificationId: 'spec-flow',
+      documentFileIds: ['file-flow'],
+      requestedByCollaboratorId: 'actor-flow',
+      requestedByCollaboratorProfile: 'lawyer' as const,
+    }
+
+    await expect(useCase.execute({ ...request, instructions: '   ' })).rejects.toThrow(
+      'instruções não podem ficar vazias',
+    )
+    cases.findById.mockResolvedValue(undefined)
+    await expect(useCase.execute(request)).rejects.toThrow()
+
+    cases.findById.mockResolvedValue(legalCase)
+    clients.findById.mockResolvedValue(undefined)
+    await expect(useCase.execute(request)).rejects.toThrow('caso não foi encontrado')
+
+    clients.findById.mockResolvedValue(ClientFaker.fake())
+    specifications.findById.mockResolvedValue(undefined)
+    checklist.listByCaseId.mockResolvedValue([])
+    validations.list.mockResolvedValue([])
+    await expect(useCase.execute(request)).rejects.toThrow('modelo de peça selecionado')
+
+    const specification = DocumentSpecificationFaker.fake({
+      id: request.documentSpecificationId,
+      status: DocumentSpecificationStatus.Unavailable,
+    })
+    specifications.findById.mockResolvedValue(specification)
+    await expect(useCase.execute(request)).rejects.toThrow('está indisponível')
+
+    const availableSpecification = DocumentSpecificationFaker.fake({
+      id: request.documentSpecificationId,
+      status: DocumentSpecificationStatus.Available,
+      application: {
+        scope: 'global',
+        moment: DocumentGenerationMoment.Consultation,
+      },
+    })
+    specifications.findById.mockResolvedValue(availableSpecification)
+    await expect(useCase.execute(request)).rejects.toThrow(
+      'não está disponível para produção jurídica',
+    )
+
+    specifications.findById.mockResolvedValue(
+      DocumentSpecificationFaker.fake({
+        id: request.documentSpecificationId,
+        status: DocumentSpecificationStatus.Available,
+        application: {
+          scope: 'legal_context',
+          moment: DocumentGenerationMoment.LegalProduction,
+          legalAreaIds: [],
+          legalTopicIdsByArea: {},
+        },
+      }),
+    )
+    await expect(useCase.execute(request)).rejects.toThrow('não está vinculado')
+
+    specifications.findById.mockResolvedValue(
+      DocumentSpecificationFaker.fake({
+        id: request.documentSpecificationId,
+        status: DocumentSpecificationStatus.Available,
+        application: {
+          scope: 'legal_context',
+          moment: DocumentGenerationMoment.LegalProduction,
+          legalAreaIds: [legalCase.legalAreaId],
+          legalTopicIdsByArea: { [legalCase.legalAreaId]: [] },
+        },
+      }),
+    )
+    await expect(useCase.execute(request)).rejects.toThrow('não está vinculado')
+
+    const availableGlobalSpec = DocumentSpecificationFaker.fake({
+      id: request.documentSpecificationId,
+      status: DocumentSpecificationStatus.Available,
+      application: {
+        scope: 'global',
+        moment: DocumentGenerationMoment.LegalProduction,
+      },
+    })
+    specifications.findById.mockResolvedValue(availableGlobalSpec)
+    checklist.listByCaseId.mockResolvedValue([
+      { isRequired: true, status: CaseChecklistItemStatus.Pending } as never,
+    ])
+    await expect(useCase.execute(request)).rejects.toThrow('documentos obrigatórios')
+
+    cases.findById.mockResolvedValue({
+      ...legalCase,
+      checklistGate: { decision: CaseChecklistGateDecision.ApprovedWithException },
+    })
+    checklist.listByCaseId.mockResolvedValue([])
+    await expect(useCase.execute({ ...request, documentFileIds: [] })).rejects.toThrow(
+      'Selecione ao menos um documento',
+    )
+    await expect(
+      useCase.execute({ ...request, documentFileIds: ['file-flow', 'file-flow'] }),
+    ).rejects.toThrow('Selecione ao menos um documento')
+    await expect(useCase.execute(request)).rejects.toThrow(
+      'Cada documento de referência deve estar validado',
+    )
     expect(documents.add).not.toHaveBeenCalled()
   })
 })

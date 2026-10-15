@@ -14,6 +14,7 @@ import type {
   CaseMembersRepository,
   CaseTeamHistoriesRepository,
   CaseTeamOperationsRepository,
+  CaseCreationOperationsRepository,
   CaseChecklistItemsRepository,
   ChecklistTemplateItemsRepository,
   ChecklistTemplatesRepository,
@@ -46,6 +47,8 @@ export class CaseManagementSeeder {
     private readonly caseTeamHistoriesRepository: CaseTeamHistoriesRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.caseTeamOperations)
     private readonly caseTeamOperationsRepository: CaseTeamOperationsRepository,
+    @Inject(CASE_MANAGEMENT_REPOSITORIES.caseCreationOperations)
+    private readonly caseCreationOperationsRepository: CaseCreationOperationsRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems)
     private readonly caseChecklistItemsRepository: CaseChecklistItemsRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.checklistTemplates)
@@ -60,6 +63,7 @@ export class CaseManagementSeeder {
     await this.caseTeamHistoriesRepository.removeAll()
     await this.caseTeamOperationsRepository.removeAll()
     await this.caseTasksRepository.removeAll()
+    await this.caseCreationOperationsRepository.removeAll()
     await this.caseChecklistItemsRepository.removeAll()
     await this.caseMembersRepository.removeAll()
     await this.legalCasesRepository.removeAll()
