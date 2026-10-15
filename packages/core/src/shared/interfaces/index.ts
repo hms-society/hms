@@ -1,4 +1,6 @@
 export * from './appointment-write-transaction-provider'
+export * from './case-identity-transaction'
+export * from './case-identity-transaction-scope'
 export * from './broker'
 export * from './calendar-consultation-provider'
 export * from './calendar-identity-provider'

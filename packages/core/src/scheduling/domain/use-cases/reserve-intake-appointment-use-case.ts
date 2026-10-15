@@ -10,6 +10,7 @@ import type {
   SchedulesRepository,
 } from '../../interfaces'
 import type { DatetimeProvider, IdProvider, UseCase } from '#shared/interfaces'
+import { AppError } from '#shared/domain/errors'
 
 type Request = {
   intakeId: string
@@ -59,44 +60,62 @@ export class ReserveIntakeAppointmentUseCase implements UseCase<Request, Respons
 
   async execute(request: Request): Promise<Response> {
     if (this.database) {
-      return this.database.run(
-        async ({ schedulesRepository, appointmentsRepository }) => {
-          const schedule = await schedulesRepository.findByCollaboratorIdForUpdate(
-            request.assignedLawyerId,
-          )
-          if (!schedule) throw new ScheduleNotFoundError()
-          return this.reserve(request, schedule, appointmentsRepository)
-        },
+      return this.database.run(({ schedulesRepository, appointmentsRepository }) =>
+        this.reserve(
+          request,
+          (lawyerId) => schedulesRepository.findByCollaboratorIdForUpdate(lawyerId),
+          appointmentsRepository,
+        ),
       )
     }
 
-    const schedule = await this.schedulesRepository?.findByCollaboratorId(
-      request.assignedLawyerId,
-    )
-    if (!schedule) throw new ScheduleNotFoundError()
+    const schedulesRepository = this.schedulesRepository
+    const appointmentsRepository = this.appointmentsRepository
+    if (!schedulesRepository || !appointmentsRepository) {
+      throw new AppError(
+        'ReserveIntakeAppointmentUseCase dependencies are not configured.',
+        'Configuration Error',
+      )
+    }
+
     return this.reserve(
       request,
-      schedule,
-      this.appointmentsRepository as AppointmentsRepository,
+      (lawyerId) => schedulesRepository.findByCollaboratorId(lawyerId),
+      appointmentsRepository,
     )
   }
 
   private async reserve(
     request: Request,
-    schedule: { id: string; appointmentDurationInMinutes: number },
+    findSchedule: (
+      lawyerId: string,
+    ) => ReturnType<SchedulesRepository['findByCollaboratorId']>,
     appointmentsRepository: AppointmentsRepository,
   ): Promise<Response> {
+    const schedule = await findSchedule(request.assignedLawyerId)
+
+    if (!schedule) throw new ScheduleNotFoundError()
+
     const existingAppointment = await appointmentsRepository.findByIntakeId(
       request.intakeId,
     )
+
     if (existingAppointment) {
       const matchesExistingAppointment =
         existingAppointment.scheduleId === schedule.id &&
         existingAppointment.clientId === request.clientId &&
         existingAppointment.startsAt.getTime() === request.startsAt.getTime()
+
       if (!matchesExistingAppointment) throw new AppointmentRetryConflictError()
+
       return existingAppointment
     }
+
+    const appointmentDate = getLocalDate(request.startsAt, schedule.timeZone)
+    const isBlocked = schedule.blockedPeriods.some(
+      (period) => period.startsOn <= appointmentDate && period.endsOn >= appointmentDate,
+    )
+    if (isBlocked) throw new AppointmentConflictError()
 
     const endsAt = new Date(
       request.startsAt.getTime() + schedule.appointmentDurationInMinutes * 60_000,
@@ -106,9 +125,11 @@ export class ReserveIntakeAppointmentUseCase implements UseCase<Request, Respons
       request.startsAt,
       endsAt,
     )
+
     if (conflictingAppointment) throw new AppointmentConflictError()
 
     const now = this.datetimeProvider.now()
+
     return appointmentsRepository.add({
       id: this.idProvider.generate(),
       intakeId: request.intakeId,
@@ -121,4 +142,15 @@ export class ReserveIntakeAppointmentUseCase implements UseCase<Request, Respons
       updatedAt: now,
     })
   }
+}
+
+function getLocalDate(date: Date, timeZone: string): `${number}-${number}-${number}` {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date)
+  const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]))
+  return `${values.year}-${values.month}-${values.day}` as `${number}-${number}-${number}`
 }

@@ -5,6 +5,10 @@ import type {
   CaseTeamMember,
   CaseTimelineItem,
 } from './types'
+import {
+  CaseMemberRole,
+  LegalCaseStatus,
+} from '@hms/core/case-management/domain/structures'
 
 export const MOCK_ACTIVITIES: ActivityItem[] = [
   {
@@ -71,25 +75,25 @@ export const CASE_TEAM: CaseTeamMember[] = [
   {
     initials: 'RM',
     name: 'Dr. Ricardo Mendes',
-    role: 'Advogado Principal - Responsável Técnico',
+    role: CaseMemberRole.Manager,
     className: 'bg-primary text-primary-foreground',
   },
   {
     initials: 'MC',
     name: 'Mariana Costa',
-    role: 'Advogada Auxiliar - Execução',
+    role: CaseMemberRole.Collaborator,
     className: 'bg-accent text-accent-foreground',
   },
   {
     initials: 'JP',
     name: 'João Pedro Silva',
-    role: 'Paralegal - Edição',
+    role: CaseMemberRole.Collaborator,
     className: 'bg-highlight text-highlight-foreground',
   },
   {
     initials: 'BO',
     name: 'Beatriz Oliveira',
-    role: 'Estagiária - Visualização',
+    role: CaseMemberRole.Collaborator,
     className: 'bg-muted text-foreground',
   },
 ]
@@ -106,6 +110,24 @@ export const CASE_STAGES: CaseStage[] = [
   { icon: 'chart-line', label: 'Execução' },
   { icon: 'check', label: 'Encerramento' },
 ]
+
+export const getCaseStages = (caseStatus?: string): CaseStage[] => {
+  const isInLegalProduction = caseStatus === LegalCaseStatus.LegalProduction
+  const activeStageIndex = isInLegalProduction ? 1 : 0
+
+  return CASE_STAGES.map((stage, index) => {
+    if (index === 0 && isInLegalProduction) {
+      return {
+        ...stage,
+        icon: 'check',
+        status: 'Concluída',
+        isActive: false,
+      }
+    }
+
+    return { ...stage, isActive: index === activeStageIndex }
+  })
+}
 
 export const TEAM_MEMBERS = CASE_TEAM.map(({ className, initials }) => ({
   className,

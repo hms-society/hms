@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common'
 import { DocumentEngineAiModule } from '@/document-engine/ai/document-engine-ai.module'
 import { DocumentsDatabaseModule } from '@/document-engine/database/documents-database.module'
 import {
-  OrganizeDocumentFileJsonWithOllamaJob,
+  OrganizeDocumentFileJsonJob,
   ProcessDocumentFileJob,
   ProcessWhatsappBatchJob,
   ExpireProvisionalAcceptancesJob,
@@ -26,25 +26,25 @@ export const DOCUMENT_ENGINE_INNGEST_FUNCTIONS = Symbol(
     CommunicationModule,
   ],
   providers: [
-    OrganizeDocumentFileJsonWithOllamaJob,
+    OrganizeDocumentFileJsonJob,
     ProcessDocumentFileJob,
     ProcessWhatsappBatchJob,
     ExpireProvisionalAcceptancesJob,
     {
       provide: DOCUMENT_ENGINE_INNGEST_FUNCTIONS,
       inject: [
-        OrganizeDocumentFileJsonWithOllamaJob,
+        OrganizeDocumentFileJsonJob,
         ProcessDocumentFileJob,
         ProcessWhatsappBatchJob,
         ExpireProvisionalAcceptancesJob,
       ],
       useFactory: (
-        organizeFileJsonWithOllamaJob: OrganizeDocumentFileJsonWithOllamaJob,
+        organizeDocumentFileJsonJob: OrganizeDocumentFileJsonJob,
         processFileJob: ProcessDocumentFileJob,
         processWhatsappBatchJob: ProcessWhatsappBatchJob,
         expireProvisionalAcceptancesJob: ExpireProvisionalAcceptancesJob,
       ): InngestFunctionGroup => [
-        organizeFileJsonWithOllamaJob.function,
+        organizeDocumentFileJsonJob.function,
         processFileJob.function,
         processWhatsappBatchJob.function,
         expireProvisionalAcceptancesJob.function,
@@ -52,7 +52,7 @@ export const DOCUMENT_ENGINE_INNGEST_FUNCTIONS = Symbol(
     },
   ],
   exports: [
-    OrganizeDocumentFileJsonWithOllamaJob,
+    OrganizeDocumentFileJsonJob,
     ProcessDocumentFileJob,
     ProcessWhatsappBatchJob,
     ExpireProvisionalAcceptancesJob,

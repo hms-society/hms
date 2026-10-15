@@ -13,9 +13,11 @@ import type { CasePortalAccessGrant } from '@hms/core/case-management/domain/ent
 import type { LegalCasesRepository } from '@hms/core/case-management/interfaces'
 import { GetThirdPartyPortalCaseUseCase } from '@hms/core/case-management/use-cases'
 import type { IntakesRepository } from '@hms/core/intake/interfaces'
+import type { ClientsRepository } from '@hms/core/identity/interfaces'
 
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
 import { INTAKE_REPOSITORIES } from '@/intake/constants/intake-repositories'
+import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { CurrentPortalAccessGrant } from '@/case-management/rest/decorators/current-portal-access-grant.decorator'
 import { RouteAccess } from '@/identity/decorators/route-access.decorator'
 import { ApplicationAccessGuard } from '@/identity/guards/application-access.guard'
@@ -31,8 +33,13 @@ export class GetThirdPartyPortalCaseController {
     legalCasesRepository: LegalCasesRepository,
     @Inject(INTAKE_REPOSITORIES.intakes)
     private readonly intakesRepository: IntakesRepository,
+    @Inject(IDENTITY_REPOSITORIES.clients)
+    clientsRepository: ClientsRepository,
   ) {
-    this.useCase = new GetThirdPartyPortalCaseUseCase(legalCasesRepository)
+    this.useCase = new GetThirdPartyPortalCaseUseCase(
+      legalCasesRepository,
+      clientsRepository,
+    )
   }
 
   @Get('cases/:caseId')

@@ -20,13 +20,14 @@ describe('Review Consultation Document Version Controller [PATCH /consultations/
   beforeEach(async () => fixture.resetDatabase())
   afterAll(async () => fixture.close())
 
-  it('records the assigned lawyer approval', async () => {
+  it('records the privileged reviewer approval', async () => {
     const { user, collaborator } = await fixture.registerAssociatedCollaborator()
+    const { collaborator: author } = await fixture.registerAssociatedCollaborator()
     const consultation = await fixture.seedConsultation(
       ConsultationFaker.fake({ assignedLawyerId: collaborator.id }),
     )
     const document = await fixture.seedDocument(consultation.id)
-    const version = await fixture.seedDocumentVersion(document.id, collaborator.id)
+    const version = await fixture.seedDocumentVersion(document.id, author.id)
 
     const response = await request(fixture.app.getHttpServer())
       .patch(
@@ -45,11 +46,12 @@ describe('Review Consultation Document Version Controller [PATCH /consultations/
 
   it('requires a reason when rejecting a version', async () => {
     const { user, collaborator } = await fixture.registerAssociatedCollaborator()
+    const { collaborator: author } = await fixture.registerAssociatedCollaborator()
     const consultation = await fixture.seedConsultation(
       ConsultationFaker.fake({ assignedLawyerId: collaborator.id }),
     )
     const document = await fixture.seedDocument(consultation.id)
-    const version = await fixture.seedDocumentVersion(document.id, collaborator.id)
+    const version = await fixture.seedDocumentVersion(document.id, author.id)
 
     await request(fixture.app.getHttpServer())
       .patch(
@@ -62,11 +64,12 @@ describe('Review Consultation Document Version Controller [PATCH /consultations/
 
   it('blocks approval with pending markers and preserves the version for rejection', async () => {
     const { user, collaborator } = await fixture.registerAssociatedCollaborator()
+    const { collaborator: author } = await fixture.registerAssociatedCollaborator()
     const consultation = await fixture.seedConsultation(
       ConsultationFaker.fake({ assignedLawyerId: collaborator.id }),
     )
     const document = await fixture.seedDocument(consultation.id)
-    const version = await fixture.seedDocumentVersion(document.id, collaborator.id, {
+    const version = await fixture.seedDocumentVersion(document.id, author.id, {
       pendingMarkers: [{ marker: '{cliente_cpf}' }],
     })
     const route = `/consultations/${consultation.id}/documents/${document.id}/versions/${version.id}/review`
@@ -89,6 +92,7 @@ describe('Review Consultation Document Version Controller [PATCH /consultations/
 
   it('keeps the pending-data seed example in review and blocks its approval', async () => {
     const { user, collaborator } = await fixture.registerAssociatedCollaborator()
+    const { collaborator: author } = await fixture.registerAssociatedCollaborator()
     const consultation = await fixture.seedConsultation(
       ConsultationFaker.fake({ assignedLawyerId: collaborator.id }),
     )
@@ -104,10 +108,19 @@ describe('Review Consultation Document Version Controller [PATCH /consultations/
       legalTopicId: consultation.legalTopicId,
     })
     const schedulingSeed = await fixture.app.get(SchedulingSeeder).run({
-      intakeId: intakeSeed.documentProductionIntake.id,
+      appointments: [
+        {
+          intakeId: intakeSeed.documentProductionIntake.id,
+          clientId: consultation.clientId,
+        },
+        {
+          intakeId: intakeSeed.pendingMarkersIntake.id,
+          clientId: consultation.clientId,
+        },
+      ],
       pendingMarkersIntakeId: intakeSeed.pendingMarkersIntake.id,
-      clientId: consultation.clientId,
       assignedLawyerId: collaborator.id,
+      lawyerIds: [collaborator.id],
     })
     if (!schedulingSeed.pendingMarkersAppointment) {
       throw new Error('The pending-data appointment must exist')
@@ -128,7 +141,7 @@ describe('Review Consultation Document Version Controller [PATCH /consultations/
     const seeded = await fixture.app.get(DocumentProductionSeeder).run({
       hasPendingDocumentData: true,
       consultationId: pendingConsultation.id,
-      requestedByCollaboratorId: collaborator.id,
+      requestedByCollaboratorId: author.id,
       legalAreas: [{ id: consultation.legalAreaId, name: 'Cível' }],
       legalTopics: [
         {

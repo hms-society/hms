@@ -1,4 +1,5 @@
 import type { IconName } from '@/ui/shared/widgets/components/icon'
+import type { CaseMemberRole } from '@hms/core/case-management/domain/structures'
 
 export type ChecklistItemStatus = 'validado' | 'solicitado' | 'nao_solicitado'
 
@@ -39,10 +40,8 @@ export type CaseTeamMember = {
   collaboratorId?: string
   initials?: string
   name: string
-  role: string
+  role: CaseMemberRole
   className?: string
-  permission?: string
-  isPrimary?: boolean
 }
 
 export type CaseStage = {

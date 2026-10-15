@@ -16,6 +16,7 @@ import type { PaginationResponse } from '#shared/responses/pagination-response.t
 import type { LookupClientRequest } from '../use-cases/lookup-client-use-case'
 import type { RegisterClientRequest } from '../use-cases/register-client-use-case'
 import type { RegisterThirdPartyRequest } from '../use-cases/register-third-party-use-case'
+import type { CollaboratorProfessionalProfile } from '../domain/structures/collaborator-professional-profile'
 
 export type ThirdPartyRegistration = Omit<
   RegisterThirdPartyRequest,
@@ -59,6 +60,9 @@ export interface IdentityService {
     >,
   ): Promise<RestResponse<PaginationResponse<CollaboratorSummary>>>
   getCollaborator(collaboratorId: string): Promise<RestResponse<CollaboratorSummary>>
+  getCollaboratorProfessionalProfile(
+    collaboratorId: string,
+  ): Promise<RestResponse<CollaboratorProfessionalProfile>>
   listCollaboratorJobTitles(): Promise<RestResponse<readonly string[]>>
   getCurrentCollaborator(): Promise<RestResponse<CollaboratorSummary>>
   registerCollaborator(

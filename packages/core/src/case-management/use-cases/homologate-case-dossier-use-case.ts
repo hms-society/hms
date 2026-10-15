@@ -3,11 +3,16 @@ import type { UseCase } from '#shared/interfaces/use-case'
 import type { LegalCase } from '../domain/entities'
 import { CaseChecklistGateReviewError, LegalCaseNotFoundError } from '../domain/errors'
 import {
+  CaseAccessIntent,
   CaseChecklistGateDecision,
   CaseChecklistItemStatus,
   LegalCaseStatus,
 } from '../domain/structures'
-import type { CaseChecklistItemsRepository, LegalCasesRepository } from '../interfaces'
+import type {
+  CaseAccessProvider,
+  CaseChecklistItemsRepository,
+  LegalCasesRepository,
+} from '../interfaces'
 
 type Request = {
   caseId: string
@@ -18,16 +23,18 @@ export class HomologateCaseDossierUseCase implements UseCase<Request, LegalCase>
   constructor(
     private readonly legalCases: LegalCasesRepository,
     private readonly checklistItems: CaseChecklistItemsRepository,
+    private readonly caseAccessProvider: CaseAccessProvider,
   ) {}
 
   async execute({ caseId, homologatedBy }: Request): Promise<LegalCase> {
     const legalCase = await this.legalCases.findById(caseId)
     if (!legalCase) throw new LegalCaseNotFoundError()
 
-    const assignedCases = await this.legalCases.listByTeamMember(homologatedBy)
-    if (!assignedCases.some((assignedCase) => assignedCase.id === caseId)) {
-      throw new LegalCaseNotFoundError()
-    }
+    await this.caseAccessProvider.authorize({
+      caseId,
+      actorId: homologatedBy,
+      intent: CaseAccessIntent.WriteContent,
+    })
 
     if (
       legalCase.checklistGate.decision !== CaseChecklistGateDecision.Approved &&
@@ -47,15 +54,7 @@ export class HomologateCaseDossierUseCase implements UseCase<Request, LegalCase>
     }
 
     const items = await this.checklistItems.listByCaseId(caseId)
-    const requiredItems = items.filter((item) => item.isRequired)
-    const hasPendingRequiredItem =
-      requiredItems.length === 0 ||
-      requiredItems.some((item) => item.status !== CaseChecklistItemStatus.Validated)
-    if (hasPendingRequiredItem) {
-      throw new CaseChecklistGateReviewError(
-        'O dossiê não pode ser homologado enquanto houver documentos obrigatórios pendentes de validação.',
-      )
-    }
+    this.ensureRequiredItemsSatisfied(legalCase, items)
 
     const homologatedCase = await this.legalCases.homologateDossier({
       caseId,
@@ -70,5 +69,22 @@ export class HomologateCaseDossierUseCase implements UseCase<Request, LegalCase>
     }
 
     return homologatedCase
+  }
+  private ensureRequiredItemsSatisfied(
+    legalCase: LegalCase,
+    items: Awaited<ReturnType<CaseChecklistItemsRepository['listByCaseId']>>,
+  ): void {
+    const requiredItems = items.filter((item) => item.isRequired)
+    const hasApprovedException =
+      legalCase.checklistGate.decision === CaseChecklistGateDecision.ApprovedWithException
+    const hasPendingRequiredItem =
+      !hasApprovedException &&
+      (requiredItems.length === 0 ||
+        requiredItems.some((item) => item.status !== CaseChecklistItemStatus.Validated))
+    if (hasPendingRequiredItem) {
+      throw new CaseChecklistGateReviewError(
+        'O dossiê não pode ser homologado enquanto houver documentos obrigatórios pendentes de validação.',
+      )
+    }
   }
 }

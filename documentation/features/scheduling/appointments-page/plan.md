@@ -7,16 +7,16 @@ evaluation: ./evaluation.md
 jira_tickets:
   - SCRUM-146
 prd: https://plataformahms.atlassian.net/wiki/spaces/~712020e69febeaca304dffb2d8d156ea17d2c4/pages/2686977/PRD+M+dulo+de+Agendamento
-updated_at: 2026-09-28
+updated_at: 2026-10-15
 ---
 
 # Execution status
 
 - **Spec:** [spec.md](spec.md), revision 13, `in_progress`.
 - **Rationale:** Plan-backed execution is required by the Core/Validation/Server/Web ownership boundaries, transactional database and outbox integration, migration risk, and multi-viewport authenticated validation.
-- **Current phase:** F7 — Integrated validation and publication handoff; implementation corrections F8/F9 are complete, and a final cancellation-revision review correction was verified.
-- **Next action:** Publish the four dependent ready-for-review PR slices and wait for every applicable CI workflow on each PR head SHA.
-- **Active blockers:** None for local readiness. Remaining manual role/concurrency/broker-failure scenarios and exact reference differences are explicitly classified `partial`; the known Drizzle snapshot-parent collision also exists on `origin/develop` and does not prevent runtime migration application. PR CI remains the conclusion gate. Prior revision 11/12 screenshots remain historical for changed rescheduling behavior; current revision 13 captures and comparisons are in Evaluation. Preserve all unrelated user work outside the four feature slices.
+- **Current phase:** F7 — Integrated validation and publication handoff; F8/F9 and PR #234 correction R2 are complete. PR #234 was merged into `develop` on 2026-10-15; its source-head checks passed and its two review threads were resolved. The remaining Web slice is open as PR #235.
+- **Next action:** Verify the current PR #235 head checks and record the review handoff. The authenticated calendar flow remains explicitly unverified under the user's waiver of that Spec gate.
+- **Active blockers:** Evaluation remains `in_progress`: PR #235 checks are pending, role/concurrency cases and exact reference comparisons are partial. The user explicitly waived the Spec's authenticated-flow check as a publication blocker; no authenticated browser run is claimed. Server/Core PR #234 is merged; the Web PR is within the 5,000-added-TypeScript-line limit. Exclude test-integrity tooling, Vite/local tooling changes, unrelated Identity/Intake test-only edits, and the generated local Playwright snapshot. Preserve other unrelated user work outside those PRs.
 - **Builders:** Core, Validation, Server and Web ownership Builders are complete; `reviewer` found and rechecked FND-036. Clean-candidate coverage passes for all four workspaces (Core 124/404, Validation 6/18, Server 87/201, Web 122/406 with 3 skips); focused Agenda Playwright passes 13/13. Current-source Admin/Lawyer block checks, cross-lawyer transfer and 11 supplemental state/recovery captures are recorded in Evaluation.
 - **Shared coordination:** `builder_core` owns Core contracts/use cases; `builder_validation` owns shared schemas; `builder_server` owns server persistence/REST/messaging and migration artifacts; `builder_web` owns web REST consumers, route, widgets and browser tests. The Orchestrator owns integration, generated route metadata, lockfile/root configuration, evaluation, and final evidence.
 
@@ -38,25 +38,24 @@ updated_at: 2026-09-28
 | 3 | `builder_web` | F6 | F6-T3 — Appointment dialogs and action flows | F6-T1 | F5, F6-T2 | `completed` | Details, client filter, cancel, reschedule and overflow dialogs implement focus, validation, permission and recovery behavior. |
 | 3 | `builder_web` | F6 | F6-T4 — Web tests and generated route | F6-T2, F6-T3 | F5 | `completed` | Web suite, route, keyboard, direct-card focus, overflow focus and narrow viewport checks pass; seeded live evidence is recorded. |
 | 4 | `reviewer` | R1 | Integrated read-only review | F5-T3, F6-T4 | F7 | `completed` | Same Reviewer rechecked the overflow-trigger correction and found no implementation defect; residual gaps are validation coverage only. |
-| 4 | `orchestrator` | F7 | Integrated validation and publication handoff | F5-T3, F6-T4, R1 | — | `in_progress` | Exact clean-candidate workspace coverage, typechecks, lint/architecture and focused Playwright evidence pass. Evaluation is `ready`; create the four chained PRs and complete the PR-head CI Quality Gate. Remaining MV/VIS partial classifications and the upstream Drizzle metadata collision are explicit and non-blocking for runtime migration application. |
+| 4 | `orchestrator` | F7 | Integrated validation and publication handoff | F5-T3, F6-T4, R1 | — | `in_progress` | Focused integrated tests, typechecks, architecture checks, migration tests and builds pass; complete the remaining authenticated role/concurrency scenarios and required reference comparisons before Evaluation becomes `ready`. |
 | 5 | `builder_core` + `builder_validation` | F8 | F8-T1 — Core lawyer-transfer contract and shared schemas | F1/F2/F3 | — | `completed` | Optional lawyerId is validated; slots carry the destination agenda's IANA timezone for correct presentation. Core typecheck passed. |
 | 5 | `builder_server` | F8 | F8-T2 — Cross-agenda transaction, persistence and Consultation adapter | F8-T1 | F8-T3 | `completed` | Origin/destination schedules lock in stable order; appointment, pending Consultation lawyer, change history and event commit atomically; slots expose destination timezone; active lawyer is revalidated under an Identity row lock. Server typecheck passed. |
 | 5 | `builder_web` | F8 | F8-T3 — yVAoI dialog and typed lawyer/slot flow | F8-T1 | F8-T2 | `completed` | Dialog offers active lawyers, refreshes slots on lawyer/date changes, shows current/new summary in the destination timezone, and reloads details/slots after conflicts while preserving available selections. Web typecheck and Biome pass. |
 | 6 | `orchestrator` + `reviewer` | F8 | F8-T4 — Integrated contract review and evidence refresh | F8-T1–T3 | — | `completed` | Independent review corrections are integrated; authenticated transfer and revision 13 Admin/Lawyer evidence plus current responsive dialog screenshots are in Evaluation. Supplemental state captures and final coverage were completed after this row began. |
 | 7 | `builder_web` + orchestrator | F9 | F9-T1 — Hide block cards from Admin calendar projection | F8 | — | `completed` | Admin and unresolved-role page projections suppress cached blocks; Server projection omits Admin blocks and toolbar filter; known non-Admin behavior and Lawyer availability constraints remain. EV-071 records current-source Admin/Lawyer REST and browser checks. |
+| 7 | `orchestrator` + `reviewer` | F7 | R2 — Resolve PR #234 appointment availability and revision comments | F7 | — | `completed` | Commit `174c1cf9` adds scheduled-only rescheduling filters and regression coverage for canceled-slot release and calendar history. Post-merge focused checks, independent recheck and all applicable CI checks pass; both review conversations are replied to and resolved on source head `5a4956c7d`. |
 
 ## Publication slices
 
-The reviewed TypeScript addition count uses the repository size-gate rule: added `.ts`, `.tsx`, `.mts` and `.cts` lines in each PR diff against its declared base. Each slice has a concrete ownership or dependency boundary.
+The reviewed TypeScript addition count uses `.github/workflows/check-pr-size.yml`: added `.ts`, `.tsx`, `.mts` and `.cts` lines in each PR diff against its declared base. Core foundation PR #180 and Server/Core PR #234 are merged into `develop`; the only remaining delivery is the Web slice, which depends on the now-merged #234.
 
-| Order | Proposed branch | Scope | TypeScript additions | Base / dependency | Criteria and outcome |
+| Order | Implementation slice | Scope | TypeScript additions | Base / dependency | Criteria and outcome |
 | --- | --- | --- | ---: | --- | --- |
-| 1 | `codex/agenda-core-validation` | Core contracts/use cases, shared schemas, migration-independent Spec/Plan/Evaluation/design bundle, timestamp precision Rule clarification and minimal Validation lockfile entry | 3,448 | `develop`; independent foundation | `RF-01`–`RF-08`; `CA-01`–`CA-09`; domain/persistence contracts. |
-| 2 | `codex/agenda-server` | Server modules, REST/controllers, repositories, consultation synchronization/outbox, migration 0053–0055, fixtures and REST examples | 3,735 | Base on PR 1 | `CA-02`–`CA-07`, `CA-09`; real persistence and access boundaries. |
-| 3 | `codex/agenda-lawyer-selector` | Shared Identity lawyer selector extraction and existing Intake integration | 342 | Base on PR 2 | Reusable dependency required by the reschedule flow; supports `RF-06`/`CA-06` without duplicating Identity search rules. |
-| 4 | `codex/agenda-web` | `/agenda/consultas`, typed REST consumers, calendar/dialog widgets and tests, generated route metadata; removes only blank placeholder consultation pages/routes | 4,611 | Base on PR 3 | `RF-01`–`RF-08`; `CA-01`–`CA-09`; UI and route delivery. |
+| 1 | [PR #234](https://github.com/hms-society/hms/pull/234), `codex/appointments-server-pr` | Scheduling/Consultation/Identity adapters, remaining Core compatibility changes, REST, transactions/outbox, migration 0066, fixtures, seed and feature Spec/Plan/Evaluation | 3,847 | `develop`; merged 2026-10-15 | `CA-02`–`CA-07`, `CA-09`; persisted scheduling and API behavior. |
+| 2 | [PR #235](https://github.com/hms-society/hms/pull/235), `codex/appointments-web-pr` | `/agenda/consultas`, shared lawyer selector and Intake integration, typed REST consumers, calendar/dialog widgets and route tests | 4,958 | `develop`; dependency PR #234 is merged | `RF-01`–`RF-08`; `CA-01`–`CA-09`; UI and route delivery. |
 
-Every slice remains under the 5,000-line limit. Push and publish all four as ready-for-review PRs in this dependency order. Keep inherited test-integrity tooling, unrelated Identity/Intake test edits, the generated local Playwright snapshot and other dirty user files outside the branches.
+Both slices remain under the 5,000-line limit. Exclude `.github/workflows/test-integrity-ci.yaml`, `scripts/check-test-integrity.mjs`, `test-integrity.config.mjs`, related package/lockfile/tooling edits, unrelated Identity/Intake test-only edits and `apps/web/tests/routes/agenda/consultas.real.test-snapshots/agenda-consultas-real-390x844-chromium-linux.png`. Historical PRs #181, #191, #183 and #197 do not target `develop`; do not create duplicates of them.
 
 ### F1 — Core contracts and domain model
 
@@ -100,7 +99,7 @@ Every slice remains under the 5,000-line limit. Push and publish all four as rea
 
 - **Status/owner:** `completed` — `builder_server`
 - **Depends/parallel:** Depends on F1; parallel with F3. F4-T2 and F4-T3 consume the persisted schema; F5 waits for this task’s migration review.
-- **Paths:** `apps/server/src/scheduling/database/drizzle/{models/**,types/**,mappers/**}`; `apps/server/src/consultation/database/drizzle/{models/**,types/**,mappers/**}`; `apps/server/src/shared/database/drizzle/schema/scheduling.ts`; generated migration `0053_appointment_calendar_history.sql`, snapshot and journal; schema compatibility/backfill artifacts.
+- **Paths:** `apps/server/src/scheduling/database/drizzle/{models/**,types/**,mappers/**}`; `apps/server/src/consultation/database/drizzle/{models/**,types/**,mappers/**}`; `apps/server/src/shared/database/drizzle/schema/scheduling.ts`; generated migration `0066_even_captain_america.sql`, snapshot and journal; schema compatibility/backfill artifacts.
 - **Contract:** RF-03, RF-05–RF-07; CA-02, CA-04–CA-07, CA-09; Technical Contract §3 Database and migration model.
 - **Outcome:** PostgreSQL models, mappers and schema support bounded calendar queries, persisted agenda time zones, revision uniqueness, history and Consultation outbox durability while preserving existing data.
 - **Rules:** `documentation/rules/code-conventions-rules.md`; `documentation/rules/database-layer-rules.md`; `documentation/rules/server-app-layer-rules.md`; preserve mapper boundaries and the no-cross-module-table-import rule.
@@ -194,7 +193,7 @@ Every slice remains under the 5,000-line limit. Push and publish all four as rea
 
 - **Status/owner:** `completed` — `builder_web`
 - **Depends/parallel:** Depends on F6-T2 and F6-T3; parallel with F5. F7 owns real-service/authenticated browser evidence.
-- **Paths:** Colocated widget/hook tests; `apps/web/tests/agenda/consultas.test.ts`; generated `apps/web/src/routeTree.gen.ts` only through route generation; feature test fixtures and mocked HTTP contract setup.
+- **Paths:** Colocated widget/hook tests; `apps/web/tests/routes/agenda/consultas.test.ts`; generated `apps/web/src/routeTree.gen.ts` only through route generation; feature test fixtures and mocked HTTP contract setup.
 - **Contract:** RF-01–RF-04, RF-08; CA-01–CA-04, CA-08–CA-09; Spec widget tree, route contract and widget-testing boundary.
 - **Outcome:** Web tests exercise the complete route/widget tree with mocked transport clearly scoped to isolated coverage, generated route metadata is current, and keyboard/narrow viewport behavior is executable.
 - **Rules:** `documentation/rules/ui-layer-rules.md`; `documentation/rules/web-app-routing-rules.md`; `documentation/rules/widget-testing-rules.md`; `documentation/rules/rest-layer-rules.md`; `documentation/tooling.md`; use repository Playwright CLI, not Playwright MCP.
@@ -222,7 +221,7 @@ Every slice remains under the 5,000-line limit. Push and publish all four as rea
 - **Contract:** CA-01–CA-09; MV-01–MV-04; final handoff condition in the create-plan contract.
 - **Outcome:** All automated boundaries, real PostgreSQL/REST/Auth/browser flows, visual states, permissions, transaction/outbox behavior, keyboard paths, narrow viewport states and final Spec-tree comparisons are evidenced without claiming unexecuted results.
 - **Rules:** `documentation/rules/sdd-rules.md`; `AGENTS.md`; `documentation/tooling.md`; `documentation/rules/controllers-testing-rules.md`; `documentation/rules/web-app-routing-rules.md`; `documentation/rules/widget-testing-rules.md`; use the repository’s Playwright CLI/authenticated-browser workflow and leave shared Docker services unchanged.
-- **Exit:** Run the Spec commands: Core/Validation/Server/Web coverage, typechecks, lint, architecture checks, route generation, migration review/application and focused Playwright CLI; execute the applicable MV-01–MV-04 authenticated URL/content, REST, persistence, keyboard, responsive and recovery checks; record unexecuted manual scenarios as `partial` and classify console/network output. Local evidence is complete and Evaluation is `ready`; route to conclusion after every delivery PR head has terminal green applicable CI and no blocking finding remains. `pnpm check:test-integrity` was run only through the inherited local untracked script/config and is not claimed as PR evidence.
+- **Exit:** Run the Spec commands: Core/Validation/Server/Web coverage, typechecks, lint, architecture checks, route generation, migration review/application and focused Playwright CLI; execute the applicable MV-01–MV-04 authenticated URL/content, REST, persistence, keyboard, responsive and recovery checks; record unexecuted manual scenarios as `partial` and classify console/network output. Local evidence is complete and Evaluation is `ready`; route to conclusion after the integrated PR head has terminal green applicable CI and no blocking finding remains. `pnpm check:test-integrity` was run only through the inherited local untracked script/config and is not claimed as PR evidence.
 
 # Validation and handoff
 
@@ -269,11 +268,11 @@ The final handoff requires every phase/task and coverage row to be `completed`; 
 
 - **Status/owner:** `completed` — `builder_server`
 - **Depends/parallel:** Depends on F8-T1 and migration review; can proceed alongside F8-T3 against the frozen API contract.
-- **Paths:** `apps/server/src/scheduling/rest/controllers/{list-reschedule-slots.controller.ts,reschedule-appointment.controller.ts}`; scheduling change/appointment repositories and models; `apps/server/src/consultation/database/drizzle/repositories/drizzle-rescheduled-appointment-consultation-provider.ts` and module/tokens; `apps/server/src/shared/database/drizzle/migrations/0055_faulty_red_hulk.sql`, `meta/0055_snapshot.json` and `_journal.json`.
+- **Paths:** `apps/server/src/scheduling/rest/controllers/{list-reschedule-slots.controller.ts,reschedule-appointment.controller.ts}`; scheduling change/appointment repositories and models; `apps/server/src/consultation/database/drizzle/repositories/drizzle-rescheduled-appointment-consultation-provider.ts` and module/tokens; `apps/server/src/shared/database/drizzle/migrations/0066_even_captain_america.sql`, `meta/0066_snapshot.json` and `_journal.json`.
 - **Contract:** RF-06–RF-07; CA-06–CA-07; Spec §3 REST, Database, migration and cross-module Provider contracts.
 - **Outcome:** Revalidate active lawyer and availability under deterministic source/destination schedule locks; update appointment schedule, the existing pending Consultation’s `assignedLawyerId`, history and outbox in one transaction; rollback together on any failure.
 - **Rules:** REST, Database, Server App, Provision and Messaging Rules; Consultation owns its table and adapter, Scheduling owns appointment transaction/history.
-- **Exit:** Migration 0055 is generated, applied and catalog-checked; transfer/REST suites, Server types, lint, architecture and prior full Server coverage are recorded in Evaluation. The live cross-lawyer PATCH, Consultation sync, persisted history and cleanup are verified in `EV-074`/`EV-075`.
+- **Exit:** Migration 0066 is generated, applied and catalog-checked; transfer/REST suites, Server types, lint, architecture and prior full Server coverage are recorded in Evaluation. The live cross-lawyer PATCH, Consultation sync, persisted history and cleanup are verified in `EV-074`/`EV-075`.
 
 #### F8-T3 — Align the reschedule dialog with Pencil yVAoI
 

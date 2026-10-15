@@ -1,11 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { and, desc, eq, ne, sql } from 'drizzle-orm'
+import { and, desc, eq, isNull, ne } from 'drizzle-orm'
 import type {
-  DocumentValidationDocument,
-  DocumentValidationDuplicateMatch,
-  DocumentValidationExtractedField,
-  DocumentValidationFailure,
   DocumentValidationHumanCorrection,
+  DocumentValidationRecord as DocumentValidationRecordProjection,
 } from '@hms/core/document-engine/domain/entities'
 import type {
   DocumentValidationsRepository,
@@ -17,7 +14,6 @@ import type {
 import { DocumentValidationStatus } from '@hms/core/document-engine/domain/structures'
 import { AppError } from '@hms/core/shared/domain/errors'
 
-import { collaboratorModel, userModel } from '@/identity/database/drizzle/models'
 import {
   caseChecklistItemModel,
   legalCaseModel,
@@ -25,33 +21,28 @@ import {
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
 import { DrizzleRepository } from '@/shared/database/drizzle/drizzle-repository'
 import { documentBatchFileModel, documentBatchModel } from '../models'
-
-type DocumentValidationRecord = typeof documentBatchFileModel.$inferSelect & {
-  batch: typeof documentBatchModel.$inferSelect
-  reviewerName?: string | null
-  caseLabel?: string | null
-  checklistItemLabel?: string | null
-}
+import { DrizzleDocumentValidationMapper } from '../mappers/drizzle-document-validation-mapper'
 
 @Injectable()
 export class DrizzleDocumentValidationsRepository
   extends DrizzleRepository
   implements DocumentValidationsRepository
 {
-  constructor(@Inject(DrizzleClient) drizzle: DrizzleClient) {
+  constructor(
+    @Inject(DrizzleClient) drizzle: DrizzleClient,
+    @Inject(DrizzleDocumentValidationMapper)
+    private readonly mapper: DrizzleDocumentValidationMapper,
+  ) {
     super(drizzle)
   }
 
   async list(
     filters: ListDocumentValidationsFilters = {},
-  ): Promise<DocumentValidationDocument[]> {
+  ): Promise<DocumentValidationRecordProjection[]> {
     const query = this.database
       .select({
         file: documentBatchFileModel,
         batch: documentBatchModel,
-        reviewerName: sql<
-          string | null
-        >`coalesce(${collaboratorModel.professionalName}, ${userModel.email})`,
         caseLabel: legalCaseModel.title,
         checklistItemLabel: caseChecklistItemModel.title,
       })
@@ -60,8 +51,6 @@ export class DrizzleDocumentValidationsRepository
         documentBatchModel,
         eq(documentBatchFileModel.batchId, documentBatchModel.id),
       )
-      .leftJoin(userModel, eq(documentBatchFileModel.reviewedBy, userModel.id))
-      .leftJoin(collaboratorModel, eq(collaboratorModel.userId, userModel.id))
       .leftJoin(legalCaseModel, eq(documentBatchFileModel.caseId, legalCaseModel.id))
       .leftJoin(
         caseChecklistItemModel,
@@ -81,10 +70,9 @@ export class DrizzleDocumentValidationsRepository
     const records = await query.orderBy(desc(documentBatchFileModel.createdAt))
 
     return records.map((record) =>
-      this.toDomain({
+      this.mapper.toDomain({
         ...record.file,
         batch: record.batch,
-        reviewerName: record.reviewerName,
         caseLabel: record.caseLabel,
         checklistItemLabel: record.checklistItemLabel,
       }),
@@ -93,14 +81,11 @@ export class DrizzleDocumentValidationsRepository
 
   async findByFileId(
     documentFileId: string,
-  ): Promise<DocumentValidationDocument | undefined> {
+  ): Promise<DocumentValidationRecordProjection | undefined> {
     const [record] = await this.database
       .select({
         file: documentBatchFileModel,
         batch: documentBatchModel,
-        reviewerName: sql<
-          string | null
-        >`coalesce(${collaboratorModel.professionalName}, ${userModel.email})`,
         caseLabel: legalCaseModel.title,
         checklistItemLabel: caseChecklistItemModel.title,
       })
@@ -109,8 +94,6 @@ export class DrizzleDocumentValidationsRepository
         documentBatchModel,
         eq(documentBatchFileModel.batchId, documentBatchModel.id),
       )
-      .leftJoin(userModel, eq(documentBatchFileModel.reviewedBy, userModel.id))
-      .leftJoin(collaboratorModel, eq(collaboratorModel.userId, userModel.id))
       .leftJoin(legalCaseModel, eq(documentBatchFileModel.caseId, legalCaseModel.id))
       .leftJoin(
         caseChecklistItemModel,
@@ -122,10 +105,9 @@ export class DrizzleDocumentValidationsRepository
       return undefined
     }
 
-    return this.toDomain({
+    return this.mapper.toDomain({
       ...record.file,
       batch: record.batch,
-      reviewerName: record.reviewerName,
       caseLabel: record.caseLabel,
       checklistItemLabel: record.checklistItemLabel,
     })
@@ -134,14 +116,11 @@ export class DrizzleDocumentValidationsRepository
   async findDuplicateByHash(
     hashSha256: string,
     excludedDocumentFileId: string,
-  ): Promise<DocumentValidationDocument | undefined> {
+  ): Promise<DocumentValidationRecordProjection | undefined> {
     const [record] = await this.database
       .select({
         file: documentBatchFileModel,
         batch: documentBatchModel,
-        reviewerName: sql<
-          string | null
-        >`coalesce(${collaboratorModel.professionalName}, ${userModel.email})`,
         caseLabel: legalCaseModel.title,
         checklistItemLabel: caseChecklistItemModel.title,
       })
@@ -150,8 +129,6 @@ export class DrizzleDocumentValidationsRepository
         documentBatchModel,
         eq(documentBatchFileModel.batchId, documentBatchModel.id),
       )
-      .leftJoin(userModel, eq(documentBatchFileModel.reviewedBy, userModel.id))
-      .leftJoin(collaboratorModel, eq(collaboratorModel.userId, userModel.id))
       .leftJoin(legalCaseModel, eq(documentBatchFileModel.caseId, legalCaseModel.id))
       .leftJoin(
         caseChecklistItemModel,
@@ -170,10 +147,9 @@ export class DrizzleDocumentValidationsRepository
       return undefined
     }
 
-    return this.toDomain({
+    return this.mapper.toDomain({
       ...record.file,
       batch: record.batch,
-      reviewerName: record.reviewerName,
       caseLabel: record.caseLabel,
       checklistItemLabel: record.checklistItemLabel,
     })
@@ -181,7 +157,7 @@ export class DrizzleDocumentValidationsRepository
 
   async recordAnalysis(
     input: RecordDocumentValidationAnalysisInput,
-  ): Promise<DocumentValidationDocument> {
+  ): Promise<DocumentValidationRecordProjection> {
     await this.database
       .update(documentBatchFileModel)
       .set({
@@ -201,21 +177,28 @@ export class DrizzleDocumentValidationsRepository
     return this.findRequiredByFileId(input.documentFileId)
   }
 
-  async recordProcessing(documentFileId: string): Promise<DocumentValidationDocument> {
+  async recordProcessing(
+    documentFileId: string,
+  ): Promise<DocumentValidationRecordProjection> {
     await this.database
       .update(documentBatchFileModel)
       .set({
         status: DocumentValidationStatus.Processing,
         aiConfidence: 0,
       })
-      .where(eq(documentBatchFileModel.id, documentFileId))
+      .where(
+        and(
+          eq(documentBatchFileModel.id, documentFileId),
+          isNull(documentBatchFileModel.reviewedAt),
+        ),
+      )
 
     return this.findRequiredByFileId(documentFileId)
   }
 
   async recordDecision(
     input: RecordDocumentValidationDecisionInput,
-  ): Promise<DocumentValidationDocument> {
+  ): Promise<DocumentValidationRecordProjection> {
     const humanCorrection: DocumentValidationHumanCorrection = {
       decision: input.decision,
       documentTypeId: input.documentTypeId,
@@ -245,7 +228,7 @@ export class DrizzleDocumentValidationsRepository
 
   async recordResendRequest(
     input: RecordDocumentResendRequestInput,
-  ): Promise<DocumentValidationDocument> {
+  ): Promise<DocumentValidationRecordProjection> {
     const humanCorrection: DocumentValidationHumanCorrection = {
       decision: DocumentValidationStatus.ResendRequested,
       reason: input.reason,
@@ -276,126 +259,6 @@ export class DrizzleDocumentValidationsRepository
     }
 
     return document
-  }
-
-  private toDomain(record: DocumentValidationRecord): DocumentValidationDocument {
-    const aiSuggestion = this.toRecord(record.aiSuggestion)
-    const extractedFields = this.toExtractedFields(record.extractedFields)
-    const missingFields = this.toStringList(record.missingFields)
-    const duplicateMatch = this.toDuplicateMatch(record)
-    const failure = this.toFailure(aiSuggestion)
-
-    return {
-      id: record.id,
-      batchId: record.batchId,
-      fileName: record.originalName,
-      mimeType: record.mimeType,
-      sizeBytes: record.sizeBytes,
-      storagePath: record.storagePath,
-      hashSha256: record.hashSha256 ?? undefined,
-      status:
-        (record.status as DocumentValidationDocument['status'] | null) ??
-        DocumentValidationStatus.AwaitingValidation,
-      channel: record.batch.channel as DocumentValidationDocument['channel'],
-      sender: record.batch.sender,
-      clientId: record.batch.clientId ?? undefined,
-      receivedAt: record.batch.createdAt,
-      createdAt: record.createdAt,
-      reviewedBy: record.reviewedBy ?? undefined,
-      reviewedByName: record.reviewerName ?? undefined,
-      reviewedAt: record.reviewedAt ?? undefined,
-      aiConfidence: record.aiConfidence ?? undefined,
-      aiSuggestion,
-      extractedFields,
-      missingFields,
-      checklistLink: {
-        caseId: record.caseId ?? undefined,
-        caseLabel:
-          record.caseLabel ?? (aiSuggestion.caseLabel as string | undefined) ?? undefined,
-        checklistItemId: record.checklistItemId ?? undefined,
-        checklistItemLabel:
-          record.checklistItemLabel ??
-          (aiSuggestion.checklistItemLabel as string | undefined) ??
-          undefined,
-      },
-      duplicateMatch,
-      failure,
-      humanCorrection: this.toHumanCorrection(record.humanCorrection),
-    }
-  }
-
-  private toExtractedFields(value: unknown): DocumentValidationExtractedField[] {
-    if (!Array.isArray(value)) {
-      return []
-    }
-
-    return value.filter((item): item is DocumentValidationExtractedField => {
-      return typeof item === 'object' && item !== null && 'label' in item
-    })
-  }
-
-  private toStringList(value: unknown): string[] {
-    if (!Array.isArray(value)) {
-      return []
-    }
-
-    return value.filter((item): item is string => typeof item === 'string')
-  }
-
-  private toRecord(value: unknown): Record<string, unknown> {
-    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-      return {}
-    }
-
-    return value as Record<string, unknown>
-  }
-
-  private toHumanCorrection(
-    value: unknown,
-  ): DocumentValidationHumanCorrection | undefined {
-    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-      return undefined
-    }
-
-    return value as DocumentValidationHumanCorrection
-  }
-
-  private toDuplicateMatch(
-    record: DocumentValidationRecord,
-  ): DocumentValidationDuplicateMatch | undefined {
-    if (!record.originalDocumentId) {
-      return undefined
-    }
-
-    const aiSuggestion = this.toRecord(record.aiSuggestion)
-
-    return {
-      documentFileId: record.originalDocumentId,
-      fileName:
-        (aiSuggestion.originalDocumentFileName as string | undefined) ??
-        'comprovante-residencia.pdf',
-      receivedAt: record.createdAt,
-      caseLabel: (aiSuggestion.caseLabel as string | undefined) ?? 'Caso 0089',
-      checklistItemLabel:
-        (aiSuggestion.checklistItemLabel as string | undefined) ??
-        'Comprovante de residência',
-      hashSha256: record.hashSha256 ?? undefined,
-    }
-  }
-
-  private toFailure(
-    aiSuggestion: Record<string, unknown>,
-  ): DocumentValidationFailure | undefined {
-    if (!aiSuggestion.failureReason) {
-      return undefined
-    }
-
-    return {
-      reason: String(aiSuggestion.failureReason),
-      instruction: aiSuggestion.failureInstruction
-        ? String(aiSuggestion.failureInstruction)
-        : undefined,
-    }
   }
 
   private toOptionalUuid(value: string | undefined): string | undefined {

@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Inject,
-  Param,
-  Post,
-  UseGuards,
-  ForbiddenException,
-} from '@nestjs/common'
+import { Body, Controller, Inject, Param, Post, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { ReviewDocumentExceptionUseCase } from '@hms/core/document-engine/use-cases'
 import type { DocumentException } from '@hms/core/document-engine/domain/entities'
@@ -18,6 +10,8 @@ import { AuthGuard, ActiveCollaboratorGuard } from '@/identity/guards'
 import { CurrentCollaborator } from '@/identity/decorators'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 import { DOCUMENT_ENGINE_REPOSITORIES } from './request-document-exception.controller'
+import type { CaseAccessProvider } from '@hms/core/case-management/interfaces'
+import { CASE_MANAGEMENT_ACCESS } from '@/case-management/constants/case-management-access'
 
 export class ReviewDocumentExceptionDto {
   justification?: string
@@ -34,10 +28,13 @@ export class ReviewDocumentExceptionController {
     private readonly documentExceptionsRepository: DocumentExceptionsRepository,
     @Inject(DOCUMENT_ENGINE_REPOSITORIES.auditLogs)
     private readonly auditLogsRepository: DocumentExceptionAuditLogsRepository,
+    @Inject(CASE_MANAGEMENT_ACCESS.access)
+    caseAccessProvider: CaseAccessProvider,
   ) {
     this.reviewDocumentExceptionUseCase = new ReviewDocumentExceptionUseCase(
       this.documentExceptionsRepository,
       this.auditLogsRepository,
+      caseAccessProvider,
     )
   }
 
@@ -50,8 +47,6 @@ export class ReviewDocumentExceptionController {
     @Body() body: ReviewDocumentExceptionDto,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ): Promise<DocumentException> {
-    this.checkReviewPermission(collaborator.profile)
-
     return this.reviewDocumentExceptionUseCase.execute({
       documentExceptionId: id,
       action: 'APPROVE',
@@ -69,20 +64,11 @@ export class ReviewDocumentExceptionController {
     @Body() body: ReviewDocumentExceptionDto,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ): Promise<DocumentException> {
-    this.checkReviewPermission(collaborator.profile)
-
     return this.reviewDocumentExceptionUseCase.execute({
       documentExceptionId: id,
       action: 'REJECT',
       justification: body.justification,
       actorId: collaborator.collaboratorId,
     })
-  }
-
-  private checkReviewPermission(profile: string) {
-    const allowedProfiles = ['lawyer', 'supervisor']
-    if (!allowedProfiles.includes(profile)) {
-      throw new ForbiddenException('You do not have permission to review exceptions.')
-    }
   }
 }

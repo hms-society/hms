@@ -29,6 +29,48 @@ GET {{url}}/my
 Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
 Accept: application/json
 
+### Inspect the Intake and suggested initial manager before opening a case
+# @prompt intakeId Enter a contracted Intake ID
+GET {{url}}/opening-sources/{{intakeId}}
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Open a case with its initial manager and additional members
+# @prompt intakeId Enter a contracted Intake ID
+# @prompt legalAreaId Enter a legal area ID
+# @prompt legalTopicId Enter a legal topic ID
+# @prompt managerCollaboratorId Enter an active Lawyer collaborator ID
+POST {{url}}
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "title": "Acompanhamento contratual",
+  "intakeId": "{{intakeId}}",
+  "legalAreaId": "{{legalAreaId}}",
+  "legalTopicId": "{{legalTopicId}}",
+  "initialManagerCollaboratorId": "{{managerCollaboratorId}}",
+  "team": [],
+  "operationId": "00000000-0000-4000-8000-000000000062"
+}
+
+### Sign in as the seeded administrator
+# @name signInAsSeededAdmin
+POST {{BASE_URL}}/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "identifier": "admin@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
+
+### List operational metadata for all cases as Admin
+GET {{url}}/admin/list?page=1&pageSize=50
+Authorization: Bearer {{signInAsSeededAdmin.response.body.$.accessToken}}
+Accept: application/json
+
 ### List case checklist
 # @prompt caseId Enter the case ID to inspect
 GET {{url}}/{{caseId}}/checklist

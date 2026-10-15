@@ -80,6 +80,38 @@ describe('Reserve Intake Appointment Use Case', () => {
     })
   })
 
+  it('preserves the legacy repository constructor for existing callers', async () => {
+    const schedule = ScheduleFaker.fake({ appointmentDurationInMinutes: 45 })
+    const appointment = AppointmentFaker.fake({
+      id: appointmentId,
+      scheduleId: schedule.id,
+    })
+    schedulesRepository.findByCollaboratorId.mockResolvedValue(schedule)
+    appointmentsRepository.add.mockResolvedValue(appointment)
+    const legacySchedulesRepository: SchedulesRepository = schedulesRepository
+    const legacyAppointmentsRepository: AppointmentsRepository = appointmentsRepository
+    const useCase = new ReserveIntakeAppointmentUseCase(
+      legacySchedulesRepository,
+      legacyAppointmentsRepository,
+      idProvider,
+      datetimeProvider,
+    )
+
+    const result = await useCase.execute({
+      intakeId: appointment.intakeId,
+      clientId: appointment.clientId,
+      assignedLawyerId: schedule.collaboratorId,
+      startsAt: appointment.startsAt,
+    })
+
+    expect(result).toBe(appointment)
+    expect(schedulesRepository.findByCollaboratorId).toHaveBeenCalledWith(
+      schedule.collaboratorId,
+    )
+    expect(schedulesRepository.findByCollaboratorIdForUpdate).not.toHaveBeenCalled()
+    expect(database.run).not.toHaveBeenCalled()
+  })
+
   it('returns the existing Appointment when the event is retried', async () => {
     const schedule = ScheduleFaker.fake()
     const appointment = AppointmentFaker.fake({ scheduleId: schedule.id })
@@ -163,6 +195,37 @@ describe('Reserve Intake Appointment Use Case', () => {
         startsAt: appointment.startsAt,
       }),
     ).rejects.toBeInstanceOf(AppointmentConflictError)
+  })
+
+  it('rejects an appointment on a blocked day', async () => {
+    const schedule = ScheduleFaker.fake({
+      blockedPeriods: [
+        {
+          id: 'blocked-period-1',
+          startsOn: '2026-08-12',
+          endsOn: '2026-08-12',
+          reason: 'Férias',
+          createdAt: currentDate,
+        },
+      ],
+    })
+    const useCase = new ReserveIntakeAppointmentUseCase(
+      database,
+      idProvider,
+      datetimeProvider,
+    )
+    schedulesRepository.findByCollaboratorIdForUpdate.mockResolvedValue(schedule)
+
+    await expect(
+      useCase.execute({
+        intakeId: 'f20f3bb4-c2e5-4024-aca6-521f5f06f38a',
+        clientId: '20cb02a4-4974-4fc0-bf65-0f5881afd532',
+        assignedLawyerId: schedule.collaboratorId,
+        startsAt: new Date('2026-08-12T15:00:00.000Z'),
+      }),
+    ).rejects.toBeInstanceOf(AppointmentConflictError)
+
+    expect(appointmentsRepository.add).not.toHaveBeenCalled()
   })
 
   it('preserves the legacy repository constructor path', async () => {

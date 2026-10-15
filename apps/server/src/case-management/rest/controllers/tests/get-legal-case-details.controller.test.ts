@@ -21,6 +21,13 @@ describe('Get Legal Case Details Controller [GET /cases/:id]', () => {
       legalAreaId: collaborator.legalAreaId,
       legalTopicId: collaborator.legalTopicId,
     })
+    await fixture.registerCaseMembers([
+      {
+        caseId: legalCase.id,
+        collaboratorId: collaborator.collaboratorId,
+        role: 'manager',
+      },
+    ])
     const response = await request(fixture.app.getHttpServer())
       .get(`/cases/${legalCase.id}`)
       .expect(200)
@@ -29,6 +36,28 @@ describe('Get Legal Case Details Controller [GET /cases/:id]', () => {
       clientName: collaborator.clientName,
       legalArea: collaborator.legalAreaName,
       legalTopic: collaborator.legalTopicName,
+      team: [
+        {
+          collaboratorId: collaborator.collaboratorId,
+          name: collaborator.professionalName,
+          role: 'manager',
+        },
+      ],
+    })
+  })
+  it('allows an active Admin to read metadata without team membership', async () => {
+    const admin = await fixture.registerCollaborator({ profile: 'admin' })
+    const legalCase = await fixture.registerLegalCase({
+      clientId: admin.clientId,
+      legalAreaId: admin.legalAreaId,
+      legalTopicId: admin.legalTopicId,
+    })
+    const response = await request(fixture.app.getHttpServer())
+      .get(`/cases/${legalCase.id}`)
+      .expect(200)
+    expect(response.body).toMatchObject({
+      id: legalCase.id,
+      clientName: admin.clientName,
       team: [],
     })
   })

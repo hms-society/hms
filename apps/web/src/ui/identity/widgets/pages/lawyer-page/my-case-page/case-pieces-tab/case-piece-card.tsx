@@ -4,6 +4,16 @@ import { Button } from '@/ui/shadcn/button'
 
 import type { CasePiece } from './types'
 
+function getStatusBadgeVariant(status: string) {
+  if (status === 'Aprovada') return 'success'
+  if (status === 'Requer ajustes' || status === 'Pendente de ajustes') return 'attention'
+  if (status === 'Em revisão' || status === 'Gerando minuta' || status === 'Gerando') {
+    return 'info'
+  }
+  if (status === 'Falha na geração') return 'destructive'
+  return 'secondary'
+}
+
 export type CasePieceCardProps = {
   piece: CasePiece
   onOpenReview?: () => void
@@ -12,6 +22,7 @@ export type CasePieceCardProps = {
   onRetry?: () => void
   isRetrying?: boolean
   retryError?: string
+  readOnly?: boolean
 }
 
 export function CasePieceCard({
@@ -22,9 +33,11 @@ export function CasePieceCard({
   onRetry,
   isRetrying = false,
   retryError,
+  readOnly = false,
 }: CasePieceCardProps) {
   const canRetry =
-    piece.status === 'Gerando minuta' || piece.status === 'Falha na geração'
+    !readOnly &&
+    (piece.status === 'Gerando minuta' || piece.status === 'Falha na geração')
   return (
     <article className='rounded-lg border border-border bg-card p-4 shadow-xs'>
       <header className='flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between'>
@@ -35,7 +48,17 @@ export function CasePieceCard({
           <div className='min-w-0'>
             <div className='flex flex-wrap items-center gap-2'>
               <h2 className='text-sm font-semibold text-foreground'>{piece.title}</h2>
-              <Badge variant='attention' className='h-5 rounded-full px-2 text-[11px]'>
+              <Badge
+                variant={getStatusBadgeVariant(piece.status)}
+                className='h-5 rounded-full px-2 text-[11px]'
+              >
+                {piece.status === 'Gerando minuta' ? (
+                  <Icon
+                    name='refresh-cw'
+                    className='size-3 animate-spin'
+                    aria-hidden='true'
+                  />
+                ) : null}
                 {piece.status}
               </Badge>
             </div>
@@ -73,7 +96,7 @@ export function CasePieceCard({
               className='flex items-center gap-3 py-2 first:pt-0 last:pb-0'
             >
               <Badge
-                variant={index === 0 ? 'success' : 'secondary'}
+                variant={index === 0 ? getStatusBadgeVariant(version.title) : 'secondary'}
                 className='h-6 min-w-8 justify-center rounded-md px-1.5 text-[11px]'
               >
                 {version.label}
@@ -92,6 +115,7 @@ export function CasePieceCard({
                   variant='ghost'
                   size='icon-xs'
                   aria-label={`Visualizar ${version.label}`}
+                  disabled={readOnly}
                   onClick={onOpenReview}
                 >
                   <Icon name='eye' className='size-3.5' />
@@ -128,23 +152,27 @@ export function CasePieceCard({
               {isRetrying ? 'Enviando...' : 'Gerar novamente'}
             </Button>
           ) : null}
-          <Button
-            size='xs'
-            className='rounded-full'
-            disabled={!piece.versions.length}
-            onClick={onOpenReview}
-          >
-            <Icon name='eye' className='size-3' /> Abrir revisão técnica
-          </Button>
-          <Button
-            variant='outline'
-            size='xs'
-            className='rounded-full'
-            disabled={!piece.versions.length}
-            onClick={onOpenEditor}
-          >
-            <Icon name='pencil' className='size-3' /> Abrir no editor
-          </Button>
+          {!readOnly && (
+            <>
+              <Button
+                size='xs'
+                className='rounded-full'
+                disabled={!piece.versions.length}
+                onClick={onOpenReview}
+              >
+                <Icon name='eye' className='size-3' /> Abrir revisão técnica
+              </Button>
+              <Button
+                variant='outline'
+                size='xs'
+                className='rounded-full'
+                disabled={!piece.versions.length}
+                onClick={onOpenEditor}
+              >
+                <Icon name='pencil' className='size-3' /> Abrir no editor
+              </Button>
+            </>
+          )}
         </div>
         <span className='text-right text-[11px] text-muted-foreground'>
           {piece.status === 'Aprovada'

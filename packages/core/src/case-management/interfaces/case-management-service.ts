@@ -1,3 +1,7 @@
+import type { LegalCaseOperationalSummary } from '../domain/entities'
+import type { CreateLegalCaseRequest as CreateLegalCaseUseCaseRequest } from '../use-cases/create-legal-case-request'
+import type { AdminCasesQuery, CaseOpeningSource } from '../domain/structures'
+import type { PaginationResponse } from '#shared/responses/pagination-response'
 import type {
   CaseChecklistItem,
   ChecklistTemplate,
@@ -5,9 +9,12 @@ import type {
   LegalCaseSummary,
   Pending,
   AssistedMessage,
+  CaseTask,
+  CaseTaskUpdate,
 } from '../domain/entities'
 import type {
   CaseChecklistGateDecision,
+  CaseTeam,
   ChecklistDocumentType,
 } from '../domain/structures'
 import type { RestResponse } from '#shared/responses/rest-response'
@@ -88,18 +95,6 @@ export type ReplaceChecklistTemplateRequest = {
   }[]
 }
 
-export type CreateLegalCaseRequest = {
-  title: string
-  intakeId: string
-  legalAreaId: string
-  legalTopicId: string
-  team: Array<{
-    collaboratorId: string
-    role: string
-    permission: string
-  }>
-}
-
 export type CreatePendingRequest = {
   checklistItemId: string
   documentFileId?: string
@@ -108,8 +103,45 @@ export type CreatePendingRequest = {
   details?: string
 }
 
+export type CreateCaseTaskRequest = {
+  type: CaseTask['type']
+  title: string
+  customType?: string
+  description: string
+  plannedDate: string
+  plannedTime?: string
+  assigneeIds: readonly string[]
+  blocksCaseClosure?: boolean
+  reminders: readonly {
+    value: number
+    unit: 'minutes' | 'hours' | 'days'
+  }[]
+}
+
+export type CreateLegalCaseRequest = Omit<CreateLegalCaseUseCaseRequest, 'actorId'>
+
 export interface CaseManagementService {
+  listAllCasesForAdmin(
+    query: AdminCasesQuery,
+  ): Promise<RestResponse<PaginationResponse<LegalCaseOperationalSummary>>>
+  getCaseOpeningSource(intakeId: string): Promise<RestResponse<CaseOpeningSource>>
   createLegalCase(request: CreateLegalCaseRequest): Promise<RestResponse<LegalCase>>
+
+  listCaseTasks(caseId: string): Promise<RestResponse<readonly CaseTask[]>>
+  createCaseTask(
+    caseId: string,
+    request: CreateCaseTaskRequest,
+  ): Promise<RestResponse<CaseTask>>
+  updateCaseTask(
+    caseId: string,
+    taskId: string,
+    request: CaseTaskUpdate & { version: number },
+  ): Promise<RestResponse<CaseTask>>
+  deleteCaseTask(
+    caseId: string,
+    taskId: string,
+    request: { version: number },
+  ): Promise<RestResponse<CaseTask>>
 
   addComplementaryChecklistItem(
     caseId: string,
@@ -130,6 +162,8 @@ export interface CaseManagementService {
   ): Promise<RestResponse<ChecklistTemplate>>
 
   getLegalCaseDetails(caseId: string): Promise<RestResponse<LegalCaseSummary>>
+
+  getCaseTeam(caseId: string): Promise<RestResponse<CaseTeam>>
 
   grantCasePortalAccess(
     caseId: string,

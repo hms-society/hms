@@ -8,6 +8,9 @@ import type { AuthUser } from '../domain/structures'
 import type { CollaboratorsRepository } from '../interfaces/collaborators-repository'
 import type { LegalExpertiseCatalogProvider } from '@hms/core/legal-catalog/interfaces'
 import type { UseCase } from '#shared/interfaces/use-case'
+import type { CaseIdentityTransaction, IdProvider } from '#shared/interfaces'
+import type { EnsureCaseManagerContinuityUseCase } from '@hms/core/case-management/use-cases'
+import { UserNotFoundError } from '../domain/errors'
 
 type Request = {
   readonly authUser: AuthUser
@@ -23,6 +26,9 @@ export class UpdateCollaboratorUseCase implements UseCase<Request, CollaboratorS
     private readonly collaboratorsRepository: CollaboratorsRepository,
     private readonly authorizeAdminUseCase: UseCase<{ authUser: AuthUser }, void>,
     private readonly legalExpertiseCatalogProvider: LegalExpertiseCatalogProvider,
+    private readonly caseIdentityTransaction: CaseIdentityTransaction,
+    private readonly ensureCaseManagerContinuity: EnsureCaseManagerContinuityUseCase,
+    private readonly idProvider: IdProvider,
   ) {}
 
   async execute({
@@ -32,16 +38,33 @@ export class UpdateCollaboratorUseCase implements UseCase<Request, CollaboratorS
   }: Request): Promise<CollaboratorSummary> {
     await this.authorizeAdminUseCase.execute({ authUser })
 
-    const collaborator = await this.collaboratorsRepository.findById(collaboratorId)
-    if (!collaborator) throw new CollaboratorNotFoundError()
-
     const normalizedChanges = await this.normalizeChanges(changes)
-    const updatedCollaborator = await this.collaboratorsRepository.replace(
-      collaboratorId,
-      normalizedChanges,
-    )
 
-    if (!updatedCollaborator) throw new CollaboratorNotFoundError()
+    await this.caseIdentityTransaction.run(async (scope) => {
+      const collaborator = await scope.identity.collaboratorsRepository.findById(
+        collaboratorId,
+      )
+      if (!collaborator) throw new CollaboratorNotFoundError()
+
+      const user = await scope.identity.usersRepository.findById(collaborator.userId)
+      if (!user) throw new UserNotFoundError()
+
+      if (collaborator.profile !== normalizedChanges.profile) {
+        await this.ensureCaseManagerContinuity.executeWithin(scope, {
+          collaboratorId,
+          nextProfile: normalizedChanges.profile,
+          nextStatus: user.status,
+          actorId: authUser.id,
+          operationId: this.idProvider.generate(),
+        })
+      }
+
+      const updatedCollaborator = await scope.identity.collaboratorsRepository.replace(
+        collaboratorId,
+        normalizedChanges,
+      )
+      if (!updatedCollaborator) throw new CollaboratorNotFoundError()
+    })
 
     const summary = await this.collaboratorsRepository.findSummaryById(collaboratorId)
     if (!summary) throw new CollaboratorNotFoundError()

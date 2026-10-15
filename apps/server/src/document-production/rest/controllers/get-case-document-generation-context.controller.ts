@@ -1,6 +1,7 @@
 import { Get, HttpStatus, Inject, Param, ParseUUIDPipe, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import type {
+  CaseAccessProvider,
   CaseChecklistItemsRepository,
   LegalCasesRepository,
 } from '@hms/core/case-management/interfaces'
@@ -10,6 +11,7 @@ import { GetCaseDocumentGenerationContextUseCase } from '@hms/core/case-manageme
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
+import { CASE_MANAGEMENT_ACCESS } from '@/case-management/constants/case-management-access'
 import { CasesController } from '@/case-management/decorators'
 import { DOCUMENT_ENGINE } from '@/document-engine/database/drizzle/constants/documents-repositories'
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
@@ -32,12 +34,14 @@ export class GetCaseDocumentGenerationContextController {
     validations: DocumentValidationsRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.specifications)
     specifications: DocumentSpecificationsRepository,
+    @Inject(CASE_MANAGEMENT_ACCESS.access) caseAccessProvider: CaseAccessProvider,
   ) {
     this.useCase = new GetCaseDocumentGenerationContextUseCase(
       cases,
       checklist,
       validations,
       specifications,
+      caseAccessProvider,
     )
   }
 

@@ -9,6 +9,8 @@ import {
   AuthorizeAdminUseCase,
   DeactivateCollaboratorUseCase,
 } from '@hms/core/identity/use-cases'
+import type { CaseIdentityTransaction } from '@hms/core/shared/interfaces'
+import { EnsureCaseManagerContinuityUseCase } from '@hms/core/case-management/use-cases'
 import type { AuthUser } from '@hms/core/identity/domain/structures'
 
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
@@ -17,6 +19,9 @@ import { CollaboratorsController, CurrentUser } from '@/identity/decorators'
 import { ActiveAdminGuard, AuthGuard } from '@/identity/guards'
 import { CollaboratorSummaryResponseDto } from '@/identity/rest/dtos'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
+import { CASE_IDENTITY_TRANSACTION } from '@/shared/database/constants/case-identity-transaction'
+import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { IdProvider } from '@/shared/provision/id/id-provider'
 
 @CollaboratorsController()
 @ApiBearerAuth()
@@ -30,16 +35,22 @@ export class DeactivateCollaboratorController {
     collaboratorsRepository: CollaboratorsRepository,
     @Inject(IDENTITY_PROVIDERS.authAdministration)
     authAdministrationProvider: AuthAdministrationProvider,
+    @Inject(CASE_IDENTITY_TRANSACTION)
+    caseIdentityTransaction: CaseIdentityTransaction,
+    datetimeProvider: DatetimeProvider,
+    idProvider: IdProvider,
   ) {
     const authorizeAdminUseCase = new AuthorizeAdminUseCase(
       usersRepository,
       collaboratorsRepository,
     )
     this.useCase = new DeactivateCollaboratorUseCase(
-      usersRepository,
       collaboratorsRepository,
       authAdministrationProvider,
       (authUser) => authorizeAdminUseCase.execute({ authUser }),
+      caseIdentityTransaction,
+      new EnsureCaseManagerContinuityUseCase(caseIdentityTransaction, datetimeProvider),
+      idProvider,
     )
   }
 

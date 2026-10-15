@@ -1,13 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { Mocked } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
+import { mock, type MockProxy } from 'vitest-mock-extended'
 import { GetCaseDocumentExceptionsUseCase } from '../get-case-document-exceptions-use-case'
 import type { DocumentExceptionsRepository } from '../../interfaces/document-exceptions-repository'
 import type { DocumentException } from '../../domain/entities/document-exception'
 import { DocumentExceptionStatus, DocumentExceptionType } from '../../domain/structures'
+import type { CaseAccessProvider } from '../../../case-management/interfaces/case-access-provider'
 
 describe('GetCaseDocumentExceptionsUseCase', () => {
   let useCase: GetCaseDocumentExceptionsUseCase
-  let exceptionsRepositoryMock: Mocked<DocumentExceptionsRepository>
+  let exceptionsRepositoryMock: MockProxy<DocumentExceptionsRepository>
+  let caseAccessProvider: MockProxy<CaseAccessProvider>
 
   const mockExceptions: DocumentException[] = [
     {
@@ -26,27 +28,30 @@ describe('GetCaseDocumentExceptionsUseCase', () => {
   ]
 
   beforeEach(() => {
-    exceptionsRepositoryMock = {
-      create: vi.fn(),
-      findById: vi.fn(),
-      findByCaseId: vi.fn().mockResolvedValue(mockExceptions),
-      updateStatus: vi.fn(),
-      hasExpiredExceptionsForCase: vi.fn(),
-      findExpiredProvisionalAcceptances: vi.fn(),
-    } as unknown as Mocked<DocumentExceptionsRepository>
+    exceptionsRepositoryMock = mock<DocumentExceptionsRepository>()
+    exceptionsRepositoryMock.findByCaseId.mockResolvedValue(mockExceptions)
+    caseAccessProvider = mock<CaseAccessProvider>()
 
-    useCase = new GetCaseDocumentExceptionsUseCase(exceptionsRepositoryMock)
+    useCase = new GetCaseDocumentExceptionsUseCase(
+      exceptionsRepositoryMock,
+      caseAccessProvider,
+    )
   })
 
   it('deve retornar exceções com sucesso', async () => {
-    const result = await useCase.execute({ caseId: 'case-789' })
+    const result = await useCase.execute({ caseId: 'case-789', actorId: 'actor-1' })
 
     expect(result).toEqual(mockExceptions)
     expect(exceptionsRepositoryMock.findByCaseId).toHaveBeenCalledWith('case-789')
+    expect(caseAccessProvider.authorize).toHaveBeenCalledWith({
+      caseId: 'case-789',
+      actorId: 'actor-1',
+      intent: 'read_document',
+    })
   })
 
   it('deve lançar erro se caseId não for informado', async () => {
-    await expect(useCase.execute({ caseId: '' })).rejects.toThrow(
+    await expect(useCase.execute({ caseId: '', actorId: 'actor-1' })).rejects.toThrow(
       'O ID do caso é obrigatório',
     )
   })

@@ -21,6 +21,12 @@ describe('DocumentProductionSeeder', () => {
           updatedAt: new Date(),
         }))
       }),
+      add: vi.fn(async (specification: DocumentSpecificationCreation) => ({
+        ...specification,
+        id: 'specification-universal-retirement',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })),
     }
     const documentsRepository = {
       addMany: vi.fn(async (documents: DocumentCreation[]) =>
@@ -100,5 +106,14 @@ describe('DocumentProductionSeeder', () => {
     expect(JSON.stringify(powerOfAttorneyModel?.content)).toContain('{cliente_nome}')
     expect(seededSpecifications).toHaveLength(3)
     expect(result.specifications).toHaveLength(3)
+    expect(result.universalRetirementSpecification).toMatchObject({
+      name: 'Requerimento Administrativo de Aposentadoria — Modelo Universal',
+      application: {
+        scope: 'legal_context',
+        moment: 'legal_production',
+        legalAreaIds: ['previdenciary-area'],
+        legalTopicIdsByArea: { 'previdenciary-area': ['retirement-topic'] },
+      },
+    })
   })
 })

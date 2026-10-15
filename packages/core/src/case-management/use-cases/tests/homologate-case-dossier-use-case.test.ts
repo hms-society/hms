@@ -10,6 +10,8 @@ import {
 import type { CaseChecklistItemsRepository, LegalCasesRepository } from '../../interfaces'
 import { HomologateCaseDossierUseCase } from '../homologate-case-dossier-use-case'
 
+import { vi } from 'vitest'
+
 describe('Homologate Case Dossier Use Case', () => {
   let cases: MockProxy<LegalCasesRepository>
   let checklistItems: MockProxy<CaseChecklistItemsRepository>
@@ -18,7 +20,9 @@ describe('Homologate Case Dossier Use Case', () => {
   beforeEach(() => {
     cases = mock<LegalCasesRepository>()
     checklistItems = mock<CaseChecklistItemsRepository>()
-    useCase = new HomologateCaseDossierUseCase(cases, checklistItems)
+    useCase = new HomologateCaseDossierUseCase(cases, checklistItems, {
+      authorize: vi.fn(),
+    })
   })
 
   it('homologates a reviewed dossier when all required items are validated', async () => {
@@ -49,21 +53,30 @@ describe('Homologate Case Dossier Use Case', () => {
     })
   })
 
-  it('does not homologate while a required checklist item is pending', async () => {
+  it('homologates with an approved exception while an authorized required item is pending', async () => {
     const legalCase = LegalCaseFaker.fake({
-      checklistGate: { decision: CaseChecklistGateDecision.ApprovedWithException },
+      checklistGate: {
+        decision: CaseChecklistGateDecision.ApprovedWithException,
+        remarks: 'Documento dispensado por decisão do gestor.',
+      },
       status: LegalCaseStatus.ReadyForLegalProduction,
+    })
+    const homologatedCase = LegalCaseFaker.fake({
+      ...legalCase,
+      dossierGate: { homologatedAt: new Date(), homologatedBy: 'reviewer-1' },
+      status: LegalCaseStatus.LegalProduction,
     })
     cases.findById.mockResolvedValue(legalCase)
     cases.listByTeamMember.mockResolvedValue([{ id: legalCase.id } as never])
     checklistItems.listByCaseId.mockResolvedValue([
       { isRequired: true, status: CaseChecklistItemStatus.Pending } as never,
     ])
+    cases.homologateDossier.mockResolvedValue(homologatedCase)
 
     await expect(
       useCase.execute({ caseId: legalCase.id, homologatedBy: 'reviewer-1' }),
-    ).rejects.toThrow('documentos obrigatórios')
-    expect(cases.homologateDossier).not.toHaveBeenCalled()
+    ).resolves.toBe(homologatedCase)
+    expect(cases.homologateDossier).toHaveBeenCalled()
   })
 
   it('requires a successful checklist decision before dossier homologation', async () => {
@@ -78,5 +91,57 @@ describe('Homologate Case Dossier Use Case', () => {
     ).rejects.toThrow('checklist')
     expect(checklistItems.listByCaseId).not.toHaveBeenCalled()
     expect(cases.homologateDossier).not.toHaveBeenCalled()
+  })
+  it('rejects missing cases, the wrong status, and an already homologated dossier', async () => {
+    cases.findById.mockResolvedValue(undefined)
+    await expect(
+      useCase.execute({ caseId: 'missing', homologatedBy: 'reviewer-1' }),
+    ).rejects.toThrow('O caso não foi encontrado.')
+
+    cases.findById.mockResolvedValue(
+      LegalCaseFaker.fake({
+        checklistGate: { decision: CaseChecklistGateDecision.Approved },
+        status: LegalCaseStatus.LegalProduction,
+      }),
+    )
+    await expect(
+      useCase.execute({ caseId: 'case-1', homologatedBy: 'reviewer-1' }),
+    ).rejects.toThrow('após a aprovação do checklist')
+
+    cases.findById.mockResolvedValue(
+      LegalCaseFaker.fake({
+        checklistGate: { decision: CaseChecklistGateDecision.Approved },
+        status: LegalCaseStatus.ReadyForLegalProduction,
+        dossierGate: { homologatedAt: new Date(), homologatedBy: 'reviewer-1' },
+      }),
+    )
+    await expect(
+      useCase.execute({ caseId: 'case-1', homologatedBy: 'reviewer-1' }),
+    ).rejects.toThrow('já foi homologado')
+    expect(checklistItems.listByCaseId).not.toHaveBeenCalled()
+    expect(cases.homologateDossier).not.toHaveBeenCalled()
+  })
+
+  it('requires at least one validated required item and a successful status update', async () => {
+    const legalCase = LegalCaseFaker.fake({
+      checklistGate: { decision: CaseChecklistGateDecision.Approved },
+      status: LegalCaseStatus.ReadyForLegalProduction,
+    })
+    cases.findById.mockResolvedValue(legalCase)
+    checklistItems.listByCaseId.mockResolvedValue([
+      { isRequired: false, status: CaseChecklistItemStatus.Pending } as never,
+    ])
+
+    await expect(
+      useCase.execute({ caseId: legalCase.id, homologatedBy: 'reviewer-1' }),
+    ).rejects.toThrow('documentos obrigatórios')
+
+    checklistItems.listByCaseId.mockResolvedValue([
+      { isRequired: true, status: CaseChecklistItemStatus.Validated } as never,
+    ])
+    cases.homologateDossier.mockResolvedValue(undefined)
+    await expect(
+      useCase.execute({ caseId: legalCase.id, homologatedBy: 'reviewer-1' }),
+    ).rejects.toThrow('não pode mais ser homologado')
   })
 })

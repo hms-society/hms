@@ -119,6 +119,10 @@ export class DrizzleThirdPartiesRepository
     return thirdParty ? this.thirdPartyMapper.toDomain(thirdParty) : undefined
   }
 
+  async removeAll(): Promise<void> {
+    await this.database.delete(thirdPartyModel)
+  }
+
   private toDrizzle(thirdParty: ThirdPartyCreation) {
     return {
       type: thirdParty.type,
