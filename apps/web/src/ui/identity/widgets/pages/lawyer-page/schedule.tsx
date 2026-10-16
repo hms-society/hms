@@ -8,12 +8,29 @@ import { Switch } from '@/ui/shadcn/switch'
 import { Input } from '@/ui/shadcn/input'
 import { Label } from '@/ui/shadcn/label'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/shadcn/select'
+import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
 } from '@/ui/shadcn/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/ui/shadcn/alert-dialog'
 import { useConsultation } from './use-schedule'
 
 type ScheduleSlot = {
@@ -48,6 +65,13 @@ const WEEKDAY_NAMES: Record<string, string> = {
   sunday: 'Domingo',
 }
 
+const TIME_ZONES = [
+  { value: 'America/Sao_Paulo', label: 'Brasília (UTC−03:00)' },
+  { value: 'America/Manaus', label: 'Manaus (UTC−04:00)' },
+  { value: 'America/Rio_Branco', label: 'Rio Branco (UTC−05:00)' },
+  { value: 'America/Noronha', label: 'Fernando de Noronha (UTC−02:00)' },
+  { value: 'UTC', label: 'UTC (UTC±00:00)' },
+]
 function normalizeWeeklyAvailability(
   rawAvailability: unknown,
   useDefaultDays: boolean,
@@ -145,6 +169,9 @@ export const Schedule = () => {
     isLoading,
     updateDuration,
     isUpdatingDuration,
+    updateTimeZone,
+    isUpdatingTimeZone,
+    hasFutureAppointments,
     updateAvailability,
     isUpdatingAvailability,
     addBlock,
@@ -163,6 +190,10 @@ export const Schedule = () => {
   const [endDate, setEndDate] = useState('')
   const [blockReason, setBlockReason] = useState('')
   const [blockError, setBlockError] = useState<string | null>(null)
+  const [timeZoneDraft, setTimeZoneDraft] = useState('America/Sao_Paulo')
+  const [pendingTimeZone, setPendingTimeZone] = useState<string | null>(null)
+  const [isTimeZoneConfirmationOpen, setIsTimeZoneConfirmationOpen] = useState(false)
+  const [isCheckingFutureAppointments, setIsCheckingFutureAppointments] = useState(false)
 
   const rawAvailability =
     (schedule as any)?.weeklyAvailability ?? (schedule as any)?.availability ?? []
@@ -185,10 +216,54 @@ export const Schedule = () => {
     }
   }, [scheduleId])
 
+  useEffect(() => {
+    setTimeZoneDraft(schedule?.timeZone ?? 'America/Sao_Paulo')
+  }, [schedule?.timeZone])
+
   const currentDuration =
     schedule?.appointmentDurationInMinutes ??
     (schedule as any)?.defaultDurationMinutes ??
     45
+
+  const persistTimeZone = async (timeZone: string) => {
+    const previousTimeZone = timeZoneDraft
+    setTimeZoneDraft(timeZone)
+    try {
+      await updateTimeZone(timeZone)
+    } catch {
+      setTimeZoneDraft(previousTimeZone)
+    }
+  }
+
+  const handleTimeZoneChange = async (timeZone: string) => {
+    if (timeZone === timeZoneDraft || isCheckingFutureAppointments) return
+
+    setIsCheckingFutureAppointments(true)
+    try {
+      if (await hasFutureAppointments()) {
+        setPendingTimeZone(timeZone)
+        setIsTimeZoneConfirmationOpen(true)
+        return
+      }
+
+      await persistTimeZone(timeZone)
+    } finally {
+      setIsCheckingFutureAppointments(false)
+    }
+  }
+
+  const handleConfirmTimeZoneChange = async () => {
+    if (!pendingTimeZone) return
+
+    await persistTimeZone(pendingTimeZone)
+    setPendingTimeZone(null)
+    setIsTimeZoneConfirmationOpen(false)
+  }
+
+  const handleCancelTimeZoneChange = () => {
+    setPendingTimeZone(null)
+    setIsTimeZoneConfirmationOpen(false)
+  }
 
   const handleToggleDay = async (dayId: string, currentActive: boolean) => {
     const updated = weeklyAvailability.map((day) =>
@@ -383,6 +458,59 @@ export const Schedule = () => {
           })}
         </div>
       </div>
+
+      <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col gap-3'>
+        <div className='flex flex-col gap-1'>
+          <span className='text-[14px] font-semibold text-foreground'>
+            Fuso horário da agenda
+          </span>
+          <span className='text-[12px] text-muted-foreground'>
+            Usado para calcular e exibir os horários das consultas.
+          </span>
+        </div>
+        <Select
+          value={timeZoneDraft}
+          onValueChange={handleTimeZoneChange}
+          disabled={isUpdatingTimeZone || isCheckingFutureAppointments}
+        >
+          <SelectTrigger className='w-full sm:max-w-sm'>
+            <SelectValue placeholder='Selecione o fuso horário' />
+          </SelectTrigger>
+          <SelectContent>
+            {TIME_ZONES.map((timeZone) => (
+              <SelectItem key={timeZone.value} value={timeZone.value}>
+                {timeZone.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <AlertDialog
+        open={isTimeZoneConfirmationOpen}
+        onOpenChange={(open) => {
+          if (!open) handleCancelTimeZoneChange()
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Alterar fuso horário da agenda?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Existem consultas futuras nesta agenda. A alteração muda a forma como os
+              horários são exibidos para novos agendamentos, mas não desloca o instante
+              das consultas já confirmadas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelTimeZoneChange}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmTimeZoneChange}>
+              Confirmar alteração
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col gap-5'>
         <div className='flex items-center gap-2 pb-3 border-b border-border'>

@@ -10,6 +10,8 @@ const useConsultationMock = vi.mocked(useConsultation)
 
 describe('Schedule', () => {
   const updateDurationMock = vi.fn()
+  const updateTimeZoneMock = vi.fn()
+  const hasFutureAppointmentsMock = vi.fn()
   const updateAvailabilityMock = vi.fn()
   const addBlockMock = vi.fn()
   const removeBlockMock = vi.fn()
@@ -41,6 +43,9 @@ describe('Schedule', () => {
       isLoading: false,
       updateDuration: updateDurationMock,
       isUpdatingDuration: false,
+      updateTimeZone: updateTimeZoneMock,
+      isUpdatingTimeZone: false,
+      hasFutureAppointments: hasFutureAppointmentsMock,
       updateAvailability: updateAvailabilityMock,
       isUpdatingAvailability: false,
       addBlock: addBlockMock,
@@ -216,5 +221,23 @@ describe('Schedule', () => {
 
     expect(screen.getByText('Domingo')).toBeTruthy()
     expect(screen.getByText('Nenhum bloqueio cadastrado para esta agenda.')).toBeTruthy()
+  })
+
+  it('asks for confirmation before changing timezone when future appointments exist', async () => {
+    hasFutureAppointmentsMock.mockResolvedValue(true)
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+      value: vi.fn(),
+      configurable: true,
+    })
+    render(<Schedule />)
+
+    fireEvent.click(screen.getByRole('combobox'))
+    fireEvent.click(await screen.findByText('Manaus (UTC−04:00)'))
+
+    expect(await screen.findByText('Alterar fuso horário da agenda?')).not.toBeNull()
+    expect(updateTimeZoneMock).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Confirmar alteração' }))
+    await waitFor(() => expect(updateTimeZoneMock).toHaveBeenCalledWith('America/Manaus'))
   })
 })
