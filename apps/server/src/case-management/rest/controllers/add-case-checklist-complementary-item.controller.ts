@@ -9,13 +9,14 @@ import {
 } from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
 import type {
+  CaseAccessProvider,
   CaseChecklistItemsRepository,
-  LegalCasesRepository,
 } from '@hms/core/case-management/interfaces'
 import { AddCaseChecklistComplementaryItemUseCase } from '@hms/core/case-management/use-cases'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
+import { CASE_MANAGEMENT_ACCESS } from '@/case-management/constants/case-management-access'
 import { CasesController } from '@/case-management/decorators'
 import { CaseChecklistItemResponseDto } from '@/case-management/rest/dtos'
 import { CurrentCollaborator } from '@/identity/decorators'
@@ -33,14 +34,13 @@ export class AddCaseChecklistComplementaryItemController {
   private readonly useCase: AddCaseChecklistComplementaryItemUseCase
 
   constructor(
-    @Inject(CASE_MANAGEMENT_REPOSITORIES.legalCases)
-    legalCasesRepository: LegalCasesRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems)
     caseChecklistItemsRepository: CaseChecklistItemsRepository,
+    @Inject(CASE_MANAGEMENT_ACCESS.access) accessProvider: CaseAccessProvider,
   ) {
     this.useCase = new AddCaseChecklistComplementaryItemUseCase(
-      legalCasesRepository,
       caseChecklistItemsRepository,
+      accessProvider,
     )
   }
 

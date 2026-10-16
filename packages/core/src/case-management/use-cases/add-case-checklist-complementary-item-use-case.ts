@@ -28,13 +28,14 @@ export class AddCaseChecklistComplementaryItemUseCase
   constructor(
     private readonly caseChecklistItemsRepository: CaseChecklistItemsRepository,
     private readonly caseAccessProvider: CaseAccessProvider,
-    private readonly histories: CaseHistoriesRepository,
-    private readonly transaction: CaseHistoryTransactionProvider,
-    private readonly collaborators: CaseCollaboratorsProvider,
-    private readonly datetime: DatetimeProvider,
+    private readonly histories?: CaseHistoriesRepository,
+    private readonly transaction?: CaseHistoryTransactionProvider,
+    private readonly collaborators?: CaseCollaboratorsProvider,
+    private readonly datetime?: DatetimeProvider,
   ) {}
 
   async execute(request: Request): Promise<CaseChecklistItem> {
+    if (!this.transaction) return this.addItem(request)
     return this.transaction.runInTransaction(() => this.addItem(request))
   }
 
@@ -110,6 +111,7 @@ export class AddCaseChecklistComplementaryItemUseCase
   }
 
   private async recordAddition(request: Request, item: CaseChecklistItem, title: string) {
+    if (!this.histories || !this.collaborators || !this.datetime) return
     const actor = await this.collaborators.findById(request.collaboratorId)
     const now = this.datetime.now()
     await this.histories.add({

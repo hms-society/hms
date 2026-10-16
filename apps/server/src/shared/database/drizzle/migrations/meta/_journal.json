@@ -498,6 +498,20 @@
       "when": 1792028514398,
       "tag": "0067_case_creation_operations",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1792177299674,
+      "tag": "0068_checklist_waived_status",
+      "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1792177311017,
+      "tag": "0069_checklist_item_waivers_and_client_documents",
+      "breakpoints": true
     }
   ]
 }
