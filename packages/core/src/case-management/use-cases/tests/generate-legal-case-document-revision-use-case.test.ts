@@ -16,6 +16,7 @@ import { mock, type MockProxy } from 'vitest-mock-extended'
 import { CollaboratorProfile } from '../../../identity/domain/structures'
 import { LegalCaseFaker } from '../../domain/entities/fakers'
 import type { CaseAccessProvider, LegalCasesRepository } from '../../interfaces'
+import { LegalCaseStatus } from '../../domain/structures'
 import { GenerateLegalCaseDocumentRevisionUseCase } from '../generate-legal-case-document-revision-use-case'
 
 describe('GenerateLegalCaseDocumentRevisionUseCase', () => {
@@ -56,7 +57,7 @@ describe('GenerateLegalCaseDocumentRevisionUseCase', () => {
 
   it('requests AI to elaborate a new version from the selected version without creating another piece', async () => {
     const legalCase = LegalCaseFaker.fake({
-      status: 'legal_production',
+      workflowStage: LegalCaseStatus.LegalProduction,
       checklistGate: {
         decision: 'approved',
         decidedAt: new Date(),
@@ -169,7 +170,7 @@ describe('GenerateLegalCaseDocumentRevisionUseCase', () => {
 
     const readyCase = LegalCaseFaker.fake({
       id: request.caseId,
-      status: 'legal_production',
+      workflowStage: LegalCaseStatus.LegalProduction,
       checklistGate: { decision: 'approved' },
       dossierGate: { homologatedAt: new Date(), homologatedBy: 'reviewer' },
     })
@@ -204,6 +205,29 @@ describe('GenerateLegalCaseDocumentRevisionUseCase', () => {
     await expect(useCase.execute(request)).rejects.toThrow(
       'A peça já possui uma geração em andamento.',
     )
+    expect(broker.publish).not.toHaveBeenCalled()
+  })
+
+  it('rejects revision for a closed case before side effects', async () => {
+    const legalCase = LegalCaseFaker.fake({
+      workflowStage: LegalCaseStatus.LegalProduction,
+      lifecycleStatus: 'closed',
+      checklistGate: { decision: 'approved' },
+      dossierGate: { homologatedAt: new Date('2026-09-25T12:00:00.000Z') },
+    })
+    cases.findById.mockResolvedValue(legalCase)
+    access.authorize.mockResolvedValue()
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        documentId: 'document-1',
+        sourceDocumentVersionId: 'version-1',
+        requestedByCollaboratorId: 'lawyer-id',
+        requestedByCollaboratorProfile: CollaboratorProfile.Lawyer,
+        instructions: 'Update pleading.',
+      }),
+    ).rejects.toThrow()
+    expect(packages.findByContext).not.toHaveBeenCalled()
     expect(broker.publish).not.toHaveBeenCalled()
   })
 })

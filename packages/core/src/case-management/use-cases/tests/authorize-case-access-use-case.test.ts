@@ -4,6 +4,7 @@ import { CaseMemberFaker, LegalCaseFaker } from '../../domain/entities/fakers'
 import {
   CaseAccessIntent,
   CaseMemberRole,
+  LegalCaseLifecycleStatus,
   LegalCaseStatus,
 } from '../../domain/structures'
 import type {
@@ -19,7 +20,16 @@ import { TEST_ACTOR_ID, TEST_AT, TEST_CASE_ID } from './case-management-test-fix
 const profiles = Object.values(CollaboratorProfile)
 const statuses = Object.values(UserStatus)
 const memberStates = ['absent', 'removed', 'archived', 'collaborator', 'manager'] as const
-const caseStates = [LegalCaseStatus.Documentation, LegalCaseStatus.Closed] as const
+const caseStates = [
+  {
+    workflowStage: LegalCaseStatus.Documentation,
+    lifecycleStatus: LegalCaseLifecycleStatus.Active,
+  },
+  {
+    workflowStage: LegalCaseStatus.Execution,
+    lifecycleStatus: LegalCaseLifecycleStatus.Closed,
+  },
+] as const
 
 describe('Authorize Case Access Use Case', () => {
   let legalCases: ReturnType<typeof mock<LegalCasesRepository>>
@@ -38,11 +48,11 @@ describe('Authorize Case Access Use Case', () => {
     for (const profile of profiles) {
       for (const status of statuses) {
         for (const memberState of memberStates) {
-          for (const caseStatus of caseStates) {
+          for (const caseState of caseStates) {
             for (const sameCase of [true, false]) {
               for (const sameActor of [true, false]) {
                 legalCases.findById.mockResolvedValue(
-                  LegalCaseFaker.fake({ id: TEST_CASE_ID, status: caseStatus }),
+                  LegalCaseFaker.fake({ id: TEST_CASE_ID, ...caseState }),
                 )
                 collaborators.findById.mockResolvedValue({
                   collaboratorId: TEST_ACTOR_ID,
@@ -104,7 +114,8 @@ describe('Authorize Case Access Use Case', () => {
   it('requires a current Manager for management intents and keeps closed cases read-only', async () => {
     const legalCase = LegalCaseFaker.fake({
       id: TEST_CASE_ID,
-      status: LegalCaseStatus.Closed,
+      workflowStage: LegalCaseStatus.Execution,
+      lifecycleStatus: LegalCaseLifecycleStatus.Closed,
     })
     const member = CaseMemberFaker.fake({
       caseId: TEST_CASE_ID,
@@ -161,7 +172,7 @@ describe('Authorize Case Access Use Case', () => {
       LegalCaseFaker.fake({
         id: TEST_CASE_ID,
         clientId: 'case-client',
-        status: LegalCaseStatus.Documentation,
+        workflowStage: LegalCaseStatus.Documentation,
       }),
     )
     collaborators.findById.mockResolvedValue({
@@ -206,7 +217,7 @@ describe('Authorize Case Access Use Case', () => {
       LegalCaseFaker.fake({
         id: TEST_CASE_ID,
         clientId: 'case-client',
-        status: LegalCaseStatus.Closed,
+        lifecycleStatus: LegalCaseLifecycleStatus.Closed,
       }),
     )
     collaborators.findById.mockResolvedValue({
@@ -247,7 +258,7 @@ describe('Authorize Case Access Use Case', () => {
       LegalCaseFaker.fake({
         id: TEST_CASE_ID,
         clientId: 'case-client',
-        status: LegalCaseStatus.Documentation,
+        workflowStage: LegalCaseStatus.Documentation,
       }),
     )
     collaborators.findById.mockResolvedValue({

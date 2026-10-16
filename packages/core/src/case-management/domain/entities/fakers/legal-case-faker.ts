@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 
 import type { LegalCase } from '../legal-case'
-import { LegalCaseStatus } from '../../structures'
+import { LegalCaseLifecycleStatus, LegalCaseStatus } from '../../structures'
 
 export class LegalCaseFaker {
   static fake(overrides: Partial<LegalCase> = {}): LegalCase {
@@ -16,6 +16,8 @@ export class LegalCaseFaker {
       legalTopicId: faker.string.uuid(),
       title: faker.lorem.sentence(),
       status: LegalCaseStatus.Documentation,
+      lifecycleStatus: LegalCaseLifecycleStatus.Active,
+      workflowStage: LegalCaseStatus.Documentation,
       teamVersion: 0,
       checklistCompletedAt: undefined,
       checklistCompletedBy: undefined,

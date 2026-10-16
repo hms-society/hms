@@ -1,5 +1,6 @@
 import {
   CaseAccessIntent,
+  LegalCaseLifecycleStatus,
   LegalCaseStatus,
 } from '../../../case-management/domain/structures'
 import { ForbiddenError } from '../../../shared/domain/errors/forbidden-error'
@@ -147,7 +148,9 @@ describe('Resolve Received Client Document Use Case', () => {
     const batches = mock<DocumentBatchesRepository>()
     const access = mock<CaseAccessProvider>()
     const cases = mock<LegalCasesRepository>()
-    const legalCase = LegalCaseFaker.fake({ status: LegalCaseStatus.Closed })
+    const legalCase = LegalCaseFaker.fake({
+      lifecycleStatus: LegalCaseLifecycleStatus.Closed,
+    })
     const file = DocumentBatchFileFaker.fake({ caseId: legalCase.id })
     batches.findById.mockResolvedValue([
       DocumentBatchFaker.fake({ clientId: legalCase.clientId, files: [file] }),

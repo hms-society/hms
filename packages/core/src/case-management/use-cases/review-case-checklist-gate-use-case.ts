@@ -4,6 +4,7 @@ import type { LegalCase } from '../domain/entities'
 import { CaseChecklistGateReviewError, LegalCaseNotFoundError } from '../domain/errors'
 import {
   CaseChecklistGateDecision,
+  LegalCaseLifecycleStatus,
   LegalCaseStatus,
   type CaseChecklistGateDecision as CaseChecklistGateDecisionValue,
 } from '../domain/structures'
@@ -66,7 +67,11 @@ export class ReviewCaseChecklistGateUseCase implements UseCase<Request, LegalCas
   }
 
   private ensureCaseCanBeReviewed(legalCase: LegalCase) {
-    if (legalCase.status !== LegalCaseStatus.Documentation) {
+    const workflowStage = legalCase.workflowStage
+    if (
+      legalCase.lifecycleStatus === LegalCaseLifecycleStatus.Closed ||
+      workflowStage !== LegalCaseStatus.Documentation
+    ) {
       throw new CaseChecklistGateReviewError(
         'Revise o checklist apenas enquanto o caso estiver em documentação.',
       )

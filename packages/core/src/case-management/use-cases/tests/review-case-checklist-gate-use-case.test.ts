@@ -2,7 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
 import { LegalCaseFaker } from '../../domain/entities/fakers'
-import { CaseChecklistGateDecision, LegalCaseStatus } from '../../domain/structures'
+import {
+  CaseChecklistGateDecision,
+  CaseChecklistItemStatus,
+  LegalCaseLifecycleStatus,
+  LegalCaseStatus,
+} from '../../domain/structures'
 import type { LegalCasesRepository } from '../../interfaces'
 import { ReviewCaseChecklistGateUseCase } from '../review-case-checklist-gate-use-case'
 
@@ -70,15 +75,36 @@ describe('Review Case Checklist Gate Use Case', () => {
     expect(repository.reviewChecklistGate).not.toHaveBeenCalled()
   })
 
+  it('rejects checklist review for a closed case even when its saved workflow stage is documentation', async () => {
+    const legalCase = LegalCaseFaker.fake({
+      workflowStage: LegalCaseStatus.Documentation,
+      lifecycleStatus: LegalCaseLifecycleStatus.Closed,
+    })
+    repository.findById.mockResolvedValue(legalCase)
+    repository.listByTeamMember.mockResolvedValue([{ id: legalCase.id } as never])
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        decision: CaseChecklistGateDecision.BlockedInsufficient,
+        decidedBy: 'manager-id',
+        remarks: 'Pendência de teste.',
+      }),
+    ).rejects.toThrow(
+      'Revise o checklist apenas enquanto o caso estiver em documentação.',
+    )
+    expect(repository.reviewChecklistGate).not.toHaveBeenCalled()
+  })
+
   it.each([
-    'validated',
-    'waived',
-  ] as const)('allows full approval when required items are fulfilled by %s', async (status) => {
+    CaseChecklistItemStatus.Validated,
+    CaseChecklistItemStatus.Waived,
+  ])('allows full approval when required items are fulfilled by %s', async (status) => {
     const decidedBy = '00000000-0000-4000-8000-000000000118'
     const legalCase = LegalCaseFaker.fake()
     const reviewedCase = LegalCaseFaker.fake({
       id: legalCase.id,
-      status: LegalCaseStatus.ReadyForLegalProduction,
+      workflowStage: LegalCaseStatus.ReadyForLegalProduction,
       checklistGate: {
         decision: CaseChecklistGateDecision.Approved,
         decidedAt: new Date('2026-08-24T12:00:00.000Z'),
@@ -217,7 +243,7 @@ describe('Review Case Checklist Gate Use Case', () => {
 
   it('rejects checklist review outside the documentation stage', async () => {
     const legalCase = LegalCaseFaker.fake({
-      status: LegalCaseStatus.LegalProduction,
+      workflowStage: LegalCaseStatus.LegalProduction,
     })
 
     repository.findById.mockResolvedValue(legalCase)

@@ -1,0 +1,50 @@
+@BASE_URL = http://localhost:3333
+@url = {{BASE_URL}}/cases
+@caseId = 0e3096b4-d87f-4363-812b-51d514a0a81c
+
+# Manual smoke test for case closure lifecycle.
+# Preconditions:
+# 1. The API is already running at http://localhost:3333; this file does not start containers.
+# 2. This file authenticates as the seeded lawyer who manages the selected case.
+# 3. Before POST /close, confirm GET /closure returns capabilities.canClose=true.
+
+### Sign in as the seeded case manager
+# @name signInAsSeededCaseManager
+# @prompt seedPassword Enter HMS_USER_SEED_PASSWORD
+POST {{BASE_URL}}/auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "identifier": "lawyer@hmsadvogados.com.br",
+  "password": "{{seedPassword}}"
+}
+
+### List cases linked to the signed-in collaborator
+# @name listMyCases
+GET {{url}}/my
+Authorization: Bearer {{signInAsSeededCaseManager.response.body.$.accessToken}}
+Accept: application/json
+
+# caseId is prefilled with seeded case CASO-20261012-0009, managed by this lawyer.
+
+### Inspect closure state and current blockers
+# @name inspectCaseClosure
+GET {{url}}/{{caseId}}/closure
+Authorization: Bearer {{signInAsSeededCaseManager.response.body.$.accessToken}}
+Accept: application/json
+
+# Expected: HTTP 200 with legalCase, blockers, events, and capabilities.
+
+### Close the seeded case
+POST {{url}}/{{caseId}}/close
+Authorization: Bearer {{signInAsSeededCaseManager.response.body.$.accessToken}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "outcome": "agreement",
+  "notes": "Closure smoke test with the seeded case manager."
+}
+
+# Expected: HTTP 200 with kind "closed"; the selected seeded case has no blockers.

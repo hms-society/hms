@@ -36,6 +36,9 @@ import {
   UpdateCaseTaskController,
   DeleteCaseTaskController,
   GetCaseOpeningSourceController,
+  GetCaseClosureController,
+  CloseLegalCaseController,
+  ReopenLegalCaseController,
 } from '@/case-management/rest/controllers'
 import { DocumentsDatabaseModule } from '@/document-engine/database/documents-database.module'
 import { ProvisionModule } from '@/shared/provision/provision.module'
@@ -91,6 +94,9 @@ import { CaseManagementProvisionModule } from '@/case-management/provision/case-
     UpdateCaseTaskController,
     DeleteCaseTaskController,
     GetCaseOpeningSourceController,
+    GetCaseClosureController,
+    CloseLegalCaseController,
+    ReopenLegalCaseController,
   ],
   exports: [CaseManagementDatabaseModule],
 })

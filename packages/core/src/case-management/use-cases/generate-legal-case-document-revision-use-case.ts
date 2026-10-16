@@ -12,7 +12,11 @@ import type {
 } from '../../document-production/interfaces'
 import type { CollaboratorProfile as CollaboratorProfileValue } from '#shared/domain/structures'
 import type { Broker, DatetimeProvider, IdProvider } from '../../shared/interfaces'
-import { CaseChecklistGateDecision, LegalCaseStatus } from '../domain/structures'
+import {
+  CaseChecklistGateDecision,
+  LegalCaseLifecycleStatus,
+  LegalCaseStatus,
+} from '../domain/structures'
 import { LegalCaseDocumentGenerationError } from '../domain/errors/legal-case-document-generation-error'
 import { LegalCaseNotFoundError } from '../domain/errors/legal-case-not-found-error'
 import type { LegalCase } from '../domain/entities'
@@ -184,9 +188,11 @@ export class GenerateLegalCaseDocumentRevisionUseCase
     const approvedGate =
       legalCase.checklistGate.decision === CaseChecklistGateDecision.Approved ||
       legalCase.checklistGate.decision === CaseChecklistGateDecision.ApprovedWithException
+    const workflowStage = legalCase.workflowStage
     const productionStage =
-      legalCase.status === LegalCaseStatus.ReadyForLegalProduction ||
-      legalCase.status === LegalCaseStatus.LegalProduction
+      legalCase.lifecycleStatus !== LegalCaseLifecycleStatus.Closed &&
+      (workflowStage === LegalCaseStatus.ReadyForLegalProduction ||
+        workflowStage === LegalCaseStatus.LegalProduction)
     if (!approvedGate || !productionStage || !legalCase.dossierGate.homologatedAt) {
       throw new LegalCaseDocumentGenerationError(
         'A geração exige o dossiê documental aprovado e a liberação da produção jurídica.',

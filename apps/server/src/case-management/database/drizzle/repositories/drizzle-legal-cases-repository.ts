@@ -69,7 +69,16 @@ export class DrizzleLegalCasesRepository
 
       const [createdLegalCase] = await tx
         .insert(legalCaseModel)
-        .values({ ...legalCase, publicCode })
+        .values({
+          ...legalCase,
+          lifecycleStatus: legalCase.lifecycleStatus ?? 'active',
+          workflowStage: legalCase.workflowStage ?? 'documentation',
+          status:
+            legalCase.lifecycleStatus === 'closed'
+              ? LegalCaseStatus.Closed
+              : (legalCase.workflowStage ?? LegalCaseStatus.Documentation),
+          publicCode,
+        })
         .returning()
 
       if (team.length > 0) {
@@ -94,7 +103,17 @@ export class DrizzleLegalCasesRepository
 
     const createdLegalCases = await this.database
       .insert(legalCaseModel)
-      .values([...legalCases])
+      .values(
+        legalCases.map((legalCase) => ({
+          ...legalCase,
+          lifecycleStatus: legalCase.lifecycleStatus ?? 'active',
+          workflowStage: legalCase.workflowStage ?? 'documentation',
+          status:
+            legalCase.lifecycleStatus === 'closed'
+              ? LegalCaseStatus.Closed
+              : (legalCase.workflowStage ?? LegalCaseStatus.Documentation),
+        })),
+      )
       .returning()
 
     return createdLegalCases.map((legalCase) => this.legalCaseMapper.toDomain(legalCase))
@@ -203,11 +222,13 @@ export class DrizzleLegalCasesRepository
         checklistGateDecidedBy: checklistGate.decidedBy,
         checklistGateRemarks: checklistGate.remarks ?? null,
         status,
+        workflowStage: status === LegalCaseStatus.Closed ? null : status,
         updatedAt: new Date(),
       })
       .where(
         and(
           eq(legalCaseModel.id, caseId),
+          eq(legalCaseModel.lifecycleStatus, 'active'),
           eq(legalCaseModel.status, expectedStatus),
           isNull(legalCaseModel.checklistGateDecision),
         ),
@@ -232,11 +253,13 @@ export class DrizzleLegalCasesRepository
         dossierGateHomologatedAt: now,
         dossierGateHomologatedBy: homologatedBy,
         status,
+        workflowStage: status === LegalCaseStatus.Closed ? null : status,
         updatedAt: now,
       })
       .where(
         and(
           eq(legalCaseModel.id, caseId),
+          eq(legalCaseModel.lifecycleStatus, 'active'),
           eq(legalCaseModel.status, expectedStatus),
           inArray(legalCaseModel.checklistGateDecision, [
             'approved',
@@ -305,7 +328,10 @@ export class DrizzleLegalCasesRepository
         id: legalCaseModel.id,
         publicCode: legalCaseModel.publicCode,
         title: legalCaseModel.title,
-        status: legalCaseModel.status,
+        status: sql<LegalCaseStatus>`case
+          when ${legalCaseModel.lifecycleStatus} = 'closed' then ${LegalCaseStatus.Closed}::legal_case_status
+          else ${legalCaseModel.status}
+        end`,
         clientId: legalCaseModel.clientId,
         legalAreaId: legalCaseModel.legalAreaId,
         legalTopicId: legalCaseModel.legalTopicId,

@@ -10,6 +10,7 @@ import { LegalCaseNotFoundError } from '../domain/errors'
 import {
   CaseChecklistGateDecision,
   CaseChecklistItemStatus,
+  LegalCaseLifecycleStatus,
   LegalCaseStatus,
 } from '../domain/structures'
 import type {
@@ -169,12 +170,14 @@ export class GetCaseDocumentGenerationContextUseCase
   }
 
   private canGenerate(legalCase: LegalCase): boolean {
+    const workflowStage = legalCase.workflowStage
     const approvedGate =
       legalCase.checklistGate.decision === CaseChecklistGateDecision.Approved ||
       legalCase.checklistGate.decision === CaseChecklistGateDecision.ApprovedWithException
     const productionStage =
-      legalCase.status === LegalCaseStatus.ReadyForLegalProduction ||
-      legalCase.status === LegalCaseStatus.LegalProduction
+      legalCase.lifecycleStatus !== LegalCaseLifecycleStatus.Closed &&
+      (workflowStage === LegalCaseStatus.ReadyForLegalProduction ||
+        workflowStage === LegalCaseStatus.LegalProduction)
     return approvedGate && productionStage && Boolean(legalCase.dossierGate.homologatedAt)
   }
 }

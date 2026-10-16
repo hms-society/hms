@@ -6,6 +6,7 @@ import {
   CaseAccessIntent,
   CaseChecklistGateDecision,
   CaseChecklistItemStatus,
+  LegalCaseLifecycleStatus,
   LegalCaseStatus,
 } from '../domain/structures'
 import type {
@@ -44,7 +45,10 @@ export class HomologateCaseDossierUseCase implements UseCase<Request, LegalCase>
         'A homologação exige que o checklist tenha sido aprovado primeiro.',
       )
     }
-    if (legalCase.status !== LegalCaseStatus.ReadyForLegalProduction) {
+    if (
+      legalCase.lifecycleStatus === LegalCaseLifecycleStatus.Closed ||
+      legalCase.workflowStage !== LegalCaseStatus.ReadyForLegalProduction
+    ) {
       throw new CaseChecklistGateReviewError(
         'O dossiê só pode ser homologado após a aprovação do checklist.',
       )

@@ -12,7 +12,11 @@ import { DocumentGenerationStatus } from '../../../document-production/domain/st
 import type { Broker, DatetimeProvider, IdProvider } from '../../../shared/interfaces'
 import { ForbiddenError } from '../../../shared/domain/errors/forbidden-error'
 import { LegalCaseFaker } from '../../domain/entities/fakers'
-import { CaseChecklistGateDecision, LegalCaseStatus } from '../../domain/structures'
+import {
+  CaseChecklistGateDecision,
+  LegalCaseLifecycleStatus,
+  LegalCaseStatus,
+} from '../../domain/structures'
 import type { CaseAccessProvider, LegalCasesRepository } from '../../interfaces'
 import { RetryLegalCaseDocumentGenerationUseCase } from '../retry-legal-case-document-generation-use-case'
 
@@ -75,7 +79,7 @@ describe('Retry Legal Case Document Generation Use Case', () => {
     cases.findById.mockResolvedValue(
       LegalCaseFaker.fake({
         id: caseId,
-        status: LegalCaseStatus.LegalProduction,
+        workflowStage: LegalCaseStatus.LegalProduction,
         checklistGate: { decision: CaseChecklistGateDecision.Approved },
         dossierGate: { homologatedAt: now },
       }),
@@ -185,7 +189,7 @@ describe('Retry Legal Case Document Generation Use Case', () => {
     const now = new Date('2026-09-25T17:00:00.000Z')
     const legalCase = LegalCaseFaker.fake({
       id: caseId,
-      status: LegalCaseStatus.LegalProduction,
+      workflowStage: LegalCaseStatus.LegalProduction,
       checklistGate: { decision: CaseChecklistGateDecision.Approved },
       dossierGate: { homologatedAt: now },
     })
@@ -242,5 +246,29 @@ describe('Retry Legal Case Document Generation Use Case', () => {
     )?.[0] as DocumentGenerationRequestedEvent
     expect(event.payload).not.toHaveProperty('instructions')
     expect(event.payload.source).toEqual(source)
+  })
+
+  it('rejects retries for a closed case before package or event work', async () => {
+    const now = new Date('2026-09-25T17:00:00.000Z')
+    const legalCase = LegalCaseFaker.fake({
+      id: 'case-1',
+      workflowStage: LegalCaseStatus.LegalProduction,
+      lifecycleStatus: LegalCaseLifecycleStatus.Closed,
+      checklistGate: { decision: CaseChecklistGateDecision.Approved },
+      dossierGate: { homologatedAt: now },
+    })
+    cases.findById.mockResolvedValue(legalCase)
+    access.authorize.mockResolvedValue()
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        documentId: 'document-1',
+        requestedByCollaboratorId: 'lawyer-id',
+        requestedByCollaboratorProfile: 'lawyer',
+      }),
+    ).rejects.toThrow()
+    expect(packages.findByContext).not.toHaveBeenCalled()
+    expect(broker.publish).not.toHaveBeenCalled()
   })
 })

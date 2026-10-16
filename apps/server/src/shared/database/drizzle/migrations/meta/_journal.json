@@ -526,6 +526,13 @@
       "when": 1792177835165,
       "tag": "0071_checklist_item_waivers_and_client_documents",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1792194285274,
+      "tag": "0072_case_closure",
+      "breakpoints": true
     }
   ]
 }

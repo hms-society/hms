@@ -22,7 +22,7 @@ import { ForbiddenError } from '../../shared/domain/errors/forbidden-error'
 import type { CollaboratorProfile as CollaboratorProfileValue } from '#shared/domain/structures'
 import { LegalCaseDocumentGenerationError } from '../domain/errors/legal-case-document-generation-error'
 import { LegalCaseNotFoundError } from '../domain/errors/legal-case-not-found-error'
-import { CaseAccessIntent, LegalCaseStatus } from '../domain/structures'
+import { CaseAccessIntent, LegalCaseLifecycleStatus } from '../domain/structures'
 import type { LegalCasesRepository } from '../interfaces'
 import type { CaseAccessProvider } from '../interfaces'
 
@@ -60,7 +60,7 @@ export class SaveManualLegalCaseDocumentVersionUseCase
   async execute(request: Request): Promise<DocumentVersion> {
     const legalCase = await this.cases.findById(request.caseId)
     if (!legalCase) throw new LegalCaseNotFoundError()
-    if (legalCase.status === LegalCaseStatus.Closed) {
+    if (legalCase.lifecycleStatus === LegalCaseLifecycleStatus.Closed) {
       throw new ForbiddenError('Casos encerrados permitem apenas leitura.')
     }
     await this.caseAccessProvider.authorize({

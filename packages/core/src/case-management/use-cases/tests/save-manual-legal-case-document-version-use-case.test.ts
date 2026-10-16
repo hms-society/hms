@@ -19,7 +19,7 @@ import { ForbiddenError } from '../../../shared/domain/errors/forbidden-error'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 import { CollaboratorProfile } from '../../../identity/domain/structures'
-import { LegalCaseStatus } from '../../domain/structures'
+import { LegalCaseLifecycleStatus, LegalCaseStatus } from '../../domain/structures'
 import { LegalCaseFaker } from '../../domain/entities/fakers'
 import type { CaseAccessProvider, LegalCasesRepository } from '../../interfaces'
 import { SaveManualLegalCaseDocumentVersionUseCase } from '../save-manual-legal-case-document-version-use-case'
@@ -216,7 +216,9 @@ describe('SaveManualLegalCaseDocumentVersionUseCase', () => {
   })
 
   it('rejects Closed cases before access, export, storage, or version writes', async () => {
-    const legalCase = LegalCaseFaker.fake({ status: LegalCaseStatus.Closed })
+    const legalCase = LegalCaseFaker.fake({
+      lifecycleStatus: LegalCaseLifecycleStatus.Closed,
+    })
     cases.findById.mockResolvedValue(legalCase)
 
     await expect(

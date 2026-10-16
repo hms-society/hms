@@ -2,7 +2,11 @@ import type { UseCase } from '#shared/interfaces/use-case'
 import { ForbiddenError } from '#shared/domain/errors/forbidden-error'
 import { LegalCaseNotFoundError } from '../domain/errors'
 import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
-import { CaseAccessIntent, CaseMemberRole, LegalCaseStatus } from '../domain/structures'
+import {
+  CaseAccessIntent,
+  CaseMemberRole,
+  LegalCaseLifecycleStatus,
+} from '../domain/structures'
 import type { CaseAccessIntent as CaseAccessIntentType } from '../domain/structures'
 import type {
   CaseCollaboratorsProvider,
@@ -109,7 +113,7 @@ function assertMemberIntent(
 ): void {
   ensureActorCanAccessCase(profile, member, request)
   ensureIntentRole(request.intent, member.role)
-  ensureCaseIsWritable(request.intent, legalCase.status)
+  ensureCaseIsWritable(request.intent, legalCase.lifecycleStatus)
 }
 
 async function findLegalCase(repository: LegalCasesRepository, caseId: string) {
@@ -181,11 +185,12 @@ function ensureIntentRole(intent: CaseAccessIntentType, role: CaseMemberRole): v
 
 function ensureCaseIsWritable(
   intent: CaseAccessIntentType,
-  status: LegalCaseStatus,
+  lifecycleStatus: LegalCaseLifecycleStatus | undefined,
 ): void {
   const isReadIntent =
     intent === CaseAccessIntent.ReadContent || intent === CaseAccessIntent.ReadDocument
-  if (!isReadIntent && status === LegalCaseStatus.Closed) {
+  const isClosed = lifecycleStatus === LegalCaseLifecycleStatus.Closed
+  if (!isReadIntent && isClosed) {
     throw new ForbiddenError('Casos encerrados permitem apenas leitura.')
   }
 }

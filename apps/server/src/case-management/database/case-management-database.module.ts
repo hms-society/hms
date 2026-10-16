@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common'
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
 import {
   DrizzleCaseChecklistItemMapper,
+  DrizzleCaseClosureEventMapper,
   DrizzleCaseMemberMapper,
   DrizzleChecklistTemplateItemMapper,
   DrizzleChecklistTemplateMapper,
@@ -15,6 +16,7 @@ import {
 } from '@/case-management/database/drizzle/mappers'
 import {
   DrizzleCaseChecklistItemsRepository,
+  DrizzleCaseClosureRepository,
   DrizzleCaseMembersRepository,
   DrizzleChecklistTemplateItemsRepository,
   DrizzleChecklistTemplatesRepository,
@@ -35,6 +37,7 @@ import { CaseCollaboratorsProvisionModule } from '@/case-management/provision/ca
   imports: [SharedDatabaseModule, CaseCollaboratorsProvisionModule],
   providers: [
     DrizzleCaseChecklistItemMapper,
+    DrizzleCaseClosureEventMapper,
     DrizzleCaseMemberMapper,
     DrizzleCaseTeamHistoryMapper,
     DrizzleCaseTeamOperationMapper,
@@ -45,6 +48,7 @@ import { CaseCollaboratorsProvisionModule } from '@/case-management/provision/ca
     DrizzleCasePortalAccessGrantMapper,
     DrizzleCaseTaskMapper,
     DrizzleCaseChecklistItemsRepository,
+    DrizzleCaseClosureRepository,
     DrizzleCaseMembersRepository,
     DrizzleCaseTeamHistoriesRepository,
     DrizzleCaseTeamOperationsRepository,
@@ -62,6 +66,10 @@ import { CaseCollaboratorsProvisionModule } from '@/case-management/provision/ca
     {
       provide: CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems,
       useExisting: DrizzleCaseChecklistItemsRepository,
+    },
+    {
+      provide: CASE_MANAGEMENT_REPOSITORIES.caseClosure,
+      useExisting: DrizzleCaseClosureRepository,
     },
     {
       provide: CASE_MANAGEMENT_REPOSITORIES.caseMembers,
@@ -104,6 +112,7 @@ import { CaseCollaboratorsProvisionModule } from '@/case-management/provision/ca
   ],
   exports: [
     CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems,
+    CASE_MANAGEMENT_REPOSITORIES.caseClosure,
     CASE_MANAGEMENT_REPOSITORIES.caseMembers,
     CASE_MANAGEMENT_REPOSITORIES.caseTeamHistories,
     CASE_MANAGEMENT_REPOSITORIES.caseTeamOperations,

@@ -11,6 +11,8 @@ import {
 } from 'drizzle-orm/pg-core'
 
 import { caseChecklistGateDecisionModel } from '@/case-management/database/drizzle/models/case-checklist-gate-decision-model'
+import { caseClosureOutcomeModel } from '@/case-management/database/drizzle/models/case-closure-outcome-model'
+import { legalCaseLifecycleStatusModel } from '@/case-management/database/drizzle/models/legal-case-lifecycle-status-model'
 import { legalCaseStatusModel } from '@/case-management/database/drizzle/models/legal-case-status-model'
 
 export const legalCaseModel = pgTable(
@@ -25,6 +27,14 @@ export const legalCaseModel = pgTable(
     title: text('title').notNull(),
     description: text('description'),
     status: legalCaseStatusModel('status').default('documentation').notNull(),
+    lifecycleStatus: legalCaseLifecycleStatusModel('lifecycle_status')
+      .default('active')
+      .notNull(),
+    workflowStage: legalCaseStatusModel('workflow_stage'),
+    closureOutcome: caseClosureOutcomeModel('closure_outcome'),
+    closureNotes: text('closure_notes'),
+    closedAt: timestamp('closed_at', { withTimezone: true, mode: 'date' }),
+    closedBy: uuid('closed_by'),
     teamVersion: integer('team_version').default(0).notNull(),
     checklistCompletedAt: timestamp('checklist_completed_at', {
       withTimezone: true,

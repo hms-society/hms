@@ -11,6 +11,7 @@ import type { CaseTeamHistoryCreation, LegalCase } from '../domain/entities'
 import {
   CaseMemberRole,
   CaseTeamHistoryKind,
+  LegalCaseLifecycleStatus,
   LegalCaseStatus,
 } from '../domain/structures'
 import type { CaseCollaboratorsProvider, CaseOpeningSourceProvider } from '../interfaces'
@@ -150,7 +151,8 @@ export class CreateLegalCaseUseCase
           intakeId: request.intakeId,
           legalAreaId: request.legalAreaId,
           legalTopicId: request.legalTopicId,
-          status: LegalCaseStatus.Documentation,
+          lifecycleStatus: LegalCaseLifecycleStatus.Active,
+          workflowStage: LegalCaseStatus.Documentation,
           teamVersion: 1,
           openedAt: at,
         },

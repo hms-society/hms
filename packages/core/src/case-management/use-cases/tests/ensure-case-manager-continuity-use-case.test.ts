@@ -97,7 +97,7 @@ describe('Ensure Case Manager Continuity Use Case', () => {
     const firstLegalCase = LegalCaseFaker.fake({
       id: 'case-1',
       teamVersion: 8,
-      status: LegalCaseStatus.Closed,
+      lifecycleStatus: 'closed',
     })
     const secondLegalCase = LegalCaseFaker.fake({ id: 'case-2', teamVersion: 2 })
     identity.collaboratorsRepository.findById.mockResolvedValue(collaborator)

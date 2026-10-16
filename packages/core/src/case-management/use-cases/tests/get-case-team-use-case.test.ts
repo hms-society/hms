@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { CaseMemberFaker, LegalCaseFaker } from '../../domain/entities/fakers'
-import { CaseMemberRole, LegalCaseStatus } from '../../domain/structures'
+import {
+  CaseMemberRole,
+  LegalCaseLifecycleStatus,
+  LegalCaseStatus,
+} from '../../domain/structures'
 import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
 import { ForbiddenError } from '#shared/domain/errors/forbidden-error'
 import { GetCaseTeamUseCase } from '../get-case-team-use-case'
@@ -149,7 +153,8 @@ describe('Get Case Team Use Case', () => {
     mocks.legalCasesRepository.findById.mockResolvedValue(
       LegalCaseFaker.fake({
         id: TEST_CASE_ID,
-        status: LegalCaseStatus.Closed,
+        workflowStage: LegalCaseStatus.Execution,
+        lifecycleStatus: LegalCaseLifecycleStatus.Closed,
       }),
     )
     mocks.caseMembersRepository.listByCaseId.mockResolvedValue(
@@ -175,7 +180,9 @@ describe('Get Case Team Use Case', () => {
     await expect(
       useCase.execute({ caseId: TEST_CASE_ID, actorId: TEST_ACTOR_ID }),
     ).resolves.toMatchObject({
-      status: LegalCaseStatus.Closed,
+      status: LegalCaseStatus.Execution,
+      workflowStage: LegalCaseStatus.Execution,
+      lifecycleStatus: LegalCaseLifecycleStatus.Closed,
       canManage: false,
     })
   })

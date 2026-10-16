@@ -178,7 +178,8 @@ export class CaseManagementSeeder {
         legalAreaId: intake.legalAreaId,
         legalTopicId: intake.legalTopicId,
         title: this.getTitleByIntake(intake, index),
-        status: LegalCaseStatus.Documentation,
+        lifecycleStatus: 'active',
+        workflowStage: LegalCaseStatus.Documentation,
         teamVersion: 0,
         openedAt,
       }

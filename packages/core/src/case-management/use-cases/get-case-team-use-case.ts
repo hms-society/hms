@@ -2,7 +2,11 @@ import type { UseCase } from '#shared/interfaces/use-case'
 import { LegalCaseNotFoundError } from '../domain/errors'
 import type { CaseTeam } from '../domain/structures'
 import type { CaseMember } from '../domain/entities'
-import { CaseMemberRole, LegalCaseStatus } from '../domain/structures'
+import {
+  CaseMemberRole,
+  LegalCaseLifecycleStatus,
+  LegalCaseStatus,
+} from '../domain/structures'
 import type {
   CaseMembersRepository,
   CaseCollaboratorsProvider,
@@ -47,13 +51,15 @@ export class GetCaseTeamUseCase implements UseCase<CaseActorRequest, CaseTeam> {
     return {
       caseId: legalCase.id,
       publicCode: legalCase.publicCode,
-      status: legalCase.status,
+      status: legalCase.workflowStage ?? LegalCaseStatus.Closed,
+      lifecycleStatus: legalCase.lifecycleStatus,
+      workflowStage: legalCase.workflowStage,
       teamVersion: legalCase.teamVersion ?? 0,
       members: projectedMembers,
       total: projectedMembers.length,
       activeManagerCount: countEligibleManagers(currentMembers, profiles),
       canManage:
-        legalCase.status !== LegalCaseStatus.Closed &&
+        legalCase.lifecycleStatus !== LegalCaseLifecycleStatus.Closed &&
         (actor.profile === CollaboratorProfile.Admin ||
           (actorMembership?.role === CaseMemberRole.Manager &&
             isEligibleCaseCollaborator(actor.profile, actor.status))),

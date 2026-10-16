@@ -20,6 +20,7 @@ import { LegalCaseFaker } from '../../domain/entities/fakers'
 import {
   CaseChecklistGateDecision,
   CaseChecklistItemStatus,
+  LegalCaseLifecycleStatus,
   LegalCaseStatus,
 } from '../../domain/structures'
 import type {
@@ -87,7 +88,7 @@ describe('Generate Legal Case Document Use Case', () => {
       id: caseId,
       clientId: '44444444-4444-4444-8444-444444444444',
       title: 'Aposentadoria por tempo de contribuição',
-      status: LegalCaseStatus.LegalProduction,
+      workflowStage: LegalCaseStatus.LegalProduction,
       checklistGate: { decision: CaseChecklistGateDecision.Approved },
       dossierGate: { homologatedAt: new Date('2026-09-14T12:00:00.000Z') },
     })
@@ -296,6 +297,31 @@ describe('Generate Legal Case Document Use Case', () => {
     expect(documents.add).not.toHaveBeenCalled()
   })
 
+  it('rejects generation when the lifecycle is closed even if its saved stage allows production', async () => {
+    const legalCase = LegalCaseFaker.fake({
+      id: 'case-id',
+      workflowStage: LegalCaseStatus.LegalProduction,
+      lifecycleStatus: LegalCaseLifecycleStatus.Closed,
+      checklistGate: { decision: CaseChecklistGateDecision.Approved },
+      dossierGate: { homologatedAt: new Date('2026-09-14T12:00:00.000Z') },
+    })
+    cases.findById.mockResolvedValue(legalCase)
+    cases.listByTeamMember.mockResolvedValue([{ id: legalCase.id } as never])
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        documentSpecificationId: 'spec-id',
+        documentFileIds: [],
+        requestedByCollaboratorId: 'actor-id',
+        requestedByCollaboratorProfile: 'lawyer',
+      }),
+    ).rejects.toThrow('dossiê documental')
+
+    expect(broker.publish).not.toHaveBeenCalled()
+    expect(documents.add).not.toHaveBeenCalled()
+  })
+
   it('does not allow checklist exception approval to bypass dossier homologation', async () => {
     cases.findById.mockResolvedValue(
       LegalCaseFaker.fake({
@@ -359,7 +385,7 @@ describe('Generate Legal Case Document Use Case', () => {
   it('rejects missing inputs, unavailable models, incomplete checklists, and invalid references', async () => {
     const legalCase = LegalCaseFaker.fake({
       id: 'case-flow',
-      status: LegalCaseStatus.LegalProduction,
+      workflowStage: LegalCaseStatus.LegalProduction,
       checklistGate: { decision: CaseChecklistGateDecision.Approved },
       dossierGate: { homologatedAt: new Date('2026-09-14T12:00:00.000Z') },
     })
