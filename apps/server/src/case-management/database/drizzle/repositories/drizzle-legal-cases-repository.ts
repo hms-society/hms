@@ -328,7 +328,10 @@ export class DrizzleLegalCasesRepository
         id: legalCaseModel.id,
         publicCode: legalCaseModel.publicCode,
         title: legalCaseModel.title,
-        status: legalCaseModel.status,
+        status: sql<LegalCaseStatus>`case
+          when ${legalCaseModel.lifecycleStatus} = 'closed' then ${LegalCaseStatus.Closed}::legal_case_status
+          else ${legalCaseModel.status}
+        end`,
         clientId: legalCaseModel.clientId,
         legalAreaId: legalCaseModel.legalAreaId,
         legalTopicId: legalCaseModel.legalTopicId,

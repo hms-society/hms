@@ -519,6 +519,13 @@
       "when": 1792177805183,
       "tag": "0070_case_closure",
       "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1792180698385,
+      "tag": "0071_case_closure_events_append_only",
+      "breakpoints": true
     }
   ]
 }

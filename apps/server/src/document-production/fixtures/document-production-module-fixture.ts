@@ -215,7 +215,7 @@ export class DocumentProductionModuleFixture {
       .get(DrizzleClient)
       .requireDatabase()
       .update(legalCaseModel)
-      .set({ status: 'closed' })
+      .set({ lifecycleStatus: 'closed' })
       .where(eq(legalCaseModel.id, caseId))
   }
 

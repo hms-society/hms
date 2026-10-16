@@ -29,7 +29,7 @@ describe('List All Legal Cases For Admin Controller [GET /cases/admin/list]', ()
       clientId: admin.clientId,
       legalAreaId: admin.legalAreaId,
       legalTopicId: admin.legalTopicId,
-      status: LegalCaseStatus.Closed,
+      lifecycleStatus: 'closed',
     })
 
     const response = await request(fixture.app.getHttpServer())
