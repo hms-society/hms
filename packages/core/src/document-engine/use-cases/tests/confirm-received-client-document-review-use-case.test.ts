@@ -12,9 +12,7 @@ import {
 } from '../../domain/entities/fakers'
 import type {
   DocumentValidationsRepository,
-  DocumentValidationLogsRepository,
   DocumentValidationReviewRepository,
-  ChecklistUploadPublicationRepository,
   ClientDocumentUploadsRepository,
 } from '../../interfaces'
 import {
@@ -27,11 +25,11 @@ import { ConfirmReceivedClientDocumentReviewUseCase } from '../confirm-received-
 
 describe('Confirm Received Client Document Review Use Case', () => {
   let resolve: MockProxy<ResolveClientDocumentUseCase>
-  let validations: MockProxy<DocumentValidationsRepository & DocumentValidationReviewRepository>
-  let logs: MockProxy<DocumentValidationLogsRepository>
+  let validations: MockProxy<
+    DocumentValidationsRepository & DocumentValidationReviewRepository
+  >
   let collaborators: MockProxy<CollaboratorsRepository>
   let access: MockProxy<CaseAccessProvider>
-  let batches: MockProxy<ChecklistUploadPublicationRepository>
   let uploads: MockProxy<ClientDocumentUploadsRepository>
   let useCase: ConfirmReceivedClientDocumentReviewUseCase
   const actor = CollaboratorFaker.legal()
@@ -53,24 +51,22 @@ describe('Confirm Received Client Document Review Use Case', () => {
     humanCorrection: { decision: 'previous', reason: 'Preserved note' },
   })
   beforeEach(() => {
-    batches = mock<ChecklistUploadPublicationRepository>()
     uploads = mock<ClientDocumentUploadsRepository>()
     resolve = mock<ResolveClientDocumentUseCase>()
-    validations = mock<DocumentValidationsRepository & DocumentValidationReviewRepository>()
-    logs = mock<DocumentValidationLogsRepository>()
+    validations = mock<
+      DocumentValidationsRepository & DocumentValidationReviewRepository
+    >()
     collaborators = mock<CollaboratorsRepository>()
     access = mock<CaseAccessProvider>()
     resolve.execute.mockResolvedValue(document)
     validations.findByFileId.mockResolvedValue(current)
-    validations.replace.mockResolvedValue(true)
+    validations.record.mockResolvedValue(true)
     collaborators.findById.mockResolvedValue(actor)
     useCase = new ConfirmReceivedClientDocumentReviewUseCase(
       resolve,
       validations,
-      logs,
       collaborators,
       access,
-      batches,
       uploads,
     )
   })
@@ -85,9 +81,10 @@ describe('Confirm Received Client Document Review Use Case', () => {
       ...request,
       forSelection: false,
     })
-    expect(validations.replace).toHaveBeenCalledExactlyOnceWith(
-      current.id,
-      {
+    const [review] = validations.record.mock.calls[0]
+    expect(review).toMatchObject({
+      documentFileId: current.id,
+      changes: {
         status: DocumentValidationStatus.Valid,
         reviewedBy: actor.userId,
         reviewedAt: request.reviewedAt,
@@ -104,14 +101,16 @@ describe('Confirm Received Client Document Review Use Case', () => {
           },
         },
       },
-      {
+      expected: {
         clientId: document.clientId,
         caseId: request.caseId,
         checklistItemId: undefined,
         reviewedAt: undefined,
       },
-    )
-    expect(logs.add).toHaveBeenCalledExactlyOnceWith(
+      checklistUpload: undefined,
+    })
+    expect(validations.record).toHaveBeenCalledOnce()
+    expect(review.auditLog).toMatchObject(
       expect.objectContaining({
         documentFileId: current.id,
         actorId: actor.userId,
@@ -134,10 +133,10 @@ describe('Confirm Received Client Document Review Use Case', () => {
   ])('preserves preexisting or unrestricted source authority %j', async (link) => {
     validations.findByFileId.mockResolvedValue({ ...current, checklistLink: link })
     await useCase.execute(request)
-    const [, changes, expected] = validations.replace.mock.calls[0]
-    expect(changes.checklistItemId).toBeUndefined()
-    expect(changes).not.toHaveProperty('caseId')
-    expect(expected).toMatchObject({
+    const [review] = validations.record.mock.calls[0]
+    expect(review.changes.checklistItemId).toBeUndefined()
+    expect(review.changes).not.toHaveProperty('caseId')
+    expect(review.expected).toMatchObject({
       caseId: link?.caseId,
       checklistItemId: link?.checklistItemId,
     })
@@ -146,7 +145,7 @@ describe('Confirm Received Client Document Review Use Case', () => {
     const reviewedAt = new Date('2026-10-12T12:00:00.123Z')
     validations.findByFileId.mockResolvedValue({ ...current, reviewedAt })
     await useCase.execute(request)
-    expect(validations.replace.mock.calls[0][2].reviewedAt).toBe(reviewedAt)
+    expect(validations.record.mock.calls[0][0].expected.reviewedAt).toBe(reviewedAt)
   })
   it.each([
     'write',
@@ -156,8 +155,7 @@ describe('Confirm Received Client Document Review Use Case', () => {
       access.authorize.mockRejectedValue(new ForbiddenError('Denied'))
     else resolve.execute.mockRejectedValue(new ForbiddenError('Denied'))
     await expect(useCase.execute(request)).rejects.toBeInstanceOf(ForbiddenError)
-    expect(validations.replace).not.toHaveBeenCalled()
-    expect(logs.add).not.toHaveBeenCalled()
+    expect(validations.record).not.toHaveBeenCalled()
   })
   it.each([
     'missing-document',
@@ -173,8 +171,7 @@ describe('Confirm Received Client Document Review Use Case', () => {
     if (reason === 'missing-user')
       collaborators.findById.mockResolvedValue({ ...actor, userId: '' })
     await expect(useCase.execute(request)).rejects.toBeInstanceOf(ConflictError)
-    expect(validations.replace).not.toHaveBeenCalled()
-    expect(logs.add).not.toHaveBeenCalled()
+    expect(validations.record).not.toHaveBeenCalled()
   })
   it('does not write a produced source into the received-file projection', async () => {
     resolve.execute.mockResolvedValue(
@@ -190,19 +187,24 @@ describe('Confirm Received Client Document Review Use Case', () => {
     await expect(useCase.execute(request)).rejects.toBeInstanceOf(ConflictError)
     expect(validations.findByFileId).not.toHaveBeenCalled()
   })
-  it('rejects a source ownership or concurrent review conflict before recording a human decision', async () => {
-    validations.replace.mockResolvedValue(false)
+  it('maps an atomic repository conflict to a conflict error', async () => {
+    validations.record.mockResolvedValue(false)
     await expect(useCase.execute(request)).rejects.toBeInstanceOf(ConflictError)
-    expect(logs.add).not.toHaveBeenCalled()
+    expect(validations.record).toHaveBeenCalledOnce()
   })
-  it('propagates an audit failure so the enclosing Case transaction rolls back', async () => {
-    logs.add.mockRejectedValue(new ConflictError('Audit failure'))
+  it('propagates a failure from the atomic review persistence operation', async () => {
+    validations.record.mockRejectedValue(new ConflictError('Review persistence failure'))
     await expect(useCase.execute(request)).rejects.toBeInstanceOf(ConflictError)
+    expect(validations.record).toHaveBeenCalledOnce()
+    expect(validations.record.mock.calls[0][0]).toMatchObject({
+      changes: { status: DocumentValidationStatus.Valid },
+      auditLog: { decision: DocumentValidationDecision.Validate },
+    })
   })
   it.each([
     true,
     false,
-  ])('publishes a private original only after its bound validation, success=%s', async (published) => {
+  ])('atomically records a private upload review, success=%s', async (published) => {
     validations.findByFileId.mockResolvedValue({ ...current, clientId: undefined })
     uploads.findByStoragePath.mockResolvedValue(
       ClientDocumentUploadFaker.fake({
@@ -213,30 +215,31 @@ describe('Confirm Received Client Document Review Use Case', () => {
         checklistItemId: request.checklistItemId,
       }),
     )
-    batches.publishChecklistUpload.mockResolvedValue(published)
+    validations.record.mockResolvedValue(published)
     const result = useCase.execute(request)
     if (published) {
       await expect(result).resolves.toBeUndefined()
-      expect(validations.replace).toHaveBeenCalledOnce()
-      expect(logs.add).toHaveBeenCalledOnce()
     } else {
       await expect(result).rejects.toBeInstanceOf(ConflictError)
-      expect(validations.replace).not.toHaveBeenCalled()
-      expect(logs.add).not.toHaveBeenCalled()
     }
-    expect(batches.publishChecklistUpload).toHaveBeenCalledExactlyOnceWith({
-      documentId: document.id,
-      fileId: current.id,
-      clientId: request.clientId,
-      caseId: request.caseId,
-      checklistItemId: request.checklistItemId,
-      reviewedAt: request.reviewedAt,
+    expect(validations.record).toHaveBeenCalledOnce()
+    expect(validations.record.mock.calls[0][0]).toMatchObject({
+      documentFileId: current.id,
+      changes: { status: DocumentValidationStatus.Valid },
+      auditLog: { decision: DocumentValidationDecision.Validate },
+      checklistUpload: {
+        uploadId: expect.any(String),
+        documentId: document.id,
+        clientId: request.clientId,
+        caseId: request.caseId,
+        checklistItemId: request.checklistItemId,
+        reviewedAt: request.reviewedAt,
+      },
     })
   })
   it('rejects an unlinked ordinary source instead of publishing it as a checklist upload', async () => {
     validations.findByFileId.mockResolvedValue({ ...current, clientId: undefined })
     await expect(useCase.execute(request)).rejects.toBeInstanceOf(ConflictError)
-    expect(batches.publishChecklistUpload).not.toHaveBeenCalled()
-    expect(validations.replace).not.toHaveBeenCalled()
+    expect(validations.record).not.toHaveBeenCalled()
   })
 })

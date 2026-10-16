@@ -11,9 +11,7 @@ import {
 } from '../domain/structures'
 import type {
   DocumentValidationsRepository,
-  DocumentValidationLogsRepository,
   DocumentValidationReviewRepository,
-  ChecklistUploadPublicationRepository,
   ClientDocumentUploadsRepository,
 } from '../interfaces'
 import type { DocumentValidationRecord } from '../domain/entities'
@@ -26,11 +24,10 @@ export class ConfirmReceivedClientDocumentReviewUseCase
 {
   constructor(
     private readonly resolve: ResolveClientDocumentUseCase,
-    private readonly validations: DocumentValidationsRepository & DocumentValidationReviewRepository,
-    private readonly logs: DocumentValidationLogsRepository,
+    private readonly validations: DocumentValidationsRepository &
+      DocumentValidationReviewRepository,
     private readonly collaborators: CollaboratorsRepository,
     private readonly access: CaseAccessProvider,
-    private readonly batches: ChecklistUploadPublicationRepository,
     private readonly uploads: ClientDocumentUploadsRepository,
   ) {}
 
@@ -41,9 +38,15 @@ export class ConfirmReceivedClientDocumentReviewUseCase
       intent: CaseAccessIntent.WriteContent,
     })
     const { current, userId } = await this.resolveReviewTarget(request)
-    await this.publishChecklistUpload(request, current)
-    await this.persistReview(request, current, userId)
-    await this.recordReview(request, current, userId)
+    const checklistUpload = await this.getChecklistUpload(request, current)
+    const recorded = await this.validations.record({
+      documentFileId: current.id,
+      changes: this.reviewChanges(request, current, userId),
+      expected: this.expectedReviewState(request, current),
+      auditLog: this.reviewAuditLog(request, current, userId),
+      checklistUpload,
+    })
+    if (!recorded) throw new ConflictError('O documento mudou. Atualize o checklist.')
   }
 
   private async resolveReviewTarget(
@@ -64,73 +67,82 @@ export class ConfirmReceivedClientDocumentReviewUseCase
     return { current, userId }
   }
 
-  private async publishChecklistUpload(
+  private async getChecklistUpload(
     request: Request,
     current: DocumentValidationRecord,
-  ): Promise<void> {
+  ): Promise<
+    | {
+        uploadId: string
+        documentId: string
+        clientId: string
+        caseId: string
+        checklistItemId: string
+        reviewedAt: Date
+      }
+    | undefined
+  > {
     const upload = await this.uploads.findByStoragePath(current.storagePath)
     if (upload && !upload.publishedAt) {
-      const published = await this.batches.publishChecklistUpload({
+      return {
+        uploadId: upload.id,
         documentId: request.documentId,
-        fileId: current.id,
         clientId: request.clientId,
         caseId: request.caseId,
         checklistItemId: request.checklistItemId,
         reviewedAt: request.reviewedAt,
-      })
-      if (!published) throw new ConflictError('O envio mudou. Atualize o checklist.')
-      return
+      }
     }
     if (!current.clientId)
       throw new ConflictError('A revisão documental está indisponível.')
+    return undefined
   }
 
-  private async persistReview(
+  private reviewChanges(
     request: Request,
     current: DocumentValidationRecord,
     userId: string,
-  ): Promise<void> {
+  ) {
     const previousLink = current.checklistLink
     const checklistItemId =
       previousLink?.caseId === request.caseId && !previousLink.checklistItemId
         ? request.checklistItemId
         : undefined
-    const replaced = await this.validations.replace(
-      current.id,
-      {
-        status: DocumentValidationStatus.Valid,
-        reviewedBy: userId,
-        reviewedAt: request.reviewedAt,
-        checklistItemId,
-        humanCorrection: {
-          ...current.humanCorrection,
-          decision: DocumentValidationDecision.Validate,
-          checklistReview: {
-            clientDocumentId: request.documentId,
-            caseId: request.caseId,
-            checklistItemId: request.checklistItemId,
-            actorId: request.actorId,
-            reviewedAt: request.reviewedAt.toISOString(),
-          },
+    return {
+      status: DocumentValidationStatus.Valid,
+      reviewedBy: userId,
+      reviewedAt: request.reviewedAt,
+      checklistItemId,
+      humanCorrection: {
+        ...current.humanCorrection,
+        decision: DocumentValidationDecision.Validate,
+        checklistReview: {
+          clientDocumentId: request.documentId,
+          caseId: request.caseId,
+          checklistItemId: request.checklistItemId,
+          actorId: request.actorId,
+          reviewedAt: request.reviewedAt.toISOString(),
         },
       },
-      {
-        clientId: request.clientId,
-        caseId: previousLink?.caseId,
-        checklistItemId: previousLink?.checklistItemId,
-        reviewedAt: current.reviewedAt,
-      },
-    )
-    if (!replaced) throw new ConflictError('O documento mudou. Atualize o checklist.')
+    }
   }
 
-  private async recordReview(
+  private expectedReviewState(request: Request, current: DocumentValidationRecord) {
+    const previousLink = current.checklistLink
+    return {
+      clientId: request.clientId,
+      caseId: previousLink?.caseId,
+      checklistItemId: previousLink?.checklistItemId,
+      reviewedAt: current.reviewedAt,
+    }
+  }
+
+  private reviewAuditLog(
     request: Request,
     current: DocumentValidationRecord,
     userId: string,
-  ): Promise<void> {
+  ) {
     const previousLink = current.checklistLink
-    await this.logs.add({
+    return {
       documentFileId: current.id,
       createdAt: request.reviewedAt,
       actorId: userId,
@@ -148,6 +160,6 @@ export class ConfirmReceivedClientDocumentReviewUseCase
         sourceCaseId: previousLink?.caseId,
         sourceChecklistItemId: previousLink?.checklistItemId,
       },
-    })
+    }
   }
 }
