@@ -16,7 +16,7 @@ import type {
 type Request = ListCaseDocumentsRequest
 export type ListCaseDocumentsResponse = readonly {
   document: Document
-  versions: readonly (DocumentVersion & { homologated: boolean })[]
+  versions: readonly (DocumentVersion & { homologated?: boolean })[]
   generation?: DocumentGeneration
 }[]
 
