@@ -1,3 +1,9 @@
+import { ConflictError as HistoryConflictError } from '#shared/domain/errors'
+import { CaseHistoryKind } from '../../domain/structures'
+import type {
+  CaseHistoriesRepository,
+  CaseHistoryTransactionProvider,
+} from '../../interfaces'
 import { describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 import { CaseTaskFaker } from '../../domain/entities/fakers'
@@ -10,16 +16,23 @@ describe('Create Case Task Use Case', () => {
   let caseTasksRepository: MockProxy<CaseTasksRepository>
   let caseMembersRepository: MockProxy<CaseMembersRepository>
   let datetimeProvider: MockProxy<DatetimeProvider>
+  let histories: MockProxy<CaseHistoriesRepository>
+  let transaction: MockProxy<CaseHistoryTransactionProvider>
 
   function createUseCase() {
     caseTasksRepository = mock<CaseTasksRepository>()
     caseMembersRepository = mock<CaseMembersRepository>()
     datetimeProvider = mock<DatetimeProvider>()
+    histories = mock<CaseHistoriesRepository>()
+    transaction = mock<CaseHistoryTransactionProvider>()
+    transaction.runInTransaction.mockImplementation((callback) => callback())
     datetimeProvider.now.mockReturnValue(new Date('2026-10-06T12:00:00.000Z'))
     return new CreateCaseTaskUseCase(
       caseTasksRepository,
       caseMembersRepository,
       datetimeProvider,
+      histories,
+      transaction,
     )
   }
 
@@ -260,5 +273,62 @@ describe('Create Case Task Use Case', () => {
         reminders: [],
       }),
     ).rejects.toThrow('data prevista é inválida')
+  })
+  it('appends a detached immutable snapshot within the transaction and propagates append failure', async () => {
+    const tasks = mock<CaseTasksRepository>()
+    const members = mock<CaseMembersRepository>()
+    const datetime = mock<DatetimeProvider>()
+    const histories = mock<CaseHistoriesRepository>()
+    const transaction = mock<CaseHistoryTransactionProvider>()
+    const now = new Date('2026-10-06T12:00:00.000Z')
+    datetime.now.mockReturnValue(now)
+    transaction.runInTransaction.mockImplementation((callback) => callback())
+    const before = CaseTaskFaker.fake({
+      caseId: 'case-1',
+      type: CaseTaskType.ProcessDeadline,
+      createdById: 'actor',
+      version: 1,
+      reminders: [],
+    })
+    const after = { ...before, version: 2 }
+    members.findActiveCollaboratorIdsByCaseId.mockResolvedValue(['actor'])
+    tasks.findById.mockResolvedValue(before)
+    tasks.add.mockResolvedValue(after)
+    tasks.replace.mockResolvedValue(after)
+    tasks.remove.mockResolvedValue(after)
+    const useCase = new CreateCaseTaskUseCase(
+      tasks,
+      members,
+      datetime,
+      histories,
+      transaction,
+    )
+
+    const request = {
+      caseId: 'case-1',
+      createdById: 'actor',
+      type: CaseTaskType.ProcessDeadline,
+      title: 'Prazo',
+      description: 'Protocolar',
+      plannedDate: '2026-10-20',
+    }
+    expect(await useCase.execute(request)).toBe(after)
+    expect(transaction.runInTransaction).toHaveBeenCalledTimes(1)
+    expect(histories.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: CaseHistoryKind.DeadlineCreated,
+        title: 'Prazo criado',
+        actorId: 'actor',
+        occurredAt: now,
+        recordedAt: now,
+        documents: [],
+      }),
+    )
+    const snapshot = histories.add.mock.calls[0]?.[0].taskChange
+    expect(snapshot?.after.taskId).toBe(after.id)
+    expect(snapshot?.after.assigneeIds).not.toBe(after.assigneeIds)
+    expect(snapshot?.after.reminders).not.toBe(after.reminders)
+    histories.add.mockRejectedValue(new HistoryConflictError('Append failed'))
+    await expect(useCase.execute(request)).rejects.toThrow(HistoryConflictError)
   })
 })

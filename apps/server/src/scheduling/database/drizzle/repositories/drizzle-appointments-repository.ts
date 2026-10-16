@@ -128,6 +128,22 @@ export class DrizzleAppointmentsRepository
     return record ? this.mapper.toDomain(record) : undefined
   }
 
+  async hasFutureScheduled(scheduleId: string, from = new Date()) {
+    const [record] = await this.executor
+      .select({ id: appointmentModel.id })
+      .from(appointmentModel)
+      .where(
+        and(
+          eq(appointmentModel.scheduleId, scheduleId),
+          eq(appointmentModel.status, 'scheduled'),
+          gt(appointmentModel.startsAt, from),
+        ),
+      )
+      .limit(1)
+
+    return Boolean(record)
+  }
+
   async listOverlapping(
     startsAt: Date,
     endsAt: Date,

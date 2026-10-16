@@ -197,6 +197,37 @@ describe('Reserve Intake Appointment Use Case', () => {
     ).rejects.toBeInstanceOf(AppointmentConflictError)
   })
 
+  it('rejects an appointment on a blocked day', async () => {
+    const schedule = ScheduleFaker.fake({
+      blockedPeriods: [
+        {
+          id: 'blocked-period-1',
+          startsOn: '2026-08-12',
+          endsOn: '2026-08-12',
+          reason: 'Férias',
+          createdAt: currentDate,
+        },
+      ],
+    })
+    const useCase = new ReserveIntakeAppointmentUseCase(
+      database,
+      idProvider,
+      datetimeProvider,
+    )
+    schedulesRepository.findByCollaboratorIdForUpdate.mockResolvedValue(schedule)
+
+    await expect(
+      useCase.execute({
+        intakeId: 'f20f3bb4-c2e5-4024-aca6-521f5f06f38a',
+        clientId: '20cb02a4-4974-4fc0-bf65-0f5881afd532',
+        assignedLawyerId: schedule.collaboratorId,
+        startsAt: new Date('2026-08-12T15:00:00.000Z'),
+      }),
+    ).rejects.toBeInstanceOf(AppointmentConflictError)
+
+    expect(appointmentsRepository.add).not.toHaveBeenCalled()
+  })
+
   it('preserves the legacy repository constructor path', async () => {
     const schedule = ScheduleFaker.fake()
     const appointment = AppointmentFaker.fake({ scheduleId: schedule.id })

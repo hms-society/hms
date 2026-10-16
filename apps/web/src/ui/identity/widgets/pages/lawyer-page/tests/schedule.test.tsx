@@ -10,6 +10,8 @@ const useConsultationMock = vi.mocked(useConsultation)
 
 describe('Schedule', () => {
   const updateDurationMock = vi.fn()
+  const updateTimeZoneMock = vi.fn()
+  const hasFutureAppointmentsMock = vi.fn()
   const updateAvailabilityMock = vi.fn()
   const addBlockMock = vi.fn()
   const removeBlockMock = vi.fn()
@@ -21,12 +23,13 @@ describe('Schedule', () => {
         appointmentDurationInMinutes: 45,
         weeklyAvailability: [
           {
-            id: 'monday',
-            name: 'Segunda-feira',
-            active: true,
-            slots: [{ start: '09:00', end: '12:00' }],
+            weekday: 'monday',
+            timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }],
           },
-          { id: 'saturday', name: 'Sábado', active: false, slots: [] },
+          {
+            weekday: 'tuesday',
+            timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }],
+          },
         ],
         blockedPeriods: [
           {
@@ -40,6 +43,9 @@ describe('Schedule', () => {
       isLoading: false,
       updateDuration: updateDurationMock,
       isUpdatingDuration: false,
+      updateTimeZone: updateTimeZoneMock,
+      isUpdatingTimeZone: false,
+      hasFutureAppointments: hasFutureAppointmentsMock,
       updateAvailability: updateAvailabilityMock,
       isUpdatingAvailability: false,
       addBlock: addBlockMock,
@@ -50,6 +56,7 @@ describe('Schedule', () => {
       setDuration: vi.fn(),
       isError: false,
       error: null,
+      refetch: vi.fn(),
     })
   })
 
@@ -64,6 +71,24 @@ describe('Schedule', () => {
     expect(screen.queryByText('Configurar agenda')).toBeNull()
   })
 
+  it('hides schedule controls when access is denied', () => {
+    const accessDeniedError = Object.assign(new Error('Agenda não autorizada.'), {
+      title: 'Acesso Negado',
+    })
+
+    useConsultationMock.mockReturnValue({
+      ...useConsultationMock(),
+      error: accessDeniedError,
+    })
+
+    render(<Schedule />)
+
+    expect(screen.getByRole('alert').textContent).toContain('Acesso não permitido')
+    expect(screen.queryByText('Duração padrão da consulta')).toBeNull()
+    expect(screen.queryByText('Disponibilidade semanal')).toBeNull()
+    expect(screen.queryByText('Adicionar bloqueio')).toBeNull()
+  })
+
   it('updates duration and toggles a day availability', async () => {
     render(<Schedule />)
 
@@ -72,10 +97,12 @@ describe('Schedule', () => {
 
     fireEvent.click(screen.getAllByRole('switch')[0])
     await waitFor(() => expect(updateAvailabilityMock).toHaveBeenCalledOnce())
-    expect(updateAvailabilityMock.mock.calls[0][0]).toEqual([
-      expect.objectContaining({ id: 'monday', active: false }),
-      expect.objectContaining({ id: 'saturday', active: false }),
-    ])
+    expect(updateAvailabilityMock.mock.calls[0][0]).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ weekday: 'monday', active: false }),
+        expect.objectContaining({ weekday: 'tuesday', active: true }),
+      ]),
+    )
   })
 
   it('adds and removes weekly slots', async () => {
@@ -97,11 +124,11 @@ describe('Schedule', () => {
     await waitFor(() => expect(updateAvailabilityMock).toHaveBeenCalledOnce())
     expect(updateAvailabilityMock.mock.calls[0][0][0]).toEqual(
       expect.objectContaining({
-        id: 'monday',
+        weekday: 'monday',
         active: true,
-        slots: [
-          { start: '09:00', end: '12:00' },
-          { start: '14:00', end: '18:00' },
+        timeRanges: [
+          { startsAt: '09:00', endsAt: '12:00' },
+          { startsAt: '14:00', endsAt: '18:00' },
         ],
       }),
     )
@@ -111,7 +138,30 @@ describe('Schedule', () => {
       .filter((button) => button.querySelector('svg.lucide-x'))
     fireEvent.click(removeButtons[0])
     await waitFor(() => expect(updateAvailabilityMock).toHaveBeenCalledTimes(2))
-    expect(updateAvailabilityMock.mock.calls[1][0][0].slots).toEqual([])
+    expect(updateAvailabilityMock.mock.calls[1][0][0].timeRanges).toEqual([
+      { startsAt: '14:00', endsAt: '18:00' },
+    ])
+  })
+
+  it('renders every day and changes only the selected day', async () => {
+    render(<Schedule />)
+
+    expect(screen.getByText('Segunda-feira')).toBeTruthy()
+    expect(screen.getByText('Terça-feira')).toBeTruthy()
+    expect(screen.getByText('Domingo')).toBeTruthy()
+
+    fireEvent.click(screen.getAllByRole('switch')[0])
+    await waitFor(() => expect(updateAvailabilityMock).toHaveBeenCalledOnce())
+
+    expect(updateAvailabilityMock.mock.calls[0][0]).toEqual(
+      expect.arrayContaining([
+        {
+          weekday: 'tuesday',
+          active: true,
+          timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }],
+        },
+      ]),
+    )
   })
 
   // CT-030: Rejeitar sobreposição
@@ -220,6 +270,40 @@ describe('Schedule', () => {
     await waitFor(() => expect(removeBlockMock).toHaveBeenCalledWith('block-1'))
   })
 
+  it('shows a validation message and does not submit an inverted date range', () => {
+    render(<Schedule />)
+
+    fireEvent.click(screen.getByRole('button', { name: /Adicionar bloqueio/ }))
+    const dateInputs = document.querySelectorAll<HTMLInputElement>('input[type="date"]')
+    fireEvent.change(dateInputs[0], { target: { value: '2026-12-20' } })
+    fireEvent.change(dateInputs[1], { target: { value: '2026-12-10' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar bloqueio' }))
+
+    expect(screen.getByRole('alert').textContent).toContain(
+      'A data final deve ser igual ou posterior à data inicial.',
+    )
+    expect(addBlockMock).not.toHaveBeenCalled()
+    expect(dateInputs[1].getAttribute('min')).toBe('2026-12-20')
+  })
+
+  it('submits a one-day blocked period when both dates are equal', async () => {
+    render(<Schedule />)
+
+    fireEvent.click(screen.getByRole('button', { name: /Adicionar bloqueio/ }))
+    const dateInputs = document.querySelectorAll<HTMLInputElement>('input[type="date"]')
+    fireEvent.change(dateInputs[0], { target: { value: '2026-12-15' } })
+    fireEvent.change(dateInputs[1], { target: { value: '2026-12-15' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar bloqueio' }))
+
+    await waitFor(() =>
+      expect(addBlockMock).toHaveBeenCalledWith({
+        startDate: '2026-12-15',
+        endDate: '2026-12-15',
+        reason: 'Bloqueio de agenda',
+      }),
+    )
+  })
+
   it('uses the default weekly schedule and date fallbacks when schedule is empty', () => {
     useConsultationMock.mockReturnValue({ ...useConsultationMock(), schedule: undefined })
 
@@ -227,5 +311,23 @@ describe('Schedule', () => {
 
     expect(screen.getByText('Domingo')).toBeTruthy()
     expect(screen.getByText('Nenhum bloqueio cadastrado para esta agenda.')).toBeTruthy()
+  })
+
+  it('asks for confirmation before changing timezone when future appointments exist', async () => {
+    hasFutureAppointmentsMock.mockResolvedValue(true)
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+      value: vi.fn(),
+      configurable: true,
+    })
+    render(<Schedule />)
+
+    fireEvent.click(screen.getByRole('combobox'))
+    fireEvent.click(await screen.findByText('Manaus (UTC−04:00)'))
+
+    expect(await screen.findByText('Alterar fuso horário da agenda?')).not.toBeNull()
+    expect(updateTimeZoneMock).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Confirmar alteração' }))
+    await waitFor(() => expect(updateTimeZoneMock).toHaveBeenCalledWith('America/Manaus'))
   })
 })

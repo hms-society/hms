@@ -2,6 +2,7 @@ import '../../configure-zod'
 
 export * from './close-formalization-without-contract-schema'
 export * from './confirm-formalization-documents-schema'
+export * from './formalization-contracting-schema'
 export * from './formalization-contract-form-answers-schema'
 export * from './formalization-issue-schema'
 export * from './formalization-response-schema'

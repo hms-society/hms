@@ -26,10 +26,40 @@ describe('Authorize Schedule Access Use Case', () => {
     ).resolves.toBeUndefined()
   })
 
+  it('rejects a lawyer attempting to access another lawyer schedule', async () => {
+    const schedule = ScheduleFaker.fake({ collaboratorId: 'lawyer-2' })
+    schedulesRepository.findById.mockResolvedValue(schedule)
+
+    await expect(
+      new AuthorizeScheduleAccessUseCase(schedulesRepository).execute({
+        actor: { collaboratorId: 'lawyer-1', profile: CollaboratorProfile.Lawyer },
+        scheduleId: schedule.id,
+        operation: 'write',
+      }),
+    ).rejects.toThrow('permissão')
+  })
+
+  it('rejects conflicting schedule and collaborator targets', async () => {
+    const schedule = ScheduleFaker.fake({ collaboratorId: 'lawyer-2' })
+    schedulesRepository.findById.mockResolvedValue(schedule)
+
+    await expect(
+      new AuthorizeScheduleAccessUseCase(schedulesRepository).execute({
+        actor: { collaboratorId: 'admin-1', profile: CollaboratorProfile.Admin },
+        scheduleId: schedule.id,
+        collaboratorId: 'lawyer-1',
+        operation: 'write',
+      }),
+    ).rejects.toThrow('permissão')
+  })
+
   it('rejects a write by a supervisor', async () => {
     await expect(
       new AuthorizeScheduleAccessUseCase(schedulesRepository).execute({
-        actor: { collaboratorId: 'supervisor-1', profile: CollaboratorProfile.Supervisor },
+        actor: {
+          collaboratorId: 'supervisor-1',
+          profile: CollaboratorProfile.Supervisor,
+        },
         collaboratorId: 'lawyer-1',
         operation: 'write',
       }),

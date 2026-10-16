@@ -39,9 +39,9 @@ export class DrizzleSchedulesRepository implements CalendarSchedulesRepository {
         schedulesToAdd.map((schedule) => ({
           id: schedule.id,
           collaboratorId: schedule.collaboratorId,
+          timeZone: schedule.timeZone,
           defaultDurationMinutes: schedule.appointmentDurationInMinutes,
           weeklyAvailability: schedule.weeklyAvailability,
-          timeZone: schedule.timeZone,
           createdAt: schedule.createdAt,
           updatedAt: schedule.updatedAt,
         })),
@@ -167,6 +167,7 @@ export class DrizzleSchedulesRepository implements CalendarSchedulesRepository {
       .insert(schedules)
       .values({
         collaboratorId: data.collaboratorId,
+        timeZone: data.timeZone,
         defaultDurationMinutes: data.defaultDurationMinutes,
         weeklyAvailability: data.weeklyAvailability,
       })
@@ -200,6 +201,18 @@ export class DrizzleSchedulesRepository implements CalendarSchedulesRepository {
     return results.map((item) => this.mapBlockedPeriod(item))
   }
 
+  async findBlockedPeriodById(
+    id: string,
+  ): Promise<(BlockedPeriod & { scheduleId: string }) | null> {
+    const [item] = await this.db
+      .select()
+      .from(blockedPeriods)
+      .where(eq(blockedPeriods.id, id))
+      .limit(1)
+
+    return item ? { ...this.mapBlockedPeriod(item), scheduleId: item.scheduleId } : null
+  }
+
   async deleteBlockedPeriod(id: string): Promise<void> {
     await this.db.delete(blockedPeriods).where(eq(blockedPeriods.id, id))
   }
@@ -220,6 +233,18 @@ export class DrizzleSchedulesRepository implements CalendarSchedulesRepository {
     const [updated] = await this.db
       .update(schedules)
       .set({ defaultDurationMinutes, updatedAt: new Date() })
+      .where(eq(schedules.id, scheduleId))
+      .returning()
+
+    return updated
+      ? this.mapToScheduleDomain({ ...updated, blockedPeriods: [] })
+      : undefined
+  }
+
+  async updateTimeZone(scheduleId: string, timeZone: string) {
+    const [updated] = await this.db
+      .update(schedules)
+      .set({ timeZone, updatedAt: new Date() })
       .where(eq(schedules.id, scheduleId))
       .returning()
 

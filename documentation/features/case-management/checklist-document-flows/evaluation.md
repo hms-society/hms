@@ -16,7 +16,18 @@ updated_at: 2026-10-16
 | Visual checks | VIS-01 Passed: fresh desktop/mobile captures inspected and independently reviewed; no blocking findings |
 | Independent review | Spec revision1 reviewed; Core/Server correction and Visual reviews current. /root/review_checklist_integrated_corrections rechecked SQL/assignment/route/alias corrections with no new findings; native source integrity guard recheck found no findings. Terminal cancellation lookup correction independently reviewed with no findings and native runtime passed |
 | Blockers | Required mutation runner unavailable; decorated DTO V8 inconsistency resolved with type-only response fields and native HTTP proof; inherited complexity baseline Failed. Formalização coverage gaps remain actionable; no blocker to continuing implementation/verification |
-| Candidate | feat/checklist-enhancement from accb71738; /home/petros/projects/hms; integrated uncommitted feature/prerequisite and preserved original UI edits |
+| Candidate | Integrated aggregate remains in `/home/petros/projects/hms` on `feat/checklist-enhancement`, with unrelated user changes preserved. Current isolated PR slice: `feat/formalization-client-documents-core` in `.worktrees/formalization-client-documents-core`, based on `origin/develop` at `62c8ba858`. |
+
+## Current delivery slice — Formalização Core and Validation (2026-10-16)
+
+This PR delivers the Formalização completion and client-document source contracts plus the Intake contracting integration in Core/Validation. A signed Formalização document becomes selectable only after the stage is completed and the authoritative signed PDF has been preserved; confirming contracting requires every requested document to be confirmed and the signed artifact to have `application/pdf`, a private file ID, and a preservation timestamp. REST adapters, database implementation and Web selector integration remain follow-on slices.
+
+| Check | Type | Status | Observed result | Artifacts / limits |
+| --- | --- | --- | --- | --- |
+| FORMALIZATION-CORE-01 | Automated | Passed | Five owning Core test files passed 48/48; the owning Validation schema test passed 3/3. Core and Validation typechecks and architecture checks passed; package lint passed. | Isolated `feat/formalization-client-documents-core` candidate. Core lint reports 25 existing warnings outside this slice; Validation lint is clean. |
+| FORMALIZATION-CORE-SIZE | Automated | Passed | TypeScript additions are within the 5,000-line PR limit. | Recalculated against current `origin/develop` using `.github/workflows/check-pr-size.yml` before publication. |
+
+The earlier `PREREQ-01`/`PREREQ-02` rows preserve the integrated prerequisite evidence and its historical limitation; the focused tests above verify the newly added completion/release behavior. This partial slice does not resolve the feature-wide mutation blocker, inherited Formalização coverage-floor gaps, or complexity baseline failures. Evaluation remains `in_progress`; no full-feature readiness is claimed.
 
 ## Progress
 
@@ -143,6 +154,10 @@ Handoff: all requested implementation and affected corrections are complete. Dir
 | Uncommitted changes | Preserve the existing staged and unstaged aggregate edits in Core, Validation, Server, Web, feature Evaluations and tooling. The signed-source integration test/fixture files and both case-management Evaluations were updated during this continuation; do not broadly stage or reset. |
 | Active processes | No task-started test, browser or application process is active. Docker was started by the user and remains available; leave it running. |
 | Blockers | AUTO-10 mutation checks remain Blocked by explicit user direction; inherited aggregate complexity/coverage gates also remain unresolved. Evaluation stays `in_progress`; no publication readiness is claimed. |
+
+## Current slice handoff — 2026-10-16
+
+The isolated candidate `feat/formalization-client-documents-core` contains only Core/Validation implementation and tests plus this Evaluation update. No task-owned test, browser or application process is active. The shared root checkout remains untouched. Next, publish this slice to `develop`; then continue its dependent Server and Web integrations as separately size-checked PRs. Mutation checks remain blocked by the user's instruction.
 | Next action | Complete the per-slice path/line manifest in `.worktrees`; preserve the source→history→checklist dependency order, then prepare and verify each slice on its own current `develop` tree before authorized publication. |
 
 ## Delivery

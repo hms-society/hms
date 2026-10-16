@@ -64,6 +64,8 @@ export const DecisionStep = forwardRef<StepRef>((_, ref) => {
     selectedLawyer,
     selectedLawyerDetails,
     selectedTime,
+    isDateBlocked,
+    isTimeUnavailable,
     virtualChannel,
     handleDateChange,
     handleDecisionChange,
@@ -276,6 +278,7 @@ export const DecisionStep = forwardRef<StepRef>((_, ref) => {
                 selected={selectedDate}
                 defaultMonth={selectedDate}
                 onSelect={handleDateChange}
+                disabled={isDateBlocked}
                 locale={ptBR}
                 className='mx-auto w-full max-w-[380px] bg-transparent p-0 [--cell-size:2rem]'
               />
@@ -297,7 +300,7 @@ export const DecisionStep = forwardRef<StepRef>((_, ref) => {
                     <button
                       type='button'
                       key={h}
-                      disabled={h === '14:00'}
+                      disabled={h === '14:00' || isTimeUnavailable(h)}
                       onClick={() => handleTimeChange(h)}
                       className={`h-11 rounded-lg border text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                         selectedTime === h

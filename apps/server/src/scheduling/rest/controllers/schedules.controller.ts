@@ -18,7 +18,10 @@ import {
   AuthorizeScheduleAccessUseCase,
 } from '@hms/core/scheduling/domain/use-cases'
 import type { CalendarDate } from '@hms/core/scheduling/domain/structures'
-import type { SchedulesRepository } from '@hms/core/scheduling/interfaces'
+import type {
+  CalendarAppointmentsRepository,
+  SchedulesRepository,
+} from '@hms/core/scheduling/interfaces'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 
 import { AuthGuard, ActiveCollaboratorGuard } from '@/identity/guards'
@@ -31,6 +34,8 @@ export class SchedulesController {
   constructor(
     @Inject(SCHEDULING_REPOSITORIES.schedules)
     private readonly schedulesRepository: SchedulesRepository,
+    @Inject(SCHEDULING_REPOSITORIES.appointments)
+    private readonly appointmentsRepository: CalendarAppointmentsRepository,
     private readonly authorizeScheduleAccessUseCase: AuthorizeScheduleAccessUseCase,
     private readonly addBlockedPeriodUseCase: AddBlockedPeriodUseCase,
   ) {}
@@ -54,6 +59,7 @@ export class SchedulesController {
       collaboratorId: string
       defaultDurationMinutes: number
       weeklyAvailability: unknown
+      timeZone: string
     },
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
@@ -107,6 +113,35 @@ export class SchedulesController {
     )
   }
 
+  @Put('time-zone')
+  async updateTimeZone(
+    @Body() body: { scheduleId: string; timeZone: string },
+    @CurrentCollaborator() collaborator: CollaboratorSummary,
+  ) {
+    await this.authorizeScheduleAccessUseCase.execute({
+      actor: collaborator,
+      scheduleId: body.scheduleId,
+      operation: 'write',
+    })
+    return this.schedulesRepository.updateTimeZone(body.scheduleId, body.timeZone)
+  }
+
+  @Get(':scheduleId/future-appointments')
+  async hasFutureAppointments(
+    @Param('scheduleId') scheduleId: string,
+    @CurrentCollaborator() collaborator: CollaboratorSummary,
+  ) {
+    await this.authorizeScheduleAccessUseCase.execute({
+      actor: collaborator,
+      scheduleId,
+      operation: 'read',
+    })
+    return {
+      hasFutureAppointments:
+        await this.appointmentsRepository.hasFutureScheduled(scheduleId),
+    }
+  }
+
   @Post('blocked-periods')
   async addBlockedPeriod(
     @Body() body: {
@@ -135,19 +170,11 @@ export class SchedulesController {
       throw new NotFoundException('Bloqueio não encontrado')
     }
 
-    const schedule = await this.schedulesRepository.findById(blockedPeriod.scheduleId)
-    if (!schedule) {
-      throw new NotFoundException('Agenda não encontrada')
-    }
-
-    if (
-      collaborator.profile !== 'lawyer' ||
-      schedule.collaboratorId !== collaborator.collaboratorId
-    ) {
-      throw new ForbiddenException(
-        'Você não tem permissão para remover bloqueios da agenda de outro profissional',
-      )
-    }
+    await this.authorizeScheduleAccessUseCase.execute({
+      actor: collaborator,
+      scheduleId: blockedPeriod.scheduleId,
+      operation: 'write',
+    })
 
     await this.schedulesRepository.deleteBlockedPeriod(id)
     return { success: true }
