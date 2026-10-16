@@ -1,0 +1,1 @@
+ALTER TYPE "public"."case_checklist_item_status" ADD VALUE 'waived' BEFORE 'validated';

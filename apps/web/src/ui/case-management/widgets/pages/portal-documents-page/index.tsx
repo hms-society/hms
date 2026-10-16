@@ -44,19 +44,26 @@ function DocumentRow({
   onUpload,
 }: {
   item: CaseChecklistItem
-  status: 'pending' | 'in_analysis' | 'validated'
+  status: CaseChecklistItem['status']
   onUpload?: (item: CaseChecklistItem) => void
 }) {
   const isPending = status === 'pending'
   const isValidated = status === 'validated'
+  const isWaived = status === 'waived'
 
   return (
     <div className='flex flex-col gap-4 border-b border-border px-5 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between'>
       <div className='flex min-w-0 items-start gap-3'>
         <div className='mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-highlight'>
           <Icon
-            name={isPending ? 'file-minus' : isValidated ? 'check-circle-2' : 'clock'}
-            className={`size-4 ${isValidated ? 'text-emerald-600' : 'text-primary'}`}
+            name={
+              isPending
+                ? 'file-minus'
+                : isValidated || isWaived
+                  ? 'check-circle-2'
+                  : 'clock'
+            }
+            className={`size-4 ${isValidated || isWaived ? 'text-emerald-600' : 'text-primary'}`}
           />
         </div>
         <div className='min-w-0'>
@@ -68,23 +75,33 @@ function DocumentRow({
               ? item.documentFileName
                 ? 'Envie uma nova versão do documento para resolver esta pendência.'
                 : 'Envie um arquivo legível para resolver esta pendência.'
-              : isValidated
-                ? item.documentFileName
-                  ? `${item.documentFileName} · documento validado`
-                  : 'Documento validado pela equipe.'
-                : item.documentFileName
-                  ? `${item.documentFileName} · aguardando análise`
-                  : 'Documento recebido e encaminhado para análise.'}
+              : isWaived
+                ? 'Requisito dispensado pela equipe.'
+                : isValidated
+                  ? item.documentFileName
+                    ? `${item.documentFileName} · documento validado`
+                    : 'Documento validado pela equipe.'
+                  : item.documentFileName
+                    ? `${item.documentFileName} · aguardando análise`
+                    : 'Documento recebido e encaminhado para análise.'}
           </p>
         </div>
       </div>
 
       <div className='flex shrink-0 items-center gap-3 sm:pl-4'>
         <Badge
-          variant={isPending ? 'waiting' : isValidated ? 'success' : 'attention'}
+          variant={
+            isPending ? 'waiting' : isValidated || isWaived ? 'success' : 'attention'
+          }
           className='rounded-pill px-2.5 py-1 text-[11px] font-semibold'
         >
-          {isPending ? 'Pendente' : isValidated ? 'Validado' : 'Em análise'}
+          {isPending
+            ? 'Pendente'
+            : isWaived
+              ? 'Dispensado'
+              : isValidated
+                ? 'Validado'
+                : 'Em análise'}
         </Badge>
         {isPending && onUpload && (
           <Button

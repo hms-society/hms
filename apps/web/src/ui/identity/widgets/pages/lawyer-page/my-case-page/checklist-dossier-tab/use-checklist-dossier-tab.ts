@@ -561,6 +561,7 @@ function getChecklistItemStatusLabel(status: CaseChecklistItem['status']) {
     pending: 'pendente',
     in_analysis: 'em análise',
     validated: 'validado',
+    waived: 'dispensado',
   }
 
   return labels[status]

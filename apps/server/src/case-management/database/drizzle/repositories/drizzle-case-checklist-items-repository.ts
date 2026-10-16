@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { CaseChecklistItemStatus } from '@hms/core/case-management/domain/structures'
 import type { CaseChecklistItemsRepository } from '@hms/core/case-management/interfaces'
-import { and, asc, eq, inArray, sql } from 'drizzle-orm'
+import { and, asc, count, eq, getTableColumns, gte, inArray, lt, sql } from 'drizzle-orm'
 
 import { DrizzleCaseChecklistItemMapper } from '@/case-management/database/drizzle/mappers'
 import {
@@ -22,6 +22,79 @@ export class DrizzleCaseChecklistItemsRepository
     private readonly mapper: DrizzleCaseChecklistItemMapper,
   ) {
     super(drizzle)
+  }
+
+  async findById(
+    caseId: string,
+    checklistItemId: string,
+  ): ReturnType<CaseChecklistItemsRepository['findById']> {
+    const [item] = await this.database
+      .select({
+        ...getTableColumns(caseChecklistItemModel),
+        checklistTemplateName: checklistTemplateModel.name,
+      })
+      .from(caseChecklistItemModel)
+      .leftJoin(
+        checklistTemplateItemModel,
+        sql`${caseChecklistItemModel.templateItemKey} = ${checklistTemplateItemModel.id}::text`,
+      )
+      .leftJoin(
+        checklistTemplateModel,
+        eq(checklistTemplateModel.id, checklistTemplateItemModel.checklistTemplateId),
+      )
+      .where(
+        and(
+          eq(caseChecklistItemModel.id, checklistItemId),
+          eq(caseChecklistItemModel.caseId, caseId),
+        ),
+      )
+      .limit(1)
+
+    return item ? this.mapper.toDomain(item) : undefined
+  }
+
+  async replace(
+    checklistItemId: string,
+    changes: Parameters<CaseChecklistItemsRepository['replace']>[1],
+    expected: Parameters<CaseChecklistItemsRepository['replace']>[2],
+  ): ReturnType<CaseChecklistItemsRepository['replace']> {
+    const revision = new Date(expected.updatedAt)
+    const nextRevision = new Date(revision.getTime() + 1)
+    const conditions = [
+      eq(caseChecklistItemModel.id, checklistItemId),
+      eq(caseChecklistItemModel.caseId, expected.caseId),
+      gte(caseChecklistItemModel.updatedAt, revision),
+      lt(caseChecklistItemModel.updatedAt, nextRevision),
+    ]
+
+    if (expected.clientDocumentId) {
+      conditions.push(
+        eq(caseChecklistItemModel.clientDocumentId, expected.clientDocumentId),
+      )
+    }
+
+    const [item] = await this.database
+      .update(caseChecklistItemModel)
+      .set({
+        status: changes.status,
+        waiverJustification: changes.waiver?.justification ?? null,
+        waiverActorId: changes.waiver?.actorId ?? null,
+        waiverActorName: changes.waiver?.actorName ?? null,
+        waivedAt: changes.waiver?.grantedAt ?? null,
+        clientDocumentId: changes.documentReference?.clientDocumentId ?? null,
+        documentSource: changes.documentReference?.source ?? null,
+        documentAttachedAt: changes.documentReference?.attachedAt ?? null,
+        documentAttachedBy: changes.documentReference?.attachedBy ?? null,
+        documentFileName: changes.documentFileName ?? null,
+        documentFileId: changes.documentFileId ?? null,
+        validatedAt: changes.validatedAt ?? null,
+        validatedBy: changes.validatedBy ?? null,
+        updatedAt: changes.updatedAt,
+      })
+      .where(and(...conditions))
+      .returning()
+
+    return item ? this.mapper.toDomain(item) : undefined
   }
 
   async addMany(
@@ -51,6 +124,14 @@ export class DrizzleCaseChecklistItemsRepository
         status: caseChecklistItemModel.status,
         documentFileId: caseChecklistItemModel.documentFileId,
         documentFileName: caseChecklistItemModel.documentFileName,
+        waiverJustification: caseChecklistItemModel.waiverJustification,
+        waiverActorId: caseChecklistItemModel.waiverActorId,
+        waiverActorName: caseChecklistItemModel.waiverActorName,
+        waivedAt: caseChecklistItemModel.waivedAt,
+        clientDocumentId: caseChecklistItemModel.clientDocumentId,
+        documentSource: caseChecklistItemModel.documentSource,
+        documentAttachedAt: caseChecklistItemModel.documentAttachedAt,
+        documentAttachedBy: caseChecklistItemModel.documentAttachedBy,
         validatedAt: caseChecklistItemModel.validatedAt,
         validatedBy: caseChecklistItemModel.validatedBy,
         createdAt: caseChecklistItemModel.createdAt,
@@ -72,6 +153,27 @@ export class DrizzleCaseChecklistItemsRepository
     return items.map((item) => this.mapper.toDomain(item))
   }
 
+  async listStatusCountsByCaseIds(
+    caseIds: readonly string[],
+  ): ReturnType<CaseChecklistItemsRepository['listStatusCountsByCaseIds']> {
+    if (caseIds.length === 0) return []
+
+    return this.database
+      .select({
+        caseId: caseChecklistItemModel.caseId,
+        isRequired: caseChecklistItemModel.isRequired,
+        status: caseChecklistItemModel.status,
+        count: count(),
+      })
+      .from(caseChecklistItemModel)
+      .where(inArray(caseChecklistItemModel.caseId, [...caseIds]))
+      .groupBy(
+        caseChecklistItemModel.caseId,
+        caseChecklistItemModel.isRequired,
+        caseChecklistItemModel.status,
+      )
+  }
+
   async findByDocumentFileId(
     documentFileId: string,
   ): ReturnType<CaseChecklistItemsRepository['findByDocumentFileId']> {
@@ -85,6 +187,14 @@ export class DrizzleCaseChecklistItemsRepository
         status: caseChecklistItemModel.status,
         documentFileId: caseChecklistItemModel.documentFileId,
         documentFileName: caseChecklistItemModel.documentFileName,
+        waiverJustification: caseChecklistItemModel.waiverJustification,
+        waiverActorId: caseChecklistItemModel.waiverActorId,
+        waiverActorName: caseChecklistItemModel.waiverActorName,
+        waivedAt: caseChecklistItemModel.waivedAt,
+        clientDocumentId: caseChecklistItemModel.clientDocumentId,
+        documentSource: caseChecklistItemModel.documentSource,
+        documentAttachedAt: caseChecklistItemModel.documentAttachedAt,
+        documentAttachedBy: caseChecklistItemModel.documentAttachedBy,
         validatedAt: caseChecklistItemModel.validatedAt,
         validatedBy: caseChecklistItemModel.validatedBy,
         createdAt: caseChecklistItemModel.createdAt,

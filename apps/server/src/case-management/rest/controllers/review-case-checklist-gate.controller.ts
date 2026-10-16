@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
 import type {
+  CaseAccessProvider,
   CaseChecklistItemsRepository,
   LegalCasesRepository,
 } from '@hms/core/case-management/interfaces'
@@ -19,6 +20,7 @@ import { reviewCaseChecklistGateSchema } from '@hms/validation/case-management'
 import { createZodDto, ZodValidationPipe } from 'nestjs-zod'
 
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
+import { CASE_MANAGEMENT_ACCESS } from '@/case-management/constants/case-management-access'
 import { CasesController } from '@/case-management/decorators'
 import { LegalCaseResponseDto } from '@/case-management/rest/dtos'
 import { CurrentCollaborator } from '@/identity/decorators'
@@ -39,10 +41,12 @@ export class ReviewCaseChecklistGateController {
     legalCasesRepository: LegalCasesRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.caseChecklistItems)
     checklistItemsRepository: CaseChecklistItemsRepository,
+    @Inject(CASE_MANAGEMENT_ACCESS.access) accessProvider: CaseAccessProvider,
   ) {
     this.useCase = new ReviewCaseChecklistGateUseCase(
       legalCasesRepository,
       checklistItemsRepository,
+      accessProvider,
     )
   }
 
