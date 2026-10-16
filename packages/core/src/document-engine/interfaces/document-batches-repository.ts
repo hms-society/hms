@@ -36,8 +36,9 @@ export interface DocumentBatchesRepository {
     clientId: string,
     startDate: Date,
     endDate: Date,
+    channel?: DocumentBatchChannel,
   ): Promise<DocumentBatch | undefined>
-  findById(clientId: string): Promise<DocumentBatch[]>
+  findById(clientId: string, includeDuplicates?: boolean): Promise<DocumentBatch[]>
   findTriageBatches(params?: {
     page?: number
     limit?: number

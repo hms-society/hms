@@ -24,6 +24,8 @@ describe('useConsultation', () => {
     createSchedule: vi.fn(),
     updateDuration: vi.fn(),
     updateAvailability: vi.fn(),
+    updateTimeZone: vi.fn(),
+    hasFutureAppointments: vi.fn(),
     addBlock: vi.fn(),
     removeBlock: vi.fn(),
   }
@@ -49,6 +51,10 @@ describe('useConsultation', () => {
     schedulingService.updateAvailability.mockResolvedValue(new RestResponse({ body: {} }))
     schedulingService.addBlock.mockResolvedValue(new RestResponse({ body: {} }))
     schedulingService.removeBlock.mockResolvedValue(new RestResponse({ body: {} }))
+    schedulingService.updateTimeZone.mockResolvedValue(new RestResponse({ body: {} }))
+    schedulingService.hasFutureAppointments.mockResolvedValue(
+      new RestResponse({ body: { hasFutureAppointments: false } }),
+    )
     schedulingService.createSchedule.mockResolvedValue(
       new RestResponse({ body: { id: 'created-schedule' } }),
     )
@@ -98,6 +104,7 @@ describe('useConsultation', () => {
       collaboratorId: 'collaborator-1',
       defaultDurationMinutes: 45,
       weeklyAvailability: [],
+      timeZone: 'America/Sao_Paulo',
     })
     expect(schedulingService.updateDuration).toHaveBeenCalledWith('created-schedule', 30)
   })
@@ -153,6 +160,16 @@ describe('useConsultation', () => {
       await expect(result.current.updateAvailability([])).rejects.toThrow('update failed')
     })
     await waitFor(() => expect(result.current.isUpdatingAvailability).toBe(false))
+  })
+
+  it('checks whether the schedule has future appointments', async () => {
+    schedulingService.hasFutureAppointments.mockResolvedValueOnce(
+      new RestResponse({ body: { hasFutureAppointments: true } }),
+    )
+    const { result } = renderHook(() => useConsultation(), { wrapper: createWrapper() })
+
+    await expect(result.current.hasFutureAppointments()).resolves.toBe(true)
+    expect(schedulingService.hasFutureAppointments).toHaveBeenCalledWith('schedule-1')
   })
 })
 

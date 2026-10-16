@@ -111,6 +111,12 @@ export class ReserveIntakeAppointmentUseCase implements UseCase<Request, Respons
       return existingAppointment
     }
 
+    const appointmentDate = getLocalDate(request.startsAt, schedule.timeZone)
+    const isBlocked = schedule.blockedPeriods.some(
+      (period) => period.startsOn <= appointmentDate && period.endsOn >= appointmentDate,
+    )
+    if (isBlocked) throw new AppointmentConflictError()
+
     const endsAt = new Date(
       request.startsAt.getTime() + schedule.appointmentDurationInMinutes * 60_000,
     )
@@ -136,4 +142,15 @@ export class ReserveIntakeAppointmentUseCase implements UseCase<Request, Respons
       updatedAt: now,
     })
   }
+}
+
+function getLocalDate(date: Date, timeZone: string): `${number}-${number}-${number}` {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date)
+  const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]))
+  return `${values.year}-${values.month}-${values.day}` as `${number}-${number}-${number}`
 }

@@ -26,7 +26,7 @@ describe('List Calendar Use Case', () => {
     consultationProvider = mock<CalendarConsultationProvider>()
   })
 
-  it('lists local appointments and hides blocks when a client filter is active', async () => {
+  it('lists local appointments and keeps blocks visible when a client filter is active', async () => {
     const schedule = ScheduleFaker.fake({ collaboratorId: 'lawyer-1' })
     const appointment = AppointmentFaker.fake({
       scheduleId: schedule.id,
@@ -67,8 +67,16 @@ describe('List Calendar Use Case', () => {
       },
     })
 
-    expect(events).toHaveLength(1)
-    expect(events[0]).toMatchObject({ kind: 'appointment', clientName: 'Client' })
+    expect(events).toHaveLength(2)
+    expect(events).toContainEqual(
+      expect.objectContaining({ kind: 'appointment', clientName: 'Client' }),
+    )
+    expect(events).toContainEqual(
+      expect.objectContaining({
+        kind: 'block',
+        blockedPeriodId: 'block-1',
+      }),
+    )
   })
 
   it('applies the lawyer filter before loading schedules in a multi-lawyer calendar', async () => {
@@ -269,13 +277,25 @@ describe('List Calendar Use Case', () => {
       actor,
       query: { view: 'week', date: '2026-08-10', event: 'blocked' },
     })
+    const blockedWithClient = await useCase.execute({
+      actor,
+      query: {
+        view: 'week',
+        date: '2026-08-10',
+        event: 'blocked',
+        clientId: 'client-1',
+      },
+    })
 
     expect(noShows).toMatchObject([
       { kind: 'appointment', appointmentId: appointment.id },
     ])
     expect(blocked).toMatchObject([{ kind: 'block', blockedPeriodId: block.id }])
-    expect(appointmentsRepository.listOverlapping).toHaveBeenCalledTimes(2)
-    expect(consultationProvider.getByAppointmentIds).toHaveBeenCalledTimes(2)
+    expect(blockedWithClient).toMatchObject([
+      { kind: 'block', blockedPeriodId: block.id },
+    ])
+    expect(appointmentsRepository.listOverlapping).toHaveBeenCalledTimes(3)
+    expect(consultationProvider.getByAppointmentIds).toHaveBeenCalledTimes(3)
   })
 
   it('returns early for a lawyer filtering another calendar and omits unavailable projections', async () => {

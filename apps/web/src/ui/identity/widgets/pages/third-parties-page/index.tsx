@@ -144,22 +144,22 @@ export const ThirdPartiesPage = ({ onCreateThirdParty }: ThirdPartiesPageProps) 
             </p>
           </div>
         ) : (
-          <div className='overflow-x-auto'>
-            <Table className='min-w-[54rem]'>
+          <div className='overflow-x-hidden'>
+            <Table className='w-full table-fixed'>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Terceiro</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Documento</TableHead>
-                  <TableHead className='min-w-64'>Vínculo</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className='w-44 text-center'>Ações</TableHead>
+                  <TableHead className='w-[18%]'>Terceiro</TableHead>
+                  <TableHead className='w-[14%]'>Tipo</TableHead>
+                  <TableHead className='w-[20%]'>Documento</TableHead>
+                  <TableHead className='w-[24%]'>Vínculo</TableHead>
+                  <TableHead className='w-[10%]'>Status</TableHead>
+                  <TableHead className='w-[14%] text-center'>Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredThirdParties.map((thirdParty) => (
                   <TableRow key={thirdParty.id}>
-                    <TableCell>
+                    <TableCell className='whitespace-normal break-words'>
                       <div className='font-medium'>
                         {thirdParty.tradeName ?? thirdParty.legalName}
                       </div>
@@ -169,15 +169,17 @@ export const ThirdPartiesPage = ({ onCreateThirdParty }: ThirdPartiesPageProps) 
                         </div>
                       )}
                     </TableCell>
-                    <TableCell>{getTypeLabel(thirdParty.type)}</TableCell>
-                    <TableCell>
+                    <TableCell className='whitespace-normal break-words'>
+                      {getTypeLabel(thirdParty.type)}
+                    </TableCell>
+                    <TableCell className='whitespace-normal break-words'>
                       <div>{thirdParty.taxId.value}</div>
                       <div className='text-xs text-muted-foreground'>
                         {getDocumentTypeLabel(thirdParty.taxId.type)}
                       </div>
                     </TableCell>
-                    <TableCell className='max-w-72 whitespace-normal break-words text-sm leading-6 text-muted-foreground'>
-                      <div className='flex max-w-72 flex-wrap gap-1.5'>
+                    <TableCell className='whitespace-normal break-words text-sm leading-6 text-muted-foreground'>
+                      <div className='flex flex-wrap gap-1.5'>
                         {getRelationshipLabels(thirdParty.relationshipTypes).map(
                           (relationship) => (
                             <span
@@ -190,7 +192,7 @@ export const ThirdPartiesPage = ({ onCreateThirdParty }: ThirdPartiesPageProps) 
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className='whitespace-normal'>
                       <Badge
                         variant={
                           thirdParty.status === ThirdPartyStatus.Active
@@ -203,7 +205,7 @@ export const ThirdPartiesPage = ({ onCreateThirdParty }: ThirdPartiesPageProps) 
                           : 'Inativo'}
                       </Badge>
                     </TableCell>
-                    <TableCell className='w-44 text-center align-middle'>
+                    <TableCell className='whitespace-nowrap text-center align-middle'>
                       <div className='flex items-center justify-center gap-2'>
                         <Button
                           type='button'
