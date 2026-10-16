@@ -38,15 +38,21 @@ export class UpdateCaseTaskUseCase implements UseCase<Request, CaseTask> {
     private readonly caseTasksRepository: CaseTasksRepository,
     private readonly caseMembersRepository: CaseMembersRepository,
     private readonly datetimeProvider: DatetimeProvider,
-    private readonly histories: CaseHistoriesRepository,
-    private readonly transaction: CaseHistoryTransactionProvider,
+    private readonly histories?: CaseHistoriesRepository,
+    private readonly transaction?: CaseHistoryTransactionProvider,
   ) {}
 
   async execute(request: Request): Promise<CaseTask> {
-    return this.transaction.runInTransaction(() => this.persistWithHistory(request))
+    if (!this.histories || !this.transaction) {
+      return this.persistWithHistory(request, false)
+    }
+    return this.transaction.runInTransaction(() => this.persistWithHistory(request, true))
   }
 
-  private async persistWithHistory(request: Request): Promise<CaseTask> {
+  private async persistWithHistory(
+    request: Request,
+    recordHistory: boolean,
+  ): Promise<CaseTask> {
     const currentTask = await this.findWritableTask(request)
     const {
       caseId: _caseId,
@@ -72,7 +78,9 @@ export class UpdateCaseTaskUseCase implements UseCase<Request, CaseTask> {
       throw new ConflictError('A tarefa ou prazo foi alterada por outra pessoa.')
     }
 
-    await this.appendHistory(updatedTask, request.actorId, now, currentTask)
+    if (recordHistory) {
+      await this.appendHistory(updatedTask, request.actorId, now, currentTask)
+    }
     return updatedTask
   }
 
@@ -209,6 +217,8 @@ export class UpdateCaseTaskUseCase implements UseCase<Request, CaseTask> {
     now: Date,
     before: CaseTask,
   ): Promise<void> {
+    const histories = this.histories
+    if (!histories) return
     const isDeadline = task.type === HistoryTaskType.ProcessDeadline
     const isCompleted = task.status === CaseTaskStatus.Completed
     const kind = isCompleted
@@ -218,7 +228,7 @@ export class UpdateCaseTaskUseCase implements UseCase<Request, CaseTask> {
       : isDeadline
         ? CaseHistoryKind.DeadlineUpdated
         : CaseHistoryKind.TaskUpdated
-    await this.histories.add({
+    await histories.add({
       caseId: task.caseId,
       kind,
       category: isDeadline ? CaseHistoryCategory.Deadlines : CaseHistoryCategory.Tasks,

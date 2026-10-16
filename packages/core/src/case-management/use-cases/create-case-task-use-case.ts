@@ -43,15 +43,21 @@ export class CreateCaseTaskUseCase implements UseCase<Request, CaseTask> {
     private readonly caseTasksRepository: CaseTasksRepository,
     private readonly caseMembersRepository: CaseMembersRepository,
     private readonly datetimeProvider: DatetimeProvider,
-    private readonly histories: CaseHistoriesRepository,
-    private readonly transaction: CaseHistoryTransactionProvider,
+    private readonly histories?: CaseHistoriesRepository,
+    private readonly transaction?: CaseHistoryTransactionProvider,
   ) {}
 
   async execute(request: Request): Promise<CaseTask> {
-    return this.transaction.runInTransaction(() => this.persistWithHistory(request))
+    if (!this.histories || !this.transaction) {
+      return this.persistWithHistory(request, false)
+    }
+    return this.transaction.runInTransaction(() => this.persistWithHistory(request, true))
   }
 
-  private async persistWithHistory(request: Request): Promise<CaseTask> {
+  private async persistWithHistory(
+    request: Request,
+    recordHistory: boolean,
+  ): Promise<CaseTask> {
     const description = request.description.trim()
     const title = request.title.trim()
     const customType = request.customType?.trim() || undefined
@@ -77,7 +83,7 @@ export class CreateCaseTaskUseCase implements UseCase<Request, CaseTask> {
       assigneeIds,
     })
     const createdTask = await this.caseTasksRepository.add(creation)
-    await this.appendHistory(createdTask, request.createdById, now)
+    if (recordHistory) await this.appendHistory(createdTask, request.createdById, now)
     return createdTask
   }
 
@@ -172,11 +178,13 @@ export class CreateCaseTaskUseCase implements UseCase<Request, CaseTask> {
     now: Date,
     before?: CaseTask,
   ): Promise<void> {
+    const histories = this.histories
+    if (!histories) return
     const isDeadline = task.type === HistoryTaskType.ProcessDeadline
     const kind = isDeadline
       ? CaseHistoryKind.DeadlineCreated
       : CaseHistoryKind.TaskCreated
-    await this.histories.add({
+    await histories.add({
       caseId: task.caseId,
       kind,
       category: isDeadline ? CaseHistoryCategory.Deadlines : CaseHistoryCategory.Tasks,

@@ -32,15 +32,21 @@ export class DeleteCaseTaskUseCase implements UseCase<Request, CaseTask> {
     private readonly caseTasksRepository: CaseTasksRepository,
     private readonly caseMembersRepository: CaseMembersRepository,
     private readonly datetimeProvider: DatetimeProvider,
-    private readonly histories: CaseHistoriesRepository,
-    private readonly transaction: CaseHistoryTransactionProvider,
+    private readonly histories?: CaseHistoriesRepository,
+    private readonly transaction?: CaseHistoryTransactionProvider,
   ) {}
 
   async execute(request: Request): Promise<CaseTask> {
-    return this.transaction.runInTransaction(() => this.persistWithHistory(request))
+    if (!this.histories || !this.transaction) {
+      return this.persistWithHistory(request, false)
+    }
+    return this.transaction.runInTransaction(() => this.persistWithHistory(request, true))
   }
 
-  private async persistWithHistory(request: Request): Promise<CaseTask> {
+  private async persistWithHistory(
+    request: Request,
+    recordHistory: boolean,
+  ): Promise<CaseTask> {
     const currentTask = await this.caseTasksRepository.findById(request.caseTaskId)
     if (!currentTask || currentTask.caseId !== request.caseId) {
       throw new NotFoundError('Tarefa ou prazo não encontrado.')
@@ -67,7 +73,9 @@ export class DeleteCaseTaskUseCase implements UseCase<Request, CaseTask> {
       throw new ConflictError('A tarefa ou prazo foi alterada por outra pessoa.')
     }
 
-    await this.appendHistory(deletedTask, request.actorId, now, currentTask)
+    if (recordHistory) {
+      await this.appendHistory(deletedTask, request.actorId, now, currentTask)
+    }
     return deletedTask
   }
 
@@ -77,11 +85,13 @@ export class DeleteCaseTaskUseCase implements UseCase<Request, CaseTask> {
     now: Date,
     before: CaseTask,
   ): Promise<void> {
+    const histories = this.histories
+    if (!histories) return
     const isDeadline = task.type === HistoryTaskType.ProcessDeadline
     const kind = isDeadline
       ? CaseHistoryKind.DeadlineCancelled
       : CaseHistoryKind.TaskDeleted
-    await this.histories.add({
+    await histories.add({
       caseId: task.caseId,
       kind,
       category: isDeadline ? CaseHistoryCategory.Deadlines : CaseHistoryCategory.Tasks,
