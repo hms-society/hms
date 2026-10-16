@@ -240,13 +240,33 @@ export class DrizzleSchedulesRepository implements CalendarSchedulesRepository {
       collaboratorId: schedule.collaboratorId,
       timeZone: schedule.timeZone,
       appointmentDurationInMinutes: schedule.defaultDurationMinutes,
-      weeklyAvailability: (schedule.weeklyAvailability ?? []) as WeeklyAvailability[],
+      weeklyAvailability: this.mapWeeklyAvailability(schedule.weeklyAvailability),
       blockedPeriods: schedule.blockedPeriods.map((blockedPeriod) =>
         this.mapBlockedPeriod(blockedPeriod),
       ),
       createdAt: schedule.createdAt,
       updatedAt: schedule.updatedAt,
     }
+  }
+
+  private mapWeeklyAvailability(raw: unknown): WeeklyAvailability[] {
+    if (!Array.isArray(raw)) return []
+    return raw.map((item: any) => {
+      const weekday = item.weekday ?? item.id
+      const timeRanges =
+        item.timeRanges ??
+        (item.active === false
+          ? []
+          : (item.slots ?? []).map((s: any) => ({
+              startsAt: s.start ?? s.startsAt,
+              endsAt: s.end ?? s.endsAt,
+            })))
+      return {
+        ...item,
+        weekday,
+        timeRanges,
+      }
+    })
   }
 
   private mapBlockedPeriod(item: typeof blockedPeriods.$inferSelect): BlockedPeriod {

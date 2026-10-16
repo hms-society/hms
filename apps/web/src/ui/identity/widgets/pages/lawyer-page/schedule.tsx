@@ -28,6 +28,48 @@ const DEFAULT_WEEKLY_AVAILABILITY = [
   { id: 'sunday', name: 'Domingo', active: false, slots: [] },
 ]
 
+function normalizeWeeklyAvailability(raw: any[]) {
+  if (!Array.isArray(raw) || raw.length === 0) {
+    return DEFAULT_WEEKLY_AVAILABILITY
+  }
+
+  const hasIdFormat = raw.every((item: any) => typeof item.id === 'string')
+  if (hasIdFormat) {
+    return raw
+  }
+
+  return DEFAULT_WEEKLY_AVAILABILITY.map((defaultDay) => {
+    const found = raw.find(
+      (item: any) => item.weekday === defaultDay.id || item.id === defaultDay.id,
+    )
+    if (!found) {
+      return { ...defaultDay, active: false, slots: [] }
+    }
+
+    const slots =
+      found.slots && Array.isArray(found.slots)
+        ? found.slots.map((s: any) => ({
+            start: s.start ?? s.startsAt ?? '',
+            end: s.end ?? s.endsAt ?? '',
+          }))
+        : found.timeRanges && Array.isArray(found.timeRanges)
+          ? found.timeRanges.map((r: any) => ({
+              start: r.startsAt ?? r.start ?? '',
+              end: r.endsAt ?? r.end ?? '',
+            }))
+          : []
+
+    const active = typeof found.active === 'boolean' ? found.active : slots.length > 0
+
+    return {
+      id: defaultDay.id,
+      name: defaultDay.name,
+      active,
+      slots,
+    }
+  })
+}
+
 function formatBlockedDateRange(startsOn?: string, endsOn?: string) {
   if (!startsOn || startsOn.includes('NaN') || startsOn === 'Data inválida') {
     return 'Data inválida'
@@ -91,8 +133,7 @@ export const Schedule = () => {
 
   const rawAvailability =
     (schedule as any)?.weeklyAvailability ?? (schedule as any)?.availability ?? []
-  const weeklyAvailability =
-    rawAvailability.length > 0 ? rawAvailability : DEFAULT_WEEKLY_AVAILABILITY
+  const weeklyAvailability = normalizeWeeklyAvailability(rawAvailability)
   const blockedPeriods = schedule?.blockedPeriods ?? []
 
   const currentDuration =

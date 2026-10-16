@@ -15,11 +15,20 @@ export const availabilitySlotSchema = z
 
 export const dayAvailabilitySchema = z
   .object({
-    id: z.string(),
+    id: z.string().optional(),
+    weekday: z.string().optional(),
     name: z.string().optional(),
-    active: z.boolean(),
+    active: z.boolean().default(true),
     slots: z.array(availabilitySlotSchema).default([]),
   })
+  .refine((day) => Boolean(day.id || day.weekday), {
+    message: 'Identificador do dia é obrigatório',
+    path: ['id'],
+  })
+  .transform((day) => ({
+    ...day,
+    id: (day.id ?? day.weekday) as string,
+  }))
   .superRefine((day, ctx) => {
     if (!day.active || !day.slots || day.slots.length <= 1) {
       return

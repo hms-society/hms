@@ -137,4 +137,20 @@ describe('weeklyAvailabilitySchema', () => {
       expect(parsed.error.issues[0].message).toBe('Os horários não podem se sobrepor')
     }
   })
+
+  it('accepts weekday as day identifier', () => {
+    const data = [
+      {
+        weekday: 'monday',
+        active: true,
+        slots: [{ start: '09:00', end: '12:00' }],
+      },
+    ]
+
+    const parsed = weeklyAvailabilitySchema.safeParse(data)
+    expect(parsed.success).toBe(true)
+    if (parsed.success) {
+      expect(parsed.data[0].id).toBe('monday')
+    }
+  })
 })
