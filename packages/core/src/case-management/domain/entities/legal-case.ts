@@ -3,6 +3,7 @@ import type { CaseChecklistGate } from '../structures/case-checklist-gate'
 import type { CaseDossierGate } from '../structures/case-dossier-gate'
 import type {
   LegalCaseLifecycleStatus,
+  LegalCaseStatus,
   LegalCaseWorkflowStage,
 } from '../structures/legal-case-status'
 
@@ -14,6 +15,8 @@ export type LegalCase = Entity & {
   legalTopicId: string
   title: string
   description?: string | null
+  /** @deprecated Use lifecycleStatus and workflowStage for the case state. */
+  status: LegalCaseStatus
   lifecycleStatus: LegalCaseLifecycleStatus
   workflowStage?: LegalCaseWorkflowStage
   teamVersion?: number
@@ -28,5 +31,5 @@ export type LegalCase = Entity & {
 
 export type LegalCaseCreation = Omit<
   LegalCase,
-  'checklistGate' | 'createdAt' | 'dossierGate' | 'id' | 'updatedAt'
+  'checklistGate' | 'createdAt' | 'dossierGate' | 'id' | 'status' | 'updatedAt'
 >

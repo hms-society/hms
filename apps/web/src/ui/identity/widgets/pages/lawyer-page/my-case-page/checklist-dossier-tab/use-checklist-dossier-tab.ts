@@ -143,11 +143,6 @@ export function useChecklistDossierTab({
     validatedItemsCount,
   } = useCaseChecklist({ caseId, fallbackChecklist: checklistItems })
   const persistedCase = reviewedCase ?? caseDetails
-  const persistedWorkflowStage = persistedCase
-    ? 'status' in persistedCase
-      ? persistedCase.status
-      : persistedCase.workflowStage
-    : undefined
   const checklistGateDecision = persistedCase?.checklistGate.decision
   const checklistGateRemarks = persistedCase?.checklistGate.remarks
   const checklistGateAuditLabel =
@@ -166,7 +161,7 @@ export function useChecklistDossierTab({
   const canStartLegalWriting = Boolean(
     persistedCase?.checklistGate.decision &&
       persistedCase.dossierGate.homologatedAt &&
-      persistedWorkflowStage === LegalCaseStatus.LegalProduction,
+      persistedCase.status === LegalCaseStatus.LegalProduction,
   )
   const hasChecklistDecision = Boolean(checklistGateDecision)
   const isChecklistApproved =
@@ -185,7 +180,7 @@ export function useChecklistDossierTab({
     !persistedCase?.dossierGate.homologatedAt &&
       (checklistGateDecision === CaseChecklistGateDecision.Approved ||
         checklistGateDecision === CaseChecklistGateDecision.ApprovedWithException) &&
-      persistedWorkflowStage === LegalCaseStatus.ReadyForLegalProduction &&
+      persistedCase?.status === LegalCaseStatus.ReadyForLegalProduction &&
       (isChecklistComplete ||
         checklistGateDecision === CaseChecklistGateDecision.ApprovedWithException),
   )

@@ -111,21 +111,12 @@ export const CASE_STAGES: CaseStage[] = [
   { icon: 'check', label: 'Encerramento' },
 ]
 
-const CASE_STATUS_LABELS: Record<LegalCaseStatus, string> = {
-  [LegalCaseStatus.Documentation]: 'Documentação em formação',
-  [LegalCaseStatus.ReadyForLegalProduction]: 'Em andamento',
-  [LegalCaseStatus.LegalProduction]: 'Em produção jurídica',
-  [LegalCaseStatus.ProtocolDelivery]: 'Protocolo e entrega',
-  [LegalCaseStatus.Execution]: 'Execução',
-  [LegalCaseStatus.Closed]: 'Encerrado',
-}
-
 export const getCaseStages = (caseStatus?: string): CaseStage[] => {
-  const activeStageIndex = getActiveStageIndex(caseStatus)
-  const isCaseClosed = caseStatus === LegalCaseStatus.Closed
+  const isInLegalProduction = caseStatus === LegalCaseStatus.LegalProduction
+  const activeStageIndex = isInLegalProduction ? 1 : 0
 
   return CASE_STAGES.map((stage, index) => {
-    if (index < activeStageIndex) {
+    if (index === 0 && isInLegalProduction) {
       return {
         ...stage,
         icon: 'check',
@@ -134,39 +125,8 @@ export const getCaseStages = (caseStatus?: string): CaseStage[] => {
       }
     }
 
-    if (index === activeStageIndex) {
-      return {
-        ...stage,
-        icon: isCaseClosed ? 'check' : stage.icon,
-        status: isCaseClosed ? 'Concluído' : stage.status,
-        isActive: true,
-      }
-    }
-
-    return { ...stage, isActive: false }
+    return { ...stage, isActive: index === activeStageIndex }
   })
-}
-
-export const getCaseStatusLabel = (caseStatus?: string): string => {
-  if (!caseStatus) return 'Carregando status…'
-
-  return CASE_STATUS_LABELS[caseStatus as LegalCaseStatus] ?? 'Status indisponível'
-}
-
-function getActiveStageIndex(caseStatus?: string) {
-  switch (caseStatus) {
-    case LegalCaseStatus.ReadyForLegalProduction:
-    case LegalCaseStatus.LegalProduction:
-      return 1
-    case LegalCaseStatus.ProtocolDelivery:
-      return 2
-    case LegalCaseStatus.Execution:
-      return 3
-    case LegalCaseStatus.Closed:
-      return 4
-    default:
-      return 0
-  }
 }
 
 export const TEAM_MEMBERS = CASE_TEAM.map(({ className, initials }) => ({

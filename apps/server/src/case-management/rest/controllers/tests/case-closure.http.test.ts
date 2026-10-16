@@ -156,7 +156,7 @@ describe('Case closure HTTP flow [GET/POST /cases/:caseId/closure]', () => {
       .expect(200)
     expect(closed.body).toMatchObject({
       kind: 'closed',
-      legalCase: { lifecycleStatus: 'closed' },
+      legalCase: { lifecycleStatus: 'closed', status: LegalCaseStatus.Documentation },
       closure: {
         outcome: 'agreement',
         notes: 'Acordo confirmado.',

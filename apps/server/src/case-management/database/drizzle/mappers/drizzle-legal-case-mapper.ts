@@ -17,6 +17,7 @@ export class DrizzleLegalCaseMapper {
       legalTopicId: record.legalTopicId,
       title: record.title,
       description: record.description ?? undefined,
+      status: record.status,
       lifecycleStatus: record.lifecycleStatus ?? 'active',
       workflowStage:
         record.workflowStage && record.workflowStage !== 'closed'
