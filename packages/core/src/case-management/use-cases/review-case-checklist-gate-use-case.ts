@@ -9,6 +9,8 @@ import {
 } from '../domain/structures'
 import type { LegalCasesRepository } from '../interfaces'
 import type { CaseChecklistItemsRepository } from '../interfaces'
+import type { CaseAccessProvider } from '../interfaces'
+import { CaseAccessIntent } from '../domain/structures'
 
 type Request = {
   caseId: string
@@ -21,6 +23,7 @@ export class ReviewCaseChecklistGateUseCase implements UseCase<Request, LegalCas
   constructor(
     private readonly legalCasesRepository: LegalCasesRepository,
     private readonly checklistItemsRepository: CaseChecklistItemsRepository,
+    private readonly caseAccessProvider: CaseAccessProvider,
   ) {}
 
   async execute(request: Request): Promise<LegalCase> {
@@ -29,17 +32,11 @@ export class ReviewCaseChecklistGateUseCase implements UseCase<Request, LegalCas
     if (!legalCase) {
       throw new LegalCaseNotFoundError()
     }
-
-    const assignedCases = await this.legalCasesRepository.listByTeamMember(
-      request.decidedBy,
-    )
-    const canReviewCase = assignedCases.some(
-      (assignedCase) => assignedCase.id === request.caseId,
-    )
-
-    if (!canReviewCase) {
-      throw new LegalCaseNotFoundError()
-    }
+    await this.caseAccessProvider.authorize({
+      caseId: request.caseId,
+      actorId: request.decidedBy,
+      intent: CaseAccessIntent.ManageChecklistGate,
+    })
 
     this.ensureCaseCanBeReviewed(legalCase)
 
@@ -112,10 +109,12 @@ export class ReviewCaseChecklistGateUseCase implements UseCase<Request, LegalCas
     const requiredItems = items.filter((item) => item.isRequired)
     if (
       requiredItems.length === 0 ||
-      requiredItems.some((item) => item.status !== 'validated')
+      requiredItems.some(
+        (item) => item.status !== 'validated' && item.status !== 'waived',
+      )
     ) {
       throw new CaseChecklistGateReviewError(
-        'A aprovação integral exige checklist obrigatório instanciado e todos os documentos obrigatórios validados.',
+        'A aprovação integral exige checklist obrigatório instanciado e todos os documentos obrigatórios atendidos por validação ou dispensa.',
       )
     }
   }

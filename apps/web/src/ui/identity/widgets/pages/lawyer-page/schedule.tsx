@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { Timer, CalendarDays, Plus, Trash2, Loader2, X } from 'lucide-react'
+import { Timer, CalendarDays, Plus, Trash2, Loader2, X, AlertCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+
+import { validateAndMergeSlot } from '@hms/validation/scheduling'
 
 import { Button } from '@/ui/shadcn/button'
 import { Switch } from '@/ui/shadcn/switch'
@@ -72,6 +74,7 @@ const TIME_ZONES = [
   { value: 'America/Noronha', label: 'Fernando de Noronha (UTC−02:00)' },
   { value: 'UTC', label: 'UTC (UTC±00:00)' },
 ]
+
 function normalizeWeeklyAvailability(
   rawAvailability: unknown,
   useDefaultDays: boolean,
@@ -188,11 +191,13 @@ export const Schedule = () => {
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null)
   const [startTime, setStartTime] = useState('08:00')
   const [endTime, setEndTime] = useState('12:00')
+  const [slotError, setSlotError] = useState<string | null>(null)
 
   const [modalBlockOpen, setModalBlockOpen] = useState(false)
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [blockReason, setBlockReason] = useState('')
+  const [deletingBlockId, setDeletingBlockId] = useState<string | null>(null)
   const [blockError, setBlockError] = useState<string | null>(null)
   const [timeZoneDraft, setTimeZoneDraft] = useState('America/Sao_Paulo')
   const [pendingTimeZone, setPendingTimeZone] = useState<string | null>(null)
@@ -287,19 +292,33 @@ export const Schedule = () => {
     setSelectedDayId(dayId)
     setStartTime('08:00')
     setEndTime('12:00')
+    setSlotError(null)
     setModalOpen(true)
   }
 
   const handleAddSlot = async () => {
     if (!selectedDayId) return
 
+    const targetDay = weeklyAvailability.find((d: any) => d.id === selectedDayId)
+    const existingSlots = targetDay?.slots ?? []
+
+    const validation = validateAndMergeSlot(
+      existingSlots,
+      { start: startTime, end: endTime },
+      currentDuration,
+    )
+
+    if (!validation.success) {
+      setSlotError(validation.error)
+      return
+    }
+
     const updated = weeklyAvailability.map((day) => {
       if (day.id === selectedDayId) {
-        const currentSlots = day.slots ?? []
         return {
           ...day,
           active: true,
-          slots: [...currentSlots, { start: startTime, end: endTime }],
+          slots: validation.slots,
         }
       }
       return day
@@ -309,6 +328,7 @@ export const Schedule = () => {
     try {
       await updateAvailability(toWeeklyAvailabilityPayload(updated))
       setModalOpen(false)
+      setSlotError(null)
     } catch (error) {
       setWeeklyAvailabilityDraft(null)
       console.error('Erro ao adicionar intervalo:', error)
@@ -382,9 +402,12 @@ export const Schedule = () => {
 
   const handleRemoveBlock = async (blockId: string) => {
     try {
+      setDeletingBlockId(blockId)
       await removeBlock(blockId)
     } catch (error) {
       console.error('Erro ao remover bloqueio:', error)
+    } finally {
+      setDeletingBlockId(null)
     }
   }
 
@@ -647,11 +670,15 @@ export const Schedule = () => {
                   <Button
                     variant='ghost'
                     size='icon'
-                    disabled={isRemovingBlock}
+                    disabled={isRemovingBlock || deletingBlockId === block.id}
                     className='size-8 text-muted-foreground hover:text-destructive shrink-0'
                     onClick={() => handleRemoveBlock(block.id)}
                   >
-                    <Trash2 className='size-4' />
+                    {deletingBlockId === block.id ? (
+                      <Loader2 className='size-4 animate-spin text-destructive' />
+                    ) : (
+                      <Trash2 className='size-4' />
+                    )}
                   </Button>
                 </div>
               )
@@ -672,24 +699,42 @@ export const Schedule = () => {
             </DialogTitle>
           </DialogHeader>
 
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 py-4'>
-            <div className='flex flex-col gap-2'>
-              <Label className='text-[13px] text-foreground'>Horário inicial</Label>
-              <Input
-                type='time'
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-              />
+          <div className='flex flex-col gap-4 py-4'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+              <div className='flex flex-col gap-2'>
+                <Label className='text-[13px] text-foreground'>Horário inicial</Label>
+                <Input
+                  type='time'
+                  value={startTime}
+                  onChange={(e) => {
+                    setStartTime(e.target.value)
+                    setSlotError(null)
+                  }}
+                />
+              </div>
+
+              <div className='flex flex-col gap-2'>
+                <Label className='text-[13px] text-foreground'>Horário final</Label>
+                <Input
+                  type='time'
+                  value={endTime}
+                  onChange={(e) => {
+                    setEndTime(e.target.value)
+                    setSlotError(null)
+                  }}
+                />
+              </div>
             </div>
 
-            <div className='flex flex-col gap-2'>
-              <Label className='text-[13px] text-foreground'>Horário final</Label>
-              <Input
-                type='time'
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-              />
-            </div>
+            {slotError && (
+              <div
+                role='alert'
+                className='flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-destructive text-sm font-medium'
+              >
+                <AlertCircle className='size-4 shrink-0' />
+                <span>{slotError}</span>
+              </div>
+            )}
           </div>
 
           <DialogFooter className='pt-4 border-t border-border flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3'>

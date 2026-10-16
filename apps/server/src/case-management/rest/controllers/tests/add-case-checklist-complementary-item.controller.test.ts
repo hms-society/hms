@@ -39,13 +39,14 @@ describe('Add Case Checklist Complementary Item Controller [POST /cases/:caseId/
       .send({
         templateItemKey: 'complementary-contract',
         title: 'Contrato complementar',
+        isRequired: false,
       })
       .expect(201)
 
     expect(response.body).toEqual(
       expect.objectContaining({
         caseId: legalCase.id,
-        templateItemKey: 'complementary-contract',
+        templateItemKey: `manual-item:${collaborator.collaboratorId}:complementary-contract`,
         title: 'Contrato complementar',
         isRequired: false,
         status: 'pending',

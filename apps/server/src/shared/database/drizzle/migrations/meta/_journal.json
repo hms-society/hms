@@ -512,6 +512,20 @@
       "when": 1792078512061,
       "tag": "0069_document_homologation_artifact",
       "breakpoints": true
+    },
+    {
+      "idx": 70,
+      "version": "7",
+      "when": 1792177819977,
+      "tag": "0070_checklist_waived_status",
+      "breakpoints": true
+    },
+    {
+      "idx": 71,
+      "version": "7",
+      "when": 1792177835165,
+      "tag": "0071_checklist_item_waivers_and_client_documents",
+      "breakpoints": true
     }
   ]
 }

@@ -2,6 +2,7 @@ export const CaseChecklistItemStatus = {
   Pending: 'pending',
   InAnalysis: 'in_analysis',
   Validated: 'validated',
+  Waived: 'waived',
 } as const
 
 export type CaseChecklistItemStatus =

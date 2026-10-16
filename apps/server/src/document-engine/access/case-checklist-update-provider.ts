@@ -38,6 +38,7 @@ export class CaseChecklistUpdateProvider implements CaseChecklistUpdateProviderC
     this.useCase = new MarkCaseChecklistItemValidatedUseCase(
       this.caseChecklistItemsRepository,
       this.legalCasesRepository,
+      this.caseAccessProvider,
     )
     this.createPendingUseCase = new CreatePendingUseCase(pendingsRepository)
   }
@@ -60,6 +61,7 @@ export class CaseChecklistUpdateProvider implements CaseChecklistUpdateProviderC
       await this.useCase.executeByDocumentFileId({
         documentFileId: request.documentFileId,
         documentFileName: request.documentFileName ?? 'Documento enviado',
+        actorId: request.actorId,
         validatedBy: request.validatedBy,
       })
       return
@@ -92,6 +94,7 @@ export class CaseChecklistUpdateProvider implements CaseChecklistUpdateProviderC
       checklistItemId: request.checklistItemId,
       documentFileId: request.documentFileId,
       documentFileName: request.documentFileName ?? 'Documento enviado',
+      actorId: request.actorId,
       validatedBy: request.validatedBy,
     })
   }

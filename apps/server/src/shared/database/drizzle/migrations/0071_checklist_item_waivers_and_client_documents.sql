@@ -1,0 +1,10 @@
+ALTER TABLE "case_checklist_items" ADD COLUMN "waiver_justification" text;--> statement-breakpoint
+ALTER TABLE "case_checklist_items" ADD COLUMN "waiver_actor_id" uuid;--> statement-breakpoint
+ALTER TABLE "case_checklist_items" ADD COLUMN "waiver_actor_name" text;--> statement-breakpoint
+ALTER TABLE "case_checklist_items" ADD COLUMN "waived_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "case_checklist_items" ADD COLUMN "client_document_id" uuid;--> statement-breakpoint
+ALTER TABLE "case_checklist_items" ADD COLUMN "document_source" jsonb;--> statement-breakpoint
+ALTER TABLE "case_checklist_items" ADD COLUMN "document_attached_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "case_checklist_items" ADD COLUMN "document_attached_by" uuid;--> statement-breakpoint
+ALTER TABLE "case_checklist_items" ADD CONSTRAINT "case_checklist_items_waiver_check" CHECK (("case_checklist_items"."waiver_justification" IS NULL AND "case_checklist_items"."waiver_actor_id" IS NULL AND "case_checklist_items"."waiver_actor_name" IS NULL AND "case_checklist_items"."waived_at" IS NULL) OR ("case_checklist_items"."waiver_justification" IS NOT NULL AND "case_checklist_items"."waiver_actor_id" IS NOT NULL AND "case_checklist_items"."waiver_actor_name" IS NOT NULL AND "case_checklist_items"."waived_at" IS NOT NULL));--> statement-breakpoint
+ALTER TABLE "case_checklist_items" ADD CONSTRAINT "case_checklist_items_client_document_reference_check" CHECK (("case_checklist_items"."client_document_id" IS NULL AND "case_checklist_items"."document_source" IS NULL AND "case_checklist_items"."document_attached_at" IS NULL AND "case_checklist_items"."document_attached_by" IS NULL) OR ("case_checklist_items"."client_document_id" IS NOT NULL AND "case_checklist_items"."document_source" IS NOT NULL AND "case_checklist_items"."document_attached_at" IS NOT NULL AND "case_checklist_items"."document_attached_by" IS NOT NULL));

@@ -176,6 +176,22 @@ export class DrizzleSchedulesRepository implements CalendarSchedulesRepository {
     return schedule
   }
 
+  async findBlockedPeriodById(
+    id: string,
+  ): Promise<(BlockedPeriod & { scheduleId: string }) | null> {
+    const [result] = await this.db
+      .select()
+      .from(blockedPeriods)
+      .where(eq(blockedPeriods.id, id))
+
+    if (!result) return null
+
+    return {
+      ...this.mapBlockedPeriod(result),
+      scheduleId: result.scheduleId,
+    }
+  }
+
   async findBlockedPeriodsByScheduleId(scheduleId: string): Promise<BlockedPeriod[]> {
     const results = await this.db
       .select()
@@ -183,18 +199,6 @@ export class DrizzleSchedulesRepository implements CalendarSchedulesRepository {
       .where(eq(blockedPeriods.scheduleId, scheduleId))
 
     return results.map((item) => this.mapBlockedPeriod(item))
-  }
-
-  async findBlockedPeriodById(
-    id: string,
-  ): Promise<(BlockedPeriod & { scheduleId: string }) | null> {
-    const [item] = await this.db
-      .select()
-      .from(blockedPeriods)
-      .where(eq(blockedPeriods.id, id))
-      .limit(1)
-
-    return item ? { ...this.mapBlockedPeriod(item), scheduleId: item.scheduleId } : null
   }
 
   async deleteBlockedPeriod(id: string): Promise<void> {
@@ -265,13 +269,33 @@ export class DrizzleSchedulesRepository implements CalendarSchedulesRepository {
       collaboratorId: schedule.collaboratorId,
       timeZone: schedule.timeZone,
       appointmentDurationInMinutes: schedule.defaultDurationMinutes,
-      weeklyAvailability: (schedule.weeklyAvailability ?? []) as WeeklyAvailability[],
+      weeklyAvailability: this.mapWeeklyAvailability(schedule.weeklyAvailability),
       blockedPeriods: schedule.blockedPeriods.map((blockedPeriod) =>
         this.mapBlockedPeriod(blockedPeriod),
       ),
       createdAt: schedule.createdAt,
       updatedAt: schedule.updatedAt,
     }
+  }
+
+  private mapWeeklyAvailability(raw: unknown): WeeklyAvailability[] {
+    if (!Array.isArray(raw)) return []
+    return raw.map((item: any) => {
+      const weekday = item.weekday ?? item.id
+      const timeRanges =
+        item.timeRanges ??
+        (item.active === false
+          ? []
+          : (item.slots ?? []).map((s: any) => ({
+              startsAt: s.start ?? s.startsAt,
+              endsAt: s.end ?? s.endsAt,
+            })))
+      return {
+        ...item,
+        weekday,
+        timeRanges,
+      }
+    })
   }
 
   private mapBlockedPeriod(item: typeof blockedPeriods.$inferSelect): BlockedPeriod {
