@@ -1,4 +1,13 @@
 services:
+  gotenberg:
+    container_name: hms-gotenberg
+    image: gotenberg/gotenberg:8
+    restart: unless-stopped
+    ports:
+      - "${GOTENBERG_PORT:-3002}:3000"
+    networks:
+      - hms
+
   inngest:
     image: inngest/inngest:v1.36.0
     container_name: hms-inngest

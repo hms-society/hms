@@ -6,6 +6,7 @@ import type {
   DocumentGenerationsRepository,
   DocumentPackagesRepository,
   DocumentsRepository,
+  DocumentVersionHomologationsRepository,
   DocumentVersionsRepository,
   PackageDocumentsRepository,
 } from '../../interfaces'
@@ -19,6 +20,7 @@ describe('List Case Documents Use Case', () => {
   let documents: MockProxy<DocumentsRepository>
   let versions: MockProxy<DocumentVersionsRepository>
   let generations: MockProxy<DocumentGenerationsRepository>
+  let homologations: MockProxy<DocumentVersionHomologationsRepository>
   let useCase: ListCaseDocumentsUseCase
 
   beforeEach(() => {
@@ -29,6 +31,7 @@ describe('List Case Documents Use Case', () => {
     documents = mock<DocumentsRepository>()
     versions = mock<DocumentVersionsRepository>()
     generations = mock<DocumentGenerationsRepository>()
+    homologations = mock<DocumentVersionHomologationsRepository>()
     useCase = new ListCaseDocumentsUseCase(
       cases,
       access,
@@ -37,6 +40,7 @@ describe('List Case Documents Use Case', () => {
       documents,
       versions,
       generations,
+      homologations,
     )
   })
 
@@ -55,5 +59,31 @@ describe('List Case Documents Use Case', () => {
       cases.findById.mock.invocationCallOrder[0],
     )
     expect(packages.findByContext).not.toHaveBeenCalled()
+  })
+
+  it('exposes homologated versions in the case projection', async () => {
+    cases.findById.mockResolvedValue({ id: 'case-1' } as any)
+    packages.findByContext.mockResolvedValue({ id: 'package-1' } as any)
+    packageDocuments.findByDocumentPackageId.mockResolvedValue([
+      { documentId: 'document-1' },
+    ] as any)
+    documents.findByIds.mockResolvedValue([{ id: 'document-1' }] as any)
+    versions.findByDocumentIds.mockResolvedValue([
+      { id: 'version-1', documentId: 'document-1' },
+      { id: 'version-2', documentId: 'document-1' },
+    ] as any)
+    generations.findLatestByDocumentIds.mockResolvedValue([])
+    homologations.findByDocumentVersionId.mockImplementation(async (versionId) =>
+      versionId === 'version-1'
+        ? ({ id: 'homologation-1', artifactStoragePath: 'final/version-1.pdf' } as any)
+        : undefined,
+    )
+
+    const result = await useCase.execute({ caseId: 'case-1', actorId: 'collaborator-1' })
+
+    expect(result[0]?.versions).toEqual([
+      expect.objectContaining({ id: 'version-1', homologated: true }),
+      expect.objectContaining({ id: 'version-2', homologated: false }),
+    ])
   })
 })

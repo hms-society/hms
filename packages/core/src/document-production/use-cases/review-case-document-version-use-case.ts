@@ -4,12 +4,13 @@ import type {
 } from '../../case-management/interfaces'
 import type { CollaboratorProfile } from '../../identity/domain/structures'
 import {
+  DocumentVersionConflictError,
   DocumentVersionNotInReviewError,
   DocumentVersionReviewAccessDeniedError,
 } from '../domain/errors'
 import type { DocumentVersion } from '../domain/entities'
 import type { DocumentVersionStatus } from '../domain/structures'
-import type { DocumentVersionsRepository } from '../interfaces'
+import type { DocumentsRepository, DocumentVersionsRepository } from '../interfaces'
 
 type Request = {
   caseId: string
@@ -25,6 +26,7 @@ type Request = {
 export class ReviewCaseDocumentVersionUseCase {
   constructor(
     private readonly versionsRepository: DocumentVersionsRepository,
+    private readonly documentsRepository: DocumentsRepository,
     private readonly legalCasesRepository: LegalCasesRepository,
     private readonly caseMembersRepository: CaseMembersRepository,
   ) {}
@@ -66,6 +68,14 @@ export class ReviewCaseDocumentVersionUseCase {
     )
     if (!reviewedVersion)
       throw new Error('A versão documental não está disponível para revisão.')
+    if (request.decision === 'approved') {
+      const document = await this.documentsRepository.replace(request.documentId, {
+        currentVersionId: reviewedVersion.id,
+      })
+      if (!document) {
+        throw new DocumentVersionConflictError()
+      }
+    }
     return reviewedVersion
   }
 }

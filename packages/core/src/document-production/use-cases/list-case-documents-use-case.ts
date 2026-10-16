@@ -8,6 +8,7 @@ import type {
   DocumentGenerationsRepository,
   DocumentPackagesRepository,
   DocumentsRepository,
+  DocumentVersionHomologationsRepository,
   DocumentVersionsRepository,
   PackageDocumentsRepository,
 } from '../interfaces'
@@ -15,7 +16,7 @@ import type {
 type Request = ListCaseDocumentsRequest
 export type ListCaseDocumentsResponse = readonly {
   document: Document
-  versions: readonly DocumentVersion[]
+  versions: readonly (DocumentVersion & { homologated?: boolean })[]
   generation?: DocumentGeneration
 }[]
 
@@ -30,6 +31,7 @@ export class ListCaseDocumentsUseCase
     private readonly documents: DocumentsRepository,
     private readonly versions: DocumentVersionsRepository,
     private readonly generations: DocumentGenerationsRepository,
+    private readonly homologations?: DocumentVersionHomologationsRepository,
   ) {}
 
   async execute({ caseId, actorId }: Request): Promise<ListCaseDocumentsResponse> {
@@ -52,6 +54,20 @@ export class ListCaseDocumentsUseCase
       this.versions.findByDocumentIds(documentIds),
       this.generations.findLatestByDocumentIds(documentIds),
     ])
+    const homologatedVersionIds = new Set(
+      this.homologations
+        ? (
+            await Promise.all(
+              versions.map(async (version) =>
+                (await this.homologations?.findByDocumentVersionId(version.id))
+                  ?.artifactStoragePath
+                  ? version.id
+                  : undefined,
+              ),
+            )
+          ).filter((versionId): versionId is string => Boolean(versionId))
+        : [],
+    )
     const documentsById = new Map(documents.map((document) => [document.id, document]))
     const generationsByDocumentId = new Map(
       generations.map((generation) => [generation.documentId, generation]),
@@ -62,7 +78,12 @@ export class ListCaseDocumentsUseCase
         ? [
             {
               document,
-              versions: versions.filter((version) => version.documentId === documentId),
+              versions: versions
+                .filter((version) => version.documentId === documentId)
+                .map((version) => ({
+                  ...version,
+                  homologated: homologatedVersionIds.has(version.id),
+                })),
               generation: generationsByDocumentId.get(documentId),
             },
           ]

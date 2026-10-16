@@ -12,6 +12,7 @@ export type UsePieceFilePreviewProps = {
   documentId: string
   versionId: string
   storagePath?: string
+  homologated?: boolean
 }
 
 export function usePieceFilePreview({
@@ -19,6 +20,7 @@ export function usePieceFilePreview({
   documentId,
   versionId,
   storagePath,
+  homologated = false,
 }: UsePieceFilePreviewProps) {
   const { caseDocumentProductionService } = useRestContext()
   const docxContainerRef = useRef<HTMLDivElement>(null)
@@ -26,13 +28,19 @@ export function usePieceFilePreview({
   const [isRendering, setIsRendering] = useState(false)
   const [renderError, setRenderError] = useState<string>()
   const fileQuery = useQuery({
-    queryKey: ['case-document-file', caseId, documentId, versionId],
+    queryKey: ['case-document-file', caseId, documentId, versionId, homologated],
     queryFn: async () => {
-      const response = await caseDocumentProductionService.getDocumentFile(
-        caseId,
-        documentId,
-        versionId,
-      )
+      const response = homologated
+        ? await caseDocumentProductionService.getHomologatedDocumentFile(
+            caseId,
+            documentId,
+            versionId,
+          )
+        : await caseDocumentProductionService.getDocumentFile(
+            caseId,
+            documentId,
+            versionId,
+          )
       if (response.isFailure) response.throwError()
       return response.body
     },

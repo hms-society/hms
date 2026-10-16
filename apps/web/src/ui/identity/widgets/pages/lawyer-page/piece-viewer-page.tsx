@@ -95,6 +95,7 @@ export function PieceViewerPage({
               caseId={caseId}
               documentId={documentId}
               versionId={currentVersion.id}
+              documentTitle={document.title}
               storagePath={currentVersion.storagePath}
               versionNumber={currentVersion.versionNumber}
             />

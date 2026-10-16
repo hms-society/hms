@@ -6,14 +6,19 @@ import type {
 } from '@hms/core/case-management/interfaces'
 import type {
   DocumentFileExporter,
+  DocumentPdfConverter,
+  DocumentPdfInspector,
   DocumentPackagesRepository,
+  DocumentSpecificationsRepository,
   DocumentVersionHomologationsRepository,
   DocumentVersionsRepository,
   DocumentsRepository,
+  FrozenDocumentPdfsRepository,
   PackageDocumentsRepository,
 } from '@hms/core/document-production/interfaces'
 import {
   ConfirmCaseDocumentPackageAfterHomologationUseCase,
+  FreezeApprovedDocumentVersionPdfUseCase,
   GenerateFinalDocumentArtifactUseCase,
   HomologateDocumentVersionUseCase,
   RecordDocumentVersionHomologationAuditUseCase,
@@ -30,6 +35,7 @@ import { ActiveCollaboratorGuard, AuthGuard } from '@/identity/guards'
 import { DrizzleAuditLogsRepository } from '@/shared/database/drizzle/repositories/drizzle-audit-logs-repository'
 import { PROVISION_PROVIDERS } from '@/shared/provision/constants/provision-providers'
 import { DatetimeProvider as ServerDatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { IdProvider } from '@/shared/provision/id/id-provider'
 
 @CasesController()
 @ApiBearerAuth()
@@ -43,6 +49,7 @@ export class HomologateCaseDocumentVersionController {
   private readonly homologationsRepository: DocumentVersionHomologationsRepository
   private readonly documentPackagesRepository: DocumentPackagesRepository
   private readonly fileStorageProvider: FileStorageProvider
+  private readonly freezePdf: FreezeApprovedDocumentVersionPdfUseCase
 
   constructor(
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.versions)
@@ -55,7 +62,7 @@ export class HomologateCaseDocumentVersionController {
     caseMembersRepository: CaseMembersRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.documents)
     documentsRepository: DocumentsRepository,
-    @Inject(DOCUMENT_PRODUCTION_PROVIDERS.documentFileExporter)
+    @Inject(DOCUMENT_PRODUCTION_PROVIDERS.finalDocumentFileExporter)
     documentFileExporter: DocumentFileExporter,
     @Inject(PROVISION_PROVIDERS.fileStorage)
     fileStorageProvider: FileStorageProvider,
@@ -63,8 +70,17 @@ export class HomologateCaseDocumentVersionController {
     documentPackagesRepository: DocumentPackagesRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments)
     packageDocumentsRepository: PackageDocumentsRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.specifications)
+    specificationsRepository: DocumentSpecificationsRepository,
     datetimeProvider: ServerDatetimeProvider,
     auditEventWriter: DrizzleAuditLogsRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.frozenDocumentPdfs)
+    frozenPdfsRepository: FrozenDocumentPdfsRepository,
+    @Inject(DOCUMENT_PRODUCTION_PROVIDERS.documentPdfConverter)
+    documentPdfConverter: DocumentPdfConverter,
+    @Inject(DOCUMENT_PRODUCTION_PROVIDERS.documentPdfInspector)
+    documentPdfInspector: DocumentPdfInspector,
+    idProvider: IdProvider,
   ) {
     this.datetimeProvider = datetimeProvider
     this.homologationsRepository = homologationsRepository
@@ -96,6 +112,17 @@ export class HomologateCaseDocumentVersionController {
       auditEventWriter,
       datetimeProvider,
     )
+    this.freezePdf = new FreezeApprovedDocumentVersionPdfUseCase({
+      documentsRepository,
+      versionsRepository,
+      specificationsRepository,
+      frozenPdfsRepository,
+      fileStorageProvider,
+      converter: documentPdfConverter,
+      inspector: documentPdfInspector,
+      datetimeProvider,
+      idProvider,
+    })
   }
 
   @Post(':caseId/documents/:documentId/versions/:versionId/homologate')
@@ -150,6 +177,18 @@ export class HomologateCaseDocumentVersionController {
         approvedByCollaboratorName: homologation.approvedByCollaboratorName,
         approvedByCollaboratorProfile: homologation.approvedByCollaboratorProfile,
         approvedAt: homologation.approvedAt,
+      })
+      const packageDocument = documentPackage?.documents.find(
+        (item) => item.documentId === documentId,
+      )
+      if (!packageDocument) {
+        throw new Error('A peça homologada não está vinculada ao pacote documental.')
+      }
+      await this.freezePdf.execute({
+        documentId,
+        documentVersionId,
+        documentSpecificationId: packageDocument.documentSpecificationId,
+        traceId: documentVersionId,
       })
 
       return { homologation: artifact, documentPackage }

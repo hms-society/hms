@@ -3,6 +3,7 @@ import {
   Get,
   HttpStatus,
   Inject,
+  NotFoundException,
   Param,
   ParseUUIDPipe,
   Query,
@@ -19,6 +20,7 @@ import type {
   DocumentPackagesRepository,
   DocumentsRepository,
   DocumentVersionsRepository,
+  DocumentVersionHomologationsRepository,
   PackageDocumentsRepository,
 } from '@hms/core/document-production/interfaces'
 import {
@@ -42,6 +44,9 @@ import { STORAGE_PROVIDER } from '@/shared/provision/provision.module'
 @UseGuards(AuthGuard, ActiveCollaboratorGuard)
 export class DownloadCaseDocumentController {
   private readonly useCase: DownloadCaseDocumentUseCase
+  private readonly getCaseDocument: GetCaseDocumentUseCase
+  private readonly homologationsRepository: DocumentVersionHomologationsRepository
+  private readonly storageProvider: StorageProvider
 
   constructor(
     @Inject(CASE_MANAGEMENT_REPOSITORIES.legalCases) cases: LegalCasesRepository,
@@ -56,6 +61,8 @@ export class DownloadCaseDocumentController {
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.generations)
     generations: DocumentGenerationsRepository,
     @Inject(STORAGE_PROVIDER) storage: StorageProvider,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.versionHomologations)
+    homologationsRepository: DocumentVersionHomologationsRepository,
   ) {
     const listCaseDocuments = new ListCaseDocumentsUseCase(
       cases,
@@ -65,9 +72,12 @@ export class DownloadCaseDocumentController {
       documents,
       versions,
       generations,
+      homologationsRepository,
     )
-    const getCaseDocument = new GetCaseDocumentUseCase(listCaseDocuments)
-    this.useCase = new DownloadCaseDocumentUseCase(getCaseDocument, storage)
+    this.getCaseDocument = new GetCaseDocumentUseCase(listCaseDocuments)
+    this.useCase = new DownloadCaseDocumentUseCase(this.getCaseDocument, storage)
+    this.homologationsRepository = homologationsRepository
+    this.storageProvider = storage
   }
 
   @Get(':caseId/documents/:documentId/file')
@@ -88,5 +98,45 @@ export class DownloadCaseDocumentController {
       actorId: collaborator.collaboratorId,
     })
     return new StreamableFile(Buffer.from(file.content), { type: file.mimeType })
+  }
+
+  @Get(':caseId/documents/:documentId/versions/:versionId/homologated-file')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'O PDF final homologado foi retornado com sucesso.',
+  })
+  async handleHomologatedFile(
+    @Param('caseId', ParseUUIDPipe) caseId: string,
+    @Param('documentId', ParseUUIDPipe) documentId: string,
+    @Param('versionId', ParseUUIDPipe) versionId: string,
+    @CurrentCollaborator() collaborator: CollaboratorSummary,
+  ) {
+    const caseDocument = await this.getCaseDocument.execute({
+      caseId,
+      documentId,
+      actorId: collaborator.collaboratorId,
+    })
+    const homologation =
+      await this.homologationsRepository.findByDocumentVersionId(versionId)
+    if (!homologation?.artifactStoragePath) {
+      throw new NotFoundException('A versão ainda não possui um PDF homologado.')
+    }
+
+    const content = await this.storageProvider.download(homologation.artifactStoragePath)
+    return new StreamableFile(Buffer.from(content), {
+      type: homologation.artifactContentType ?? 'application/pdf',
+      disposition: `attachment; filename="${this.normalizeDownloadFileName(caseDocument.document.title)}.pdf"`,
+    })
+  }
+
+  private normalizeDownloadFileName(title: string): string {
+    return (
+      title
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '') || 'documento'
+    )
   }
 }

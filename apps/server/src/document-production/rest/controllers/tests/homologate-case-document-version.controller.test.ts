@@ -16,6 +16,11 @@ describe('Homologate Case Document Version Controller', () => {
   let documentsRepository: any
   let documentPackagesRepository: any
   let packageDocumentsRepository: any
+  let specificationsRepository: any
+  let frozenPdfsRepository: any
+  let documentPdfConverter: any
+  let documentPdfInspector: any
+  let idProvider: any
   let documentFileExporter: any
   let fileStorageProvider: any
   let datetimeProvider: any
@@ -42,6 +47,12 @@ describe('Homologate Case Document Version Controller', () => {
       reopen: vi.fn(),
     }
     packageDocumentsRepository = { findByDocumentPackageId: vi.fn() }
+    specificationsRepository = { findById: vi.fn() }
+    frozenPdfsRepository = { findByDocumentVersionId: vi.fn() }
+    frozenPdfsRepository.findByDocumentVersionId.mockResolvedValue({ id: 'frozen-pdf' })
+    documentPdfConverter = { convert: vi.fn() }
+    documentPdfInspector = { inspect: vi.fn() }
+    idProvider = { generate: vi.fn() }
     documentFileExporter = { export: vi.fn() }
     fileStorageProvider = { save: vi.fn(), remove: vi.fn() }
     datetimeProvider = { now: vi.fn() }
@@ -56,8 +67,13 @@ describe('Homologate Case Document Version Controller', () => {
       fileStorageProvider,
       documentPackagesRepository,
       packageDocumentsRepository,
+      specificationsRepository,
       datetimeProvider,
       auditEventWriter,
+      frozenPdfsRepository,
+      documentPdfConverter,
+      documentPdfInspector,
+      idProvider,
     )
   })
 

@@ -207,7 +207,11 @@ export function NewPieceDialog({
             onObservationsChange={setObservations}
             checklistGateDecision={context?.checklistGateDecision}
             error={
-              generationMutation.isError ? generationMutation.error.message : undefined
+              generationMutation.isError
+                ? generationMutation.error.message.includes('já foi adicionado')
+                  ? 'Este modelo já foi adicionado ao caso. Abra a peça existente para gerar uma nova versão.'
+                  : generationMutation.error.message
+                : undefined
             }
           />
         ) : null}

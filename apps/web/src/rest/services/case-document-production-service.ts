@@ -19,6 +19,7 @@ export type CaseDocumentResponse = {
     rejectionReason?: string
     content?: DocumentTemplateContent
     storagePath?: string
+    homologated?: boolean
     pendingVariables: Array<{
       marker: string
       technicalName: string
@@ -140,6 +141,16 @@ export const CaseDocumentProductionService = (restClient: RestClient) => ({
       { decision, ...(rejectionReason ? { rejectionReason } : {}) },
     )
   },
+  homologateVersion(
+    caseId: string,
+    documentId: string,
+    versionId: string,
+  ): Promise<RestResponse<unknown>> {
+    return restClient.post(
+      `/cases/${caseId}/documents/${documentId}/versions/${versionId}/homologate`,
+      {},
+    )
+  },
   generateRevision(
     caseId: string,
     documentId: string,
@@ -159,6 +170,15 @@ export const CaseDocumentProductionService = (restClient: RestClient) => ({
     const versionQuery = versionId ? `?versionId=${encodeURIComponent(versionId)}` : ''
     return restClient.getFile(
       `/cases/${caseId}/documents/${documentId}/file${versionQuery}`,
+    )
+  },
+  getHomologatedDocumentFile(
+    caseId: string,
+    documentId: string,
+    versionId: string,
+  ): Promise<RestResponse<Blob>> {
+    return restClient.getFile(
+      `/cases/${caseId}/documents/${documentId}/versions/${versionId}/homologated-file`,
     )
   },
 })
