@@ -120,18 +120,7 @@ const CASE_STATUS_LABELS: Record<LegalCaseStatus, string> = {
   [LegalCaseStatus.Closed]: 'Encerrado',
 }
 
-export const getCaseStages = (
-  caseStatus?: string,
-  isClosureActive = false,
-): CaseStage[] => {
-  if (isClosureActive) {
-    return CASE_STAGES.map((stage, index) => ({
-      ...stage,
-      icon: index < CASE_STAGES.length - 1 ? 'check' : stage.icon,
-      status: index < CASE_STAGES.length - 1 ? 'Concluída' : 'Em andamento — 2º dia',
-      isActive: index === CASE_STAGES.length - 1,
-    }))
-  }
+export const getCaseStages = (caseStatus?: string): CaseStage[] => {
   const activeStageIndex = getActiveStageIndex(caseStatus)
   const isCaseClosed = caseStatus === LegalCaseStatus.Closed
 
@@ -158,11 +147,7 @@ export const getCaseStages = (
   })
 }
 
-export const getCaseStatusLabel = (
-  caseStatus?: string,
-  isClosureActive = false,
-): string => {
-  if (isClosureActive) return 'Encerramento em andamento'
+export const getCaseStatusLabel = (caseStatus?: string): string => {
   if (!caseStatus) return 'Carregando status…'
 
   return CASE_STATUS_LABELS[caseStatus as LegalCaseStatus] ?? 'Status indisponível'

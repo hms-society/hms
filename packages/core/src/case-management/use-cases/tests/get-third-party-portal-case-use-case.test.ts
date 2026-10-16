@@ -26,7 +26,7 @@ describe('Get Third Party Portal Case Use Case', () => {
       publicCode: legalCase.publicCode,
       title: legalCase.title,
       clientName: 'Cliente do portal',
-      status: legalCase.status,
+      status: legalCase.workflowStage,
       intakeId: legalCase.intakeId,
       updatedAt: legalCase.updatedAt,
       canUpload: true,

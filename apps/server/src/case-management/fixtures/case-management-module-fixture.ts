@@ -105,7 +105,7 @@ export class CaseManagementModuleFixture {
   }
 
   static async register(
-    controller?: Type<unknown>,
+    controller?: Type<unknown> | Type<unknown>[],
     configure?: (builder: TestingModuleBuilder) => TestingModuleBuilder,
     additionalImports: Type<unknown>[] = [],
   ) {
@@ -447,7 +447,8 @@ export class CaseManagementModuleFixture {
 
   private createLegalCase(overrides: Partial<LegalCaseCreation>): LegalCaseCreation {
     const draft: LegalCase = LegalCaseFaker.fake({
-      status: LegalCaseStatus.Documentation,
+      lifecycleStatus: 'active',
+      workflowStage: LegalCaseStatus.Documentation,
       ...overrides,
     })
 
@@ -458,7 +459,8 @@ export class CaseManagementModuleFixture {
       legalAreaId: draft.legalAreaId,
       legalTopicId: draft.legalTopicId,
       title: draft.title,
-      status: draft.status,
+      lifecycleStatus: draft.lifecycleStatus,
+      workflowStage: draft.workflowStage,
       teamVersion: draft.teamVersion,
       checklistCompletedAt: draft.checklistCompletedAt,
       checklistCompletedBy: draft.checklistCompletedBy,
@@ -503,7 +505,7 @@ export class CaseManagementModuleFixture {
   private static async registerCaseManagementRestFixture(
     authFixture: SupabaseAuthFixture,
     accessToken: string,
-    controller?: Type<unknown>,
+    controller?: Type<unknown> | Type<unknown>[],
     configure?: (builder: TestingModuleBuilder) => TestingModuleBuilder,
     additionalImports: Type<unknown>[] = [],
   ) {
@@ -514,7 +516,11 @@ export class CaseManagementModuleFixture {
             Boolean(configure),
             additionalImports,
           ),
-          controllers: controller ? [controller] : [],
+          controllers: controller
+            ? Array.isArray(controller)
+              ? controller
+              : [controller]
+            : [],
         },
         (builder) => {
           const authenticatedBuilder = authFixture.configure(builder)

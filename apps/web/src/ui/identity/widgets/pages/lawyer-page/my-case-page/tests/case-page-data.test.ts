@@ -48,17 +48,6 @@ describe('getCaseStages', () => {
     )
   })
 
-  it('shows the closure stage active with earlier stages complete in the closure view', () => {
-    const stages = getCaseStages(LegalCaseStatus.Execution, true)
-
-    expect(stages.slice(0, 4).every((stage) => stage.status === 'Concluída')).toBe(true)
-    expect(stages[4]).toMatchObject({
-      label: 'Encerramento',
-      status: 'Em andamento — 2º dia',
-      isActive: true,
-    })
-  })
-
   it('maps every lifecycle status to the matching header label', () => {
     expect(getCaseStatusLabel(LegalCaseStatus.Documentation)).toBe(
       'Documentação em formação',

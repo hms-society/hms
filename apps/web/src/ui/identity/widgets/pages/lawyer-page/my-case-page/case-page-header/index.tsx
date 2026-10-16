@@ -4,7 +4,6 @@ import type { useMyCasePage } from '../use-my-case-page'
 
 export type CasePageHeaderProps = {
   isAdministrator: boolean
-  isClosureActive: boolean
   state: ReturnType<typeof useMyCasePage>
   onOpenPortal: () => void
   onOpenNewPiece: () => void
@@ -12,7 +11,6 @@ export type CasePageHeaderProps = {
 
 export const CasePageHeader = ({
   isAdministrator,
-  isClosureActive,
   state,
   onOpenPortal,
   onOpenNewPiece,
@@ -33,7 +31,6 @@ export const CasePageHeader = ({
       onOpenPortal={onOpenPortal}
       dossierApproved={Boolean(state.caseDetails?.dossierGate?.homologatedAt)}
       caseStatus={state.caseDetails?.status}
-      isClosureActive={isClosureActive}
       onOpenNewPiece={onOpenNewPiece}
     />
   )

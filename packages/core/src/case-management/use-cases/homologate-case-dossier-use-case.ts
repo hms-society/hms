@@ -5,6 +5,7 @@ import { CaseChecklistGateReviewError, LegalCaseNotFoundError } from '../domain/
 import {
   CaseChecklistGateDecision,
   CaseChecklistItemStatus,
+  LegalCaseLifecycleStatus,
   LegalCaseStatus,
 } from '../domain/structures'
 import type { CaseChecklistItemsRepository, LegalCasesRepository } from '../interfaces'
@@ -37,7 +38,11 @@ export class HomologateCaseDossierUseCase implements UseCase<Request, LegalCase>
         'A homologação exige que o checklist tenha sido aprovado primeiro.',
       )
     }
-    if (legalCase.status !== LegalCaseStatus.ReadyForLegalProduction) {
+    const workflowStage = legalCase.workflowStage
+    if (
+      legalCase.lifecycleStatus === LegalCaseLifecycleStatus.Closed ||
+      workflowStage !== LegalCaseStatus.ReadyForLegalProduction
+    ) {
       throw new CaseChecklistGateReviewError(
         'O dossiê só pode ser homologado após a aprovação do checklist.',
       )

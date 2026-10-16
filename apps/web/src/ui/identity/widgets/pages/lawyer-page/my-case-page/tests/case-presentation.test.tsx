@@ -334,7 +334,6 @@ describe('Case detail presentation widgets', () => {
     const { rerender } = render(
       <CasePageHeader
         isAdministrator
-        isClosureActive={false}
         state={casePageState}
         onOpenPortal={onOpenPortal}
         onOpenNewPiece={vi.fn()}
@@ -344,7 +343,6 @@ describe('Case detail presentation widgets', () => {
     rerender(
       <CasePageHeader
         isAdministrator={false}
-        isClosureActive={false}
         state={casePageState}
         onOpenPortal={onOpenPortal}
         onOpenNewPiece={vi.fn()}
@@ -358,7 +356,6 @@ describe('Case detail presentation widgets', () => {
     rerender(
       <CasePageHeader
         isAdministrator={false}
-        isClosureActive={false}
         state={
           {
             caseDetails: undefined,
@@ -388,13 +385,12 @@ describe('Case detail presentation widgets', () => {
     )
     expect(screen.getByRole('tab', { name: 'Peças' }).hasAttribute('disabled')).toBe(true)
     expect(screen.getByRole('tab', { name: 'Equipe' })).toBeTruthy()
-    expect(screen.getByRole('tab', { name: 'Encerramento' })).toBeTruthy()
+    expect(screen.queryByRole('tab', { name: 'Encerramento' })).toBeNull()
   })
 
   it('renders all supported administrator panels without granting editing', () => {
     const props = {
       isAdministrator: true,
-      canManageClosure: false,
       caseUuid: 'case-1',
       caseDetails: legalCase,
       checklistItems: checklist,

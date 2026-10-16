@@ -1,13 +1,10 @@
 import { getCaseStages } from '../case-page-data'
 import { Icon } from '@/ui/shared/widgets/components/icon'
 
-export type CaseStageProgressProps = { caseStatus?: string; isClosureActive?: boolean }
+export type CaseStageProgressProps = { caseStatus?: string }
 
-export const CaseStageProgress = ({
-  caseStatus,
-  isClosureActive = false,
-}: CaseStageProgressProps) => {
-  const stages = getCaseStages(caseStatus, isClosureActive)
+export const CaseStageProgress = ({ caseStatus }: CaseStageProgressProps) => {
+  const stages = getCaseStages(caseStatus)
 
   return (
     <div className='mt-5 flex w-full flex-wrap items-center gap-x-5 gap-y-3 overflow-hidden border-t border-border pt-4'>

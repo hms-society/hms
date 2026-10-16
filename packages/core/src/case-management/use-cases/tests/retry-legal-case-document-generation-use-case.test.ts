@@ -11,7 +11,11 @@ import { DocumentGenerationRequestedEvent } from '../../../document-production/d
 import { DocumentGenerationStatus } from '../../../document-production/domain/structures'
 import type { Broker, DatetimeProvider, IdProvider } from '../../../shared/interfaces'
 import { LegalCaseFaker } from '../../domain/entities/fakers'
-import { CaseChecklistGateDecision, LegalCaseStatus } from '../../domain/structures'
+import {
+  CaseChecklistGateDecision,
+  LegalCaseLifecycleStatus,
+  LegalCaseStatus,
+} from '../../domain/structures'
 import type { LegalCasesRepository } from '../../interfaces'
 import { RetryLegalCaseDocumentGenerationUseCase } from '../retry-legal-case-document-generation-use-case'
 
@@ -70,7 +74,7 @@ describe('Retry Legal Case Document Generation Use Case', () => {
     cases.findById.mockResolvedValue(
       LegalCaseFaker.fake({
         id: caseId,
-        status: LegalCaseStatus.LegalProduction,
+        workflowStage: LegalCaseStatus.LegalProduction,
         checklistGate: { decision: CaseChecklistGateDecision.Approved },
         dossierGate: { homologatedAt: now },
       }),
@@ -135,5 +139,29 @@ describe('Retry Legal Case Document Generation Use Case', () => {
         occurredAt: now,
       }),
     )
+  })
+
+  it('rejects retries for a closed case with a production workflow stage', async () => {
+    const now = new Date('2026-09-25T17:00:00.000Z')
+    const legalCase = LegalCaseFaker.fake({
+      id: 'case-1',
+      workflowStage: LegalCaseStatus.LegalProduction,
+      lifecycleStatus: LegalCaseLifecycleStatus.Closed,
+      checklistGate: { decision: CaseChecklistGateDecision.Approved },
+      dossierGate: { homologatedAt: now },
+    })
+    cases.findById.mockResolvedValue(legalCase)
+    cases.listByTeamMember.mockResolvedValue([{ id: legalCase.id } as never])
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        documentId: 'document-1',
+        requestedByCollaboratorId: 'actor-1',
+        requestedByCollaboratorProfile: 'lawyer',
+      }),
+    ).rejects.toThrow('dossiê documental')
+    expect(packages.findByContext).not.toHaveBeenCalled()
+    expect(broker.publish).not.toHaveBeenCalled()
   })
 })

@@ -5,6 +5,7 @@ import { LegalCaseFaker } from '../../domain/entities/fakers'
 import {
   CaseChecklistGateDecision,
   CaseChecklistItemStatus,
+  LegalCaseLifecycleStatus,
   LegalCaseStatus,
 } from '../../domain/structures'
 import type { CaseChecklistItemsRepository, LegalCasesRepository } from '../../interfaces'
@@ -24,12 +25,12 @@ describe('Homologate Case Dossier Use Case', () => {
   it('homologates a reviewed dossier when all required items are validated', async () => {
     const legalCase = LegalCaseFaker.fake({
       checklistGate: { decision: CaseChecklistGateDecision.Approved },
-      status: LegalCaseStatus.ReadyForLegalProduction,
+      workflowStage: LegalCaseStatus.ReadyForLegalProduction,
     })
     const homologatedCase = LegalCaseFaker.fake({
       ...legalCase,
       dossierGate: { homologatedAt: new Date(), homologatedBy: 'reviewer-1' },
-      status: LegalCaseStatus.LegalProduction,
+      workflowStage: LegalCaseStatus.LegalProduction,
     })
     cases.findById.mockResolvedValue(legalCase)
     cases.listByTeamMember.mockResolvedValue([{ id: legalCase.id } as never])
@@ -55,12 +56,12 @@ describe('Homologate Case Dossier Use Case', () => {
         decision: CaseChecklistGateDecision.ApprovedWithException,
         remarks: 'Documento dispensado por decisão do gestor.',
       },
-      status: LegalCaseStatus.ReadyForLegalProduction,
+      workflowStage: LegalCaseStatus.ReadyForLegalProduction,
     })
     const homologatedCase = LegalCaseFaker.fake({
       ...legalCase,
       dossierGate: { homologatedAt: new Date(), homologatedBy: 'reviewer-1' },
-      status: LegalCaseStatus.LegalProduction,
+      workflowStage: LegalCaseStatus.LegalProduction,
     })
     cases.findById.mockResolvedValue(legalCase)
     cases.listByTeamMember.mockResolvedValue([{ id: legalCase.id } as never])
@@ -77,7 +78,7 @@ describe('Homologate Case Dossier Use Case', () => {
 
   it('requires a successful checklist decision before dossier homologation', async () => {
     const legalCase = LegalCaseFaker.fake({
-      status: LegalCaseStatus.ReadyForLegalProduction,
+      workflowStage: LegalCaseStatus.ReadyForLegalProduction,
     })
     cases.findById.mockResolvedValue(legalCase)
     cases.listByTeamMember.mockResolvedValue([{ id: legalCase.id } as never])
@@ -86,6 +87,21 @@ describe('Homologate Case Dossier Use Case', () => {
       useCase.execute({ caseId: legalCase.id, homologatedBy: 'reviewer-1' }),
     ).rejects.toThrow('checklist')
     expect(checklistItems.listByCaseId).not.toHaveBeenCalled()
+    expect(cases.homologateDossier).not.toHaveBeenCalled()
+  })
+
+  it('rejects dossier homologation for a closed case with a homologation-ready workflow stage', async () => {
+    const legalCase = LegalCaseFaker.fake({
+      checklistGate: { decision: CaseChecklistGateDecision.Approved },
+      workflowStage: LegalCaseStatus.ReadyForLegalProduction,
+      lifecycleStatus: LegalCaseLifecycleStatus.Closed,
+    })
+    cases.findById.mockResolvedValue(legalCase)
+    cases.listByTeamMember.mockResolvedValue([{ id: legalCase.id } as never])
+
+    await expect(
+      useCase.execute({ caseId: legalCase.id, homologatedBy: 'reviewer-1' }),
+    ).rejects.toThrow('só pode ser homologado')
     expect(cases.homologateDossier).not.toHaveBeenCalled()
   })
 })

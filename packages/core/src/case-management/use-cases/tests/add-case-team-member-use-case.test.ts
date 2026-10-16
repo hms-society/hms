@@ -6,7 +6,11 @@ import type { DatetimeProvider } from '#shared/interfaces'
 import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
 import { CaseMemberFaker, LegalCaseFaker } from '../../domain/entities/fakers'
 import type { CaseMember } from '../../domain/entities'
-import { CaseMemberRole } from '../../domain/structures'
+import {
+  CaseMemberRole,
+  LegalCaseLifecycleStatus,
+  LegalCaseStatus,
+} from '../../domain/structures'
 import type { CaseTeamScope } from '../../interfaces/case-team-scope'
 import { AddCaseTeamMemberUseCase } from '../add-case-team-member-use-case'
 
@@ -235,7 +239,12 @@ describe('AddCaseTeamMemberUseCase', () => {
     await expect(useCase.execute(request)).rejects.toThrow('O Caso não foi encontrado.')
 
     cases.legalCasesRepository.findById.mockResolvedValue(
-      LegalCaseFaker.fake({ id: caseId, status: 'closed', teamVersion: 2 }),
+      LegalCaseFaker.fake({
+        id: caseId,
+        workflowStage: LegalCaseStatus.Execution,
+        lifecycleStatus: LegalCaseLifecycleStatus.Closed,
+        teamVersion: 2,
+      }),
     )
     cases.caseCollaboratorsProvider.findById.mockImplementation(async (id) => ({
       collaboratorId: id,

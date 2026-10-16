@@ -10,6 +10,7 @@ import { LegalCaseNotFoundError } from '../domain/errors'
 import {
   CaseChecklistGateDecision,
   CaseChecklistItemStatus,
+  LegalCaseLifecycleStatus,
   LegalCaseStatus,
 } from '../domain/structures'
 import type { CaseChecklistItemsRepository, LegalCasesRepository } from '../interfaces'
@@ -115,6 +116,7 @@ export class GetCaseDocumentGenerationContextUseCase
         description,
       }))
 
+    const workflowStage = legalCase.workflowStage
     return {
       case: {
         id: legalCase.id,
@@ -128,8 +130,9 @@ export class GetCaseDocumentGenerationContextUseCase
         (legalCase.checklistGate.decision === CaseChecklistGateDecision.Approved ||
           legalCase.checklistGate.decision ===
             CaseChecklistGateDecision.ApprovedWithException) &&
-        (legalCase.status === LegalCaseStatus.ReadyForLegalProduction ||
-          legalCase.status === LegalCaseStatus.LegalProduction) &&
+        legalCase.lifecycleStatus !== LegalCaseLifecycleStatus.Closed &&
+        (workflowStage === LegalCaseStatus.ReadyForLegalProduction ||
+          workflowStage === LegalCaseStatus.LegalProduction) &&
         Boolean(legalCase.dossierGate.homologatedAt),
     }
   }

@@ -5,6 +5,7 @@ import type { ClientsRepository } from '#identity/interfaces/clients-repository'
 import type { LegalAreasRepository } from '../../legal-catalog/interfaces/legal-areas-repository'
 import type { LegalTopicsRepository } from '../../legal-catalog/interfaces/legal-topics-repository'
 import { NotFoundError } from '#shared/domain/errors/not-found-error'
+import { LegalCaseLifecycleStatus, LegalCaseStatus } from '../domain/structures'
 
 type ProjectionDependencies = {
   clientsRepository: ClientsRepository
@@ -90,7 +91,13 @@ export async function projectLegalCaseSummaries(
       intakeId: legalCase.intakeId,
       publicCode: legalCase.publicCode,
       title: legalCase.title,
-      status: legalCase.status,
+      status:
+        legalCase.workflowStage ??
+        (legalCase.lifecycleStatus === LegalCaseLifecycleStatus.Closed
+          ? LegalCaseStatus.Closed
+          : LegalCaseStatus.Documentation),
+      lifecycleStatus: legalCase.lifecycleStatus,
+      workflowStage: legalCase.workflowStage,
       teamVersion: legalCase.teamVersion ?? 0,
       clientName: getClientName(client),
       legalArea: area.name,

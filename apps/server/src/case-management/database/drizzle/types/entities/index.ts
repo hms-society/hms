@@ -1,4 +1,5 @@
 export * from './drizzle-case-checklist-item'
+export * from './drizzle-case-closure-event'
 export * from './drizzle-case-member'
 export * from './drizzle-case-team-history'
 export * from './drizzle-case-team-operation'

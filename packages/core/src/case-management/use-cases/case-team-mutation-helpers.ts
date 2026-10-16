@@ -8,7 +8,7 @@ import type { CaseTeamMutationResult } from '../domain/structures'
 import {
   CaseMemberRole,
   type CaseTeamHistoryKind,
-  LegalCaseStatus,
+  LegalCaseLifecycleStatus,
 } from '../domain/structures'
 import type { CaseTeamMutationRequest } from './case-team-mutation-request'
 import type { CaseTeamScope } from '../interfaces/case-team-scope'
@@ -83,14 +83,18 @@ async function prepareExistingCaseMutation(
   action: CaseTeamMutationAction,
   fields: Record<string, unknown>,
 ): Promise<CaseTeamMutationPreparation> {
-  return authorizeCaseTeamMutation(scope, request, legalCase.status, action).then(
-    (authorization) =>
-      resolveMutationReplay(
-        scope,
-        request,
-        legalCase,
-        buildMutationContext(action, fields, request.expectedTeamVersion, authorization),
-      ),
+  return authorizeCaseTeamMutation(
+    scope,
+    request,
+    legalCase.lifecycleStatus,
+    action,
+  ).then((authorization) =>
+    resolveMutationReplay(
+      scope,
+      request,
+      legalCase,
+      buildMutationContext(action, fields, request.expectedTeamVersion, authorization),
+    ),
   )
 }
 
@@ -133,36 +137,44 @@ async function resolveMutationReplay(
 async function authorizeCaseTeamMutation(
   scope: CaseTeamScope,
   request: CaseTeamMutationRequest,
-  caseStatus: LegalCaseStatus,
+  lifecycleStatus: LegalCaseLifecycleStatus | undefined,
   action: CaseTeamMutationAction,
 ): Promise<{ isAdmin: boolean; reason?: string }> {
   const actor = await requireActiveActor(scope, request)
-  return authorizeActorMutation(scope, request, caseStatus, action, actor.profile)
+  return authorizeActorMutation(scope, request, lifecycleStatus, action, actor.profile)
 }
 
 async function authorizeActorMutation(
   scope: CaseTeamScope,
   request: CaseTeamMutationRequest,
-  caseStatus: LegalCaseStatus,
+  lifecycleStatus: LegalCaseLifecycleStatus | undefined,
   action: CaseTeamMutationAction,
   profile: string,
 ): Promise<{ isAdmin: boolean; reason?: string }> {
   const isAdmin = profile === CollaboratorProfile.Admin
   const reason = request.reason?.trim() || undefined
-  return authorizeMutation(scope, request, caseStatus, action, profile, isAdmin, reason)
+  return authorizeMutation(
+    scope,
+    request,
+    lifecycleStatus,
+    action,
+    profile,
+    isAdmin,
+    reason,
+  )
 }
 
 async function authorizeMutation(
   scope: CaseTeamScope,
   request: CaseTeamMutationRequest,
-  caseStatus: LegalCaseStatus,
+  lifecycleStatus: LegalCaseLifecycleStatus | undefined,
   action: CaseTeamMutationAction,
   profile: string,
   isAdmin: boolean,
   reason?: string,
 ): Promise<{ isAdmin: boolean; reason?: string }> {
   if (!isAdmin) await ensureActorIsManager(scope, request, profile)
-  ensureCaseTeamIsWritable(caseStatus)
+  ensureCaseTeamIsWritable(lifecycleStatus)
   ensureAdminRemovalHasReason(isAdmin, action, reason)
   return { isAdmin, reason }
 }
@@ -218,8 +230,10 @@ function isActiveManager(member: CaseMember | undefined): boolean {
   )
 }
 
-function ensureCaseTeamIsWritable(status: LegalCaseStatus): void {
-  if (status === LegalCaseStatus.Closed) {
+function ensureCaseTeamIsWritable(
+  lifecycleStatus: LegalCaseLifecycleStatus | undefined,
+): void {
+  if (lifecycleStatus === LegalCaseLifecycleStatus.Closed) {
     throw new ForbiddenError('Casos encerrados permitem apenas leitura.')
   }
 }

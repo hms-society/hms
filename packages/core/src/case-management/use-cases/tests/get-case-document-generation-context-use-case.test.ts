@@ -9,6 +9,7 @@ import { LegalCaseFaker } from '../../domain/entities/fakers'
 import {
   CaseChecklistItemStatus,
   CaseChecklistGateDecision,
+  LegalCaseLifecycleStatus,
   LegalCaseStatus,
 } from '../../domain/structures'
 import type { CaseChecklistItemsRepository, LegalCasesRepository } from '../../interfaces'
@@ -43,7 +44,7 @@ describe('Get Case Document Generation Context Use Case', () => {
     const now = new Date('2026-09-24T12:00:00.000Z')
     const legalCase = LegalCaseFaker.fake({
       id: caseId,
-      status: LegalCaseStatus.LegalProduction,
+      workflowStage: LegalCaseStatus.LegalProduction,
       checklistGate: { decision: CaseChecklistGateDecision.Approved },
       dossierGate: { homologatedAt: now },
     })
@@ -135,5 +136,15 @@ describe('Get Case Document Generation Context Use Case', () => {
       }),
     ])
     expect(result.models.map(({ name }) => name)).toEqual(['Modelo previdenciário'])
+
+    cases.findById.mockResolvedValue({
+      ...legalCase,
+      lifecycleStatus: LegalCaseLifecycleStatus.Closed,
+    })
+    const closedResult = await useCase.execute({
+      caseId,
+      collaboratorId: 'collaborator-id',
+    })
+    expect(closedResult.canGenerate).toBe(false)
   })
 })

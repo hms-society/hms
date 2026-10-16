@@ -14,6 +14,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 import { CollaboratorProfile } from '../../../identity/domain/structures'
 import { LegalCaseFaker } from '../../domain/entities/fakers'
+import { LegalCaseLifecycleStatus, LegalCaseStatus } from '../../domain/structures'
 import type { LegalCasesRepository } from '../../interfaces'
 import { GenerateLegalCaseDocumentRevisionUseCase } from '../generate-legal-case-document-revision-use-case'
 
@@ -51,7 +52,7 @@ describe('GenerateLegalCaseDocumentRevisionUseCase', () => {
 
   it('requests AI to elaborate a new version from the selected version without creating another piece', async () => {
     const legalCase = LegalCaseFaker.fake({
-      status: 'legal_production',
+      workflowStage: LegalCaseStatus.LegalProduction,
       checklistGate: {
         decision: 'approved',
         decidedAt: new Date(),
@@ -106,5 +107,29 @@ describe('GenerateLegalCaseDocumentRevisionUseCase', () => {
       generationInstructions: 'Inclua pedido subsidiário.',
       referenceDocuments: [{ id: 'ref-1', fileName: 'cnis.pdf' }],
     })
+  })
+
+  it('rejects a revision for a closed case with a production workflow stage', async () => {
+    const legalCase = LegalCaseFaker.fake({
+      workflowStage: LegalCaseStatus.LegalProduction,
+      lifecycleStatus: LegalCaseLifecycleStatus.Closed,
+      checklistGate: { decision: 'approved' },
+      dossierGate: { homologatedAt: new Date('2026-09-25T12:00:00.000Z') },
+    })
+    cases.findById.mockResolvedValue(legalCase)
+    cases.listByTeamMember.mockResolvedValue([{ id: legalCase.id } as never])
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        documentId: 'document-1',
+        sourceDocumentVersionId: 'version-1',
+        requestedByCollaboratorId: 'lawyer-id',
+        requestedByCollaboratorProfile: CollaboratorProfile.Lawyer,
+        instructions: 'Atualizar peça.',
+      }),
+    ).rejects.toThrow('dossiê documental')
+    expect(packages.findByContext).not.toHaveBeenCalled()
+    expect(broker.publish).not.toHaveBeenCalled()
   })
 })

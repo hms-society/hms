@@ -16,7 +16,6 @@ export type LawyerCaseHeaderProps = {
   onOpenPortal: () => void
   dossierApproved: boolean
   caseStatus?: string
-  isClosureActive?: boolean
   onOpenNewPiece: () => void
 }
 
@@ -30,14 +29,14 @@ export const LawyerCaseHeader = (props: LawyerCaseHeaderProps) => (
           </h1>
           <Badge
             variant={
-              props.caseStatus === LegalCaseStatus.Documentation && !props.isClosureActive
+              props.caseStatus === LegalCaseStatus.Documentation
                 ? 'attention'
                 : 'secondary'
             }
             className='h-6 rounded-full px-3 text-[12px]'
           >
             <span className='size-1.5 rounded-full bg-brand-accent' />
-            {getCaseStatusLabel(props.caseStatus, props.isClosureActive)}
+            {getCaseStatusLabel(props.caseStatus)}
           </Badge>
         </div>
         <CaseSummaryFacts
@@ -72,9 +71,6 @@ export const LawyerCaseHeader = (props: LawyerCaseHeaderProps) => (
         />
       </div>
     </div>
-    <CaseStageProgress
-      caseStatus={props.caseStatus}
-      isClosureActive={props.isClosureActive}
-    />
+    <CaseStageProgress caseStatus={props.caseStatus} />
   </section>
 )
