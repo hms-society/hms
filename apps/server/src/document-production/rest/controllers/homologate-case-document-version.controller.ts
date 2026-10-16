@@ -69,6 +69,7 @@ export class HomologateCaseDocumentVersionController {
       homologationsRepository,
       legalCasesRepository,
       caseMembersRepository,
+      documentPackagesRepository,
     )
     this.generateArtifact = new GenerateFinalDocumentArtifactUseCase(
       versionsRepository,

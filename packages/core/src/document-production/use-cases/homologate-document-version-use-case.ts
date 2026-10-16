@@ -10,6 +10,7 @@ import {
 } from '../domain/errors'
 import type { DocumentVersionHomologation } from '../domain/entities'
 import type {
+  DocumentPackagesRepository,
   DocumentVersionHomologationsRepository,
   DocumentVersionsRepository,
 } from '../interfaces'
@@ -30,6 +31,7 @@ export class HomologateDocumentVersionUseCase {
     private readonly homologationsRepository: DocumentVersionHomologationsRepository,
     private readonly legalCasesRepository: LegalCasesRepository,
     private readonly caseMembersRepository: CaseMembersRepository,
+    private readonly documentPackagesRepository: DocumentPackagesRepository,
   ) {}
 
   async execute(request: Request): Promise<DocumentVersionHomologation> {
@@ -50,6 +52,17 @@ export class HomologateDocumentVersionUseCase {
     const legalCase = await this.legalCasesRepository.findById(request.caseId)
     if (!legalCase) {
       throw new NotFoundError('O caso jurídico não foi encontrado.')
+    }
+    const documentPackage = await this.documentPackagesRepository.findByContext({
+      type: 'case',
+      caseId: request.caseId,
+    })
+    if (
+      !documentPackage?.documents.some(
+        (document) => document.documentId === request.documentId,
+      )
+    ) {
+      throw new NotFoundError('O documento não foi encontrado no caso.')
     }
     const isCaseMember = (
       await this.caseMembersRepository.findActiveCollaboratorIdsByCaseId(request.caseId, [
