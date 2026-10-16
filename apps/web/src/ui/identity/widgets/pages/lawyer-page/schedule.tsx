@@ -130,6 +130,7 @@ export const Schedule = () => {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [blockReason, setBlockReason] = useState('')
+  const [deletingBlockId, setDeletingBlockId] = useState<string | null>(null)
 
   const rawAvailability =
     (schedule as any)?.weeklyAvailability ?? (schedule as any)?.availability ?? []
@@ -246,9 +247,12 @@ export const Schedule = () => {
 
   const handleRemoveBlock = async (blockId: string) => {
     try {
+      setDeletingBlockId(blockId)
       await removeBlock(blockId)
     } catch (error) {
       console.error('Erro ao remover bloqueio:', error)
+    } finally {
+      setDeletingBlockId(null)
     }
   }
 
@@ -438,11 +442,15 @@ export const Schedule = () => {
                   <Button
                     variant='ghost'
                     size='icon'
-                    disabled={isRemovingBlock}
+                    disabled={isRemovingBlock || deletingBlockId === block.id}
                     className='size-8 text-muted-foreground hover:text-destructive shrink-0'
                     onClick={() => handleRemoveBlock(block.id)}
                   >
-                    <Trash2 className='size-4' />
+                    {deletingBlockId === block.id ? (
+                      <Loader2 className='size-4 animate-spin text-destructive' />
+                    ) : (
+                      <Trash2 className='size-4' />
+                    )}
                   </Button>
                 </div>
               )

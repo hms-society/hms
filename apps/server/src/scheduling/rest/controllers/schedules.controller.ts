@@ -3,8 +3,10 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Inject,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -128,7 +130,25 @@ export class SchedulesController {
     @Param('id') id: string,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    if (collaborator.profile !== 'admin') return { success: false }
+    const blockedPeriod = await this.schedulesRepository.findBlockedPeriodById(id)
+    if (!blockedPeriod) {
+      throw new NotFoundException('Bloqueio não encontrado')
+    }
+
+    const schedule = await this.schedulesRepository.findById(blockedPeriod.scheduleId)
+    if (!schedule) {
+      throw new NotFoundException('Agenda não encontrada')
+    }
+
+    if (
+      collaborator.profile !== 'lawyer' ||
+      schedule.collaboratorId !== collaborator.collaboratorId
+    ) {
+      throw new ForbiddenException(
+        'Você não tem permissão para remover bloqueios da agenda de outro profissional',
+      )
+    }
+
     await this.schedulesRepository.deleteBlockedPeriod(id)
     return { success: true }
   }
