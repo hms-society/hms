@@ -82,7 +82,7 @@ Adicionalmente, conforme alinhamento via `grill-me`:
   - Aplicar mesclagem automática ao salvar slot adjacente.
 
 ### 4.3. Apps / Server
-- **`apps/server/src/scheduling/database/drizzle/repositories/rest/controllers/index.ts`**:
+- **`apps/server/src/scheduling/rest/controllers/schedules.controller.ts`**:
   - Utilizar o schema de validação no DTO do body de `PUT /schedules/availability`.
   - Impedir que payloads inválidos alcancem o banco.
 
