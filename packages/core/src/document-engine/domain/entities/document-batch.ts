@@ -8,6 +8,7 @@ import type {
 import type { Entity } from '../../../shared/domain/entities/entity'
 
 export type DocumentBatchFile = Entity & {
+  caseId?: string
   batchId: string
   checklistItemId?: string
   storagePath: string
