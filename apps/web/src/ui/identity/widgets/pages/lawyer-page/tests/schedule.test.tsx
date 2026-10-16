@@ -72,9 +72,13 @@ describe('Schedule', () => {
   })
 
   it('hides schedule controls when access is denied', () => {
+    const accessDeniedError = Object.assign(new Error('Agenda não autorizada.'), {
+      title: 'Acesso Negado',
+    })
+
     useConsultationMock.mockReturnValue({
       ...useConsultationMock(),
-      error: { title: 'Acesso Negado', message: 'Agenda não autorizada.' },
+      error: accessDeniedError,
     })
 
     render(<Schedule />)
