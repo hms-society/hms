@@ -9,6 +9,7 @@ import {
   DrizzleDocumentSpecificationMapper,
   DrizzleDocumentVersionMapper,
   DrizzleDocumentVersionHomologationMapper,
+  DrizzleFrozenDocumentPdfMapper,
   DrizzlePackageDocumentMapper,
 } from '@/document-production/database/drizzle/mappers'
 import {
@@ -18,6 +19,7 @@ import {
   DrizzleDocumentSpecificationsRepository,
   DrizzleDocumentVersionsRepository,
   DrizzleDocumentVersionHomologationsRepository,
+  DrizzleFrozenDocumentPdfsRepository,
   DrizzlePackageDocumentsRepository,
 } from '@/document-production/database/drizzle/repositories'
 import { SharedDatabaseModule } from '@/shared/database/drizzle/database.module'
@@ -32,6 +34,7 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     DrizzleDocumentSpecificationMapper,
     DrizzleDocumentVersionMapper,
     DrizzleDocumentVersionHomologationMapper,
+    DrizzleFrozenDocumentPdfMapper,
     DrizzlePackageDocumentMapper,
     DrizzleDocumentGenerationsRepository,
     DrizzleDocumentsRepository,
@@ -39,6 +42,7 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     DrizzleDocumentSpecificationsRepository,
     DrizzleDocumentVersionsRepository,
     DrizzleDocumentVersionHomologationsRepository,
+    DrizzleFrozenDocumentPdfsRepository,
     DrizzlePackageDocumentsRepository,
     DocumentProductionSeeder,
     {
@@ -69,6 +73,10 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
       provide: DOCUMENT_PRODUCTION_REPOSITORIES.versionHomologations,
       useExisting: DrizzleDocumentVersionHomologationsRepository,
     },
+    {
+      provide: DOCUMENT_PRODUCTION_REPOSITORIES.frozenDocumentPdfs,
+      useExisting: DrizzleFrozenDocumentPdfsRepository,
+    },
   ],
   exports: [
     SharedDatabaseModule,
@@ -79,6 +87,7 @@ import { ProvisionModule } from '@/shared/provision/provision.module'
     DOCUMENT_PRODUCTION_REPOSITORIES.documentPackages,
     DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments,
     DOCUMENT_PRODUCTION_REPOSITORIES.versionHomologations,
+    DOCUMENT_PRODUCTION_REPOSITORIES.frozenDocumentPdfs,
     DocumentProductionSeeder,
   ],
 })

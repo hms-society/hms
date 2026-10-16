@@ -31,6 +31,7 @@ export const envSchema = z.object({
     (value) => (value === '' ? undefined : value),
     z.url().optional(),
   ),
+  DOCUMENT_PDF_CONVERTER_URL: z.url().default('http://localhost:3002'),
   HMS_USER_SEED_PASSWORD: z.string().min(6).optional(),
   INNGEST_DEV: z.enum(['0', '1']).default('0'),
   INNGEST_BASE_URL: z.string().url().optional(),

@@ -55,7 +55,7 @@ export class HomologateCaseDocumentVersionController {
     caseMembersRepository: CaseMembersRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.documents)
     documentsRepository: DocumentsRepository,
-    @Inject(DOCUMENT_PRODUCTION_PROVIDERS.documentFileExporter)
+    @Inject(DOCUMENT_PRODUCTION_PROVIDERS.finalDocumentFileExporter)
     documentFileExporter: DocumentFileExporter,
     @Inject(PROVISION_PROVIDERS.fileStorage)
     fileStorageProvider: FileStorageProvider,
