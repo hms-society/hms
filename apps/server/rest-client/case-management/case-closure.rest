@@ -6,8 +6,7 @@
 # Preconditions:
 # 1. The API is already running at http://localhost:3333; this file does not start containers.
 # 2. This file authenticates as the seeded lawyer who manages the selected case.
-# 3. The selected seeded case is already closed and has no blockers; reopen it before closing it again.
-# 4. Seeded active cases have required checklist blockers, so they cannot be closed until those items are completed.
+# 3. Before POST /close, confirm GET /closure returns capabilities.canClose=true.
 
 ### Sign in as the seeded case manager
 # @name signInAsSeededCaseManager
@@ -36,18 +35,6 @@ Authorization: Bearer {{signInAsSeededCaseManager.response.body.$.accessToken}}
 Accept: application/json
 
 # Expected: HTTP 200 with legalCase, blockers, events, and capabilities.
-
-### Reopen the seeded closed case so it can be closed in this smoke test
-POST {{url}}/{{caseId}}/reopen
-Authorization: Bearer {{signInAsSeededCaseManager.response.body.$.accessToken}}
-Content-Type: application/json
-Accept: application/json
-
-{
-  "reason": "Reopening the seeded case for the closure smoke test."
-}
-
-# Expected: HTTP 200; this lawyer is the case Manager and is eligible to reopen it.
 
 ### Close the seeded case
 POST {{url}}/{{caseId}}/close
