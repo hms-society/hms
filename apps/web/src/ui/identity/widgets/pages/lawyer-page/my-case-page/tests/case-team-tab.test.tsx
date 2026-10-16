@@ -15,7 +15,6 @@ vi.mock('../case-page-data', () => ({
   CASE_TIMELINE: [],
   MOCK_ACTIVITIES: [],
   getCaseStages: () => [],
-  getCaseStatusLabel: () => 'Status indisponível',
 }))
 vi.mock('../checklist-dossier-tab', () => ({ ChecklistDossierTab: () => null }))
 vi.mock('../case-pieces-tab', () => ({ CasePiecesTab: () => null }))
