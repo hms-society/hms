@@ -138,4 +138,54 @@ describe('Homologate Case Document Version Controller', () => {
     })
     expect(auditEventWriter.add).toHaveBeenCalled()
   })
+
+  it('removes the partial homologation when artifact generation fails', async () => {
+    const caseId = '10000000-0000-4000-8000-000000000002'
+    const documentId = '20000000-0000-4000-8000-000000000002'
+    const collaboratorId = '30000000-0000-4000-8000-000000000002'
+    const version = DocumentVersionFaker.fake({
+      id: '40000000-0000-4000-8000-000000000002',
+      documentId,
+      status: 'approved',
+    })
+    const legalCase = LegalCaseFaker.fake({ id: caseId })
+    const document = DocumentFaker.fake({ id: documentId })
+    const documentPackage = DocumentPackageFaker.fake({
+      context: { type: 'case', caseId },
+      documents: [PackageDocumentFaker.fake({ documentId })],
+    })
+    const homologation = {
+      id: 'homologation-id',
+      caseId,
+      documentId,
+      documentVersionId: version.id,
+      approvedByCollaboratorId: collaboratorId,
+      approvedByCollaboratorName: 'Dra. Teste',
+      approvedByCollaboratorProfile: 'lawyer',
+      approvedAt: new Date('2026-10-16T15:00:00.000Z'),
+    }
+
+    versionsRepository.findById.mockResolvedValue(version)
+    legalCasesRepository.findById.mockResolvedValue(legalCase)
+    caseMembersRepository.findActiveCollaboratorIdsByCaseId.mockResolvedValue([
+      collaboratorId,
+    ])
+    documentPackagesRepository.findByContext.mockResolvedValue(documentPackage)
+    homologationsRepository.findByDocumentVersionId.mockResolvedValue(undefined)
+    homologationsRepository.add.mockResolvedValue(homologation)
+    documentsRepository.findById.mockResolvedValue(document)
+    documentFileExporter.export.mockRejectedValue(new Error('export failed'))
+
+    await expect(
+      controller.handle(caseId, documentId, version.id, {
+        collaboratorId,
+        professionalName: 'Dra. Teste',
+        profile: 'lawyer',
+      } as any),
+    ).rejects.toThrow('export failed')
+
+    expect(homologationsRepository.remove).toHaveBeenCalledWith(homologation.id)
+    expect(documentPackagesRepository.confirm).not.toHaveBeenCalled()
+    expect(auditEventWriter.add).not.toHaveBeenCalled()
+  })
 })
