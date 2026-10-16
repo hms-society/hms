@@ -3,7 +3,10 @@ import type {
   LegalCasesRepository,
 } from '../../case-management/interfaces'
 import type { CollaboratorProfile } from '../../identity/domain/structures'
-import { DocumentVersionReviewAccessDeniedError } from '../domain/errors'
+import {
+  DocumentVersionNotInReviewError,
+  DocumentVersionReviewAccessDeniedError,
+} from '../domain/errors'
 import type { DocumentVersion } from '../domain/entities'
 import type { DocumentVersionStatus } from '../domain/structures'
 import type { DocumentVersionsRepository } from '../interfaces'
@@ -30,6 +33,9 @@ export class ReviewCaseDocumentVersionUseCase {
     const version = await this.versionsRepository.findById(request.documentVersionId)
     if (!version || version.documentId !== request.documentId) {
       throw new Error('A versão documental não foi encontrada.')
+    }
+    if (version.status !== 'in_review') {
+      throw new DocumentVersionNotInReviewError()
     }
     if (version.createdByCollaboratorId === request.reviewedByCollaboratorId) {
       throw new DocumentVersionReviewAccessDeniedError()
