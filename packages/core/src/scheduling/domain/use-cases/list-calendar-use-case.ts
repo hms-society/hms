@@ -51,7 +51,7 @@ export class ListCalendarUseCase implements UseCase<Request, readonly CalendarEv
       period.from,
       period.to,
       scheduleIds,
-      query.clientId,
+      { clientId: query.clientId },
     )
     const blocks =
       actor.profile === 'admin'

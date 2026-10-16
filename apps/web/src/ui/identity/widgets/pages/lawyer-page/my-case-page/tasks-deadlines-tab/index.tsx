@@ -26,11 +26,13 @@ export function TasksDeadlinesTab({
   caseIdentifier,
   caseTitle,
   team = [],
+  readOnly = false,
 }: {
   caseId: string
   caseIdentifier: string
   caseTitle: string
   team?: readonly CaseTeamMember[]
+  readOnly?: boolean
 }) {
   const { caseManagementService } = useRestContext()
   const [items, setItems] = useState<TaskDeadlineItem[]>([])
@@ -58,6 +60,7 @@ export function TasksDeadlinesTab({
   const completedItems = items.filter((item) => item.completed && matchesFilter(item))
   const completedItemsCount = items.filter((item) => item.completed).length
   const createItem = async (input: CreateTaskDeadlineInput) => {
+    if (readOnly) return
     const response = await caseManagementService.createCaseTask(caseId, {
       ...input,
       type: toApiType(input.type),
@@ -68,6 +71,7 @@ export function TasksDeadlinesTab({
     setItems((current) => [...current, mapCaseTaskToItem(response.body, team)])
   }
   const updateItem = async (item: TaskDeadlineItem) => {
+    if (readOnly) return
     const response = await caseManagementService.updateCaseTask(caseId, item.id, {
       version: item.version ?? 1,
       title: item.title,
@@ -86,7 +90,8 @@ export function TasksDeadlinesTab({
     )
   }
   const deleteItem = async (item: TaskDeadlineItem) => {
-    if (item.completed || !window.confirm('Excluir esta tarefa ou prazo?')) return
+    if (readOnly || item.completed || !window.confirm('Excluir esta tarefa ou prazo?'))
+      return
     const response = await caseManagementService.deleteCaseTask(caseId, item.id, {
       version: item.version ?? 1,
     })
@@ -104,17 +109,19 @@ export function TasksDeadlinesTab({
             Acompanhe os compromissos e atividades deste caso.
           </p>
         </div>
-        <Button
-          size='sm'
-          className='rounded-full self-start lg:self-auto'
-          onClick={() => {
-            setEditingItem(undefined)
-            setIsCreateOpen(true)
-          }}
-        >
-          <Icon name='plus' className='size-3.5' />
-          Novo item
-        </Button>
+        {!readOnly && (
+          <Button
+            size='sm'
+            className='rounded-full self-start lg:self-auto'
+            onClick={() => {
+              setEditingItem(undefined)
+              setIsCreateOpen(true)
+            }}
+          >
+            <Icon name='plus' className='size-3.5' />
+            Novo item
+          </Button>
+        )}
       </header>
       <div className='grid gap-3 sm:grid-cols-3'>
         <SummaryStat
@@ -166,6 +173,7 @@ export function TasksDeadlinesTab({
             <TaskRow
               key={item.id}
               item={item}
+              readOnly={readOnly}
               onEdit={(selectedItem) => {
                 setEditingItem(selectedItem)
                 setIsCreateOpen(true)
@@ -192,6 +200,7 @@ export function TasksDeadlinesTab({
               <TaskRow
                 key={item.id}
                 item={item}
+                readOnly={readOnly}
                 onEdit={(selectedItem) => {
                   setEditingItem(selectedItem)
                   setIsCreateOpen(true)
@@ -201,16 +210,18 @@ export function TasksDeadlinesTab({
             ))}
         </div>
       </section>
-      <NewItemDialog
-        caseIdentifier={caseIdentifier}
-        caseTitle={caseTitle}
-        open={isCreateOpen}
-        onOpenChange={setIsCreateOpen}
-        onCreate={createItem}
-        team={team}
-        editingItem={editingItem}
-        onUpdate={updateItem}
-      />
+      {!readOnly && (
+        <NewItemDialog
+          caseIdentifier={caseIdentifier}
+          caseTitle={caseTitle}
+          open={isCreateOpen}
+          onOpenChange={setIsCreateOpen}
+          onCreate={createItem}
+          team={team}
+          editingItem={editingItem}
+          onUpdate={updateItem}
+        />
+      )}
     </div>
   )
 }
@@ -298,10 +309,12 @@ function TaskRow({
   item,
   onEdit,
   onDelete,
+  readOnly,
 }: {
   item: TaskDeadlineItem
   onEdit: (item: TaskDeadlineItem) => void
   onDelete: (item: TaskDeadlineItem) => void
+  readOnly?: boolean
 }) {
   const displayType = item.customType ?? item.type
   return (
@@ -333,23 +346,27 @@ function TaskRow({
         <Badge className='rounded-full border-0 bg-muted text-[11px] text-muted-foreground'>
           {item.status}
         </Badge>
-        <Button
-          aria-label={`Editar ${item.description}`}
-          variant='ghost'
-          size='icon-xs'
-          onClick={() => onEdit(item)}
-        >
-          <Icon name='pencil' className='size-4 text-muted-foreground' />
-        </Button>
-        <Button
-          aria-label={`Excluir ${item.title}`}
-          variant='ghost'
-          size='icon-xs'
-          disabled={item.completed}
-          onClick={() => onDelete(item)}
-        >
-          <Icon name='trash-2' className='size-4 text-destructive' />
-        </Button>
+        {!readOnly && (
+          <>
+            <Button
+              aria-label={`Editar ${item.description}`}
+              variant='ghost'
+              size='icon-xs'
+              onClick={() => onEdit(item)}
+            >
+              <Icon name='pencil' className='size-4 text-muted-foreground' />
+            </Button>
+            <Button
+              aria-label={`Excluir ${item.title}`}
+              variant='ghost'
+              size='icon-xs'
+              disabled={item.completed}
+              onClick={() => onDelete(item)}
+            >
+              <Icon name='trash-2' className='size-4 text-destructive' />
+            </Button>
+          </>
+        )}
       </div>
     </article>
   )

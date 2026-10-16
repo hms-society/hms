@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import type {
+  CaseAccessProvider,
   CaseChecklistItemsRepository,
   LegalCasesRepository,
 } from '@hms/core/case-management/interfaces'
@@ -36,6 +37,7 @@ import {
 import { ZodValidationPipe } from 'nestjs-zod'
 
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
+import { CASE_MANAGEMENT_ACCESS } from '@/case-management/constants/case-management-access'
 import { CasesController } from '@/case-management/decorators'
 import { DOCUMENT_ENGINE } from '@/document-engine/database/drizzle/constants/documents-repositories'
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
@@ -77,6 +79,7 @@ export class GenerateCaseDocumentController {
     broker: InngestBroker,
     datetime: DatetimeProvider,
     ids: IdProvider,
+    @Inject(CASE_MANAGEMENT_ACCESS.access) caseAccessProvider: CaseAccessProvider,
   ) {
     this.useCase = new GenerateLegalCaseDocumentUseCase(
       cases,
@@ -90,6 +93,7 @@ export class GenerateCaseDocumentController {
       broker,
       datetime,
       ids,
+      caseAccessProvider,
     )
     this.retryUseCase = new RetryLegalCaseDocumentGenerationUseCase(
       cases,
@@ -99,6 +103,7 @@ export class GenerateCaseDocumentController {
       broker,
       datetime,
       ids,
+      caseAccessProvider,
     )
     this.revisionUseCase = new GenerateLegalCaseDocumentRevisionUseCase(
       cases,
@@ -109,6 +114,7 @@ export class GenerateCaseDocumentController {
       broker,
       datetime,
       ids,
+      caseAccessProvider,
     )
   }
 

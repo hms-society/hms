@@ -11,7 +11,9 @@ import { userModel } from '@/identity/database/drizzle/models/user-model'
 import { collaboratorModel } from '@/identity/database/drizzle/models/collaborator-model'
 import { SharedModule } from '@/shared/shared.module'
 import { DocumentsModule } from '@/document-engine/database/documents.module'
-import { DocumentEngineProvisionModule } from '@/document-engine/provision/document-engine-provision.module'
+import { DocumentEngineChecklistAccessModule } from '@/document-engine/access/document-engine-checklist-access.module'
+import { CaseManagementAccessModule } from '@/case-management/access/case-management-access.module'
+import { CaseManagementDatabaseModule } from '@/case-management/database'
 import { eq } from 'drizzle-orm'
 import { documentExceptionAuditLogModel } from '@/document-engine/database/drizzle/models/document-exception-audit-log-model'
 import { DOCUMENT_ENGINE_REPOSITORIES } from '@/document-engine/rest/controllers/request-document-exception.controller'
@@ -20,12 +22,27 @@ import type {
   DocumentExceptionsRepository,
 } from '@hms/core/document-engine/interfaces'
 import type { ClientsRepository } from '@hms/core/identity/interfaces'
+import { ClientFaker } from '@hms/core/identity/domain/entities/fakers'
+import { LegalCaseFaker } from '@hms/core/case-management/domain/entities/fakers'
+import type {
+  LegalCasesRepository,
+  CaseMembersRepository,
+} from '@hms/core/case-management/interfaces'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
+import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
+import { IntakeDatabaseModule } from '@/intake/database'
+import { LegalCatalogModule } from '@/legal-catalog/legal-catalog.module'
+import { DrizzleIntakesRepository } from '@/intake/database/drizzle/repositories'
+import {
+  DrizzleLegalAreasRepository,
+  DrizzleLegalTopicsRepository,
+} from '@/legal-catalog/database/drizzle/repositories'
 import { DOCUMENT_ENGINE } from '@/document-engine/database/drizzle/constants/documents-repositories'
 import type { DailyCountersRepository } from '@hms/core/document-engine/interfaces'
 import { CreateDocumentBatchUseCase } from '@hms/core/document-engine/use-cases'
 import type { Broker } from '@hms/core/shared/interfaces'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
+import { ProvisionModule } from '@/shared/provision/provision.module'
 import { SupabaseAuthFixture } from '@/shared/rest/tests/supabase-auth-fixture'
 
 export class DocumentEngineModuleFixture {
@@ -48,13 +65,26 @@ export class DocumentEngineModuleFixture {
     return this.restFixture.app
   }
 
+  get authenticatedUserId() {
+    return this.authUserId
+  }
+
   static async register(
     controller?: Type<unknown>,
     configure?: (builder: TestingModuleBuilder) => TestingModuleBuilder,
   ) {
     const restFixture = await RestFixture.register(
       {
-        imports: [SharedModule, DocumentsModule, DocumentEngineProvisionModule],
+        imports: [
+          SharedModule,
+          ProvisionModule,
+          DocumentsModule,
+          DocumentEngineChecklistAccessModule,
+          CaseManagementAccessModule,
+          CaseManagementDatabaseModule,
+          IntakeDatabaseModule,
+          LegalCatalogModule,
+        ],
         controllers: controller ? [controller] : [],
       },
       configure,
@@ -85,7 +115,16 @@ export class DocumentEngineModuleFixture {
     try {
       restFixture = await RestFixture.register(
         {
-          imports: [SharedModule, DocumentsModule, DocumentEngineProvisionModule],
+          imports: [
+            SharedModule,
+            ProvisionModule,
+            DocumentsModule,
+            DocumentEngineChecklistAccessModule,
+            CaseManagementAccessModule,
+            CaseManagementDatabaseModule,
+            IntakeDatabaseModule,
+            LegalCatalogModule,
+          ],
           controllers: controller ? [controller] : [],
         },
         (builder) => {
@@ -195,5 +234,94 @@ export class DocumentEngineModuleFixture {
       taxIdType: 'cpf',
       taxIdValue: '12345678909',
     })
+  }
+
+  async createCaseWithCurrentCollaborator(assignCurrentCollaborator = true) {
+    if (!this.authUserId || !this.authCollaboratorId) {
+      throw new Error('An authenticated collaborator is required for a Case fixture')
+    }
+    const legalCase = await this.createLegalCase(this.authUserId)
+    if (assignCurrentCollaborator) await this.assignCurrentCollaborator(legalCase.id)
+    return legalCase
+  }
+
+  private async createLegalCase(userId: string) {
+    const references = await this.createCaseReferences(userId)
+    const draft = LegalCaseFaker.fake(references)
+    const [legalCase] = await this.restFixture
+      .get<LegalCasesRepository>(CASE_MANAGEMENT_REPOSITORIES.legalCases)
+      .addMany([
+        {
+          publicCode: draft.publicCode,
+          clientId: draft.clientId,
+          intakeId: draft.intakeId,
+          legalAreaId: draft.legalAreaId,
+          legalTopicId: draft.legalTopicId,
+          title: draft.title,
+          status: draft.status,
+          teamVersion: draft.teamVersion,
+          checklistCompletedAt: draft.checklistCompletedAt,
+          checklistCompletedBy: draft.checklistCompletedBy,
+          openedAt: draft.openedAt,
+        },
+      ])
+    if (!legalCase) throw new Error('Legal case fixture was not created')
+    return legalCase
+  }
+
+  private async createCaseReferences(userId: string) {
+    const [legalArea] = await this.restFixture
+      .get(DrizzleLegalAreasRepository)
+      .addMany([{ name: `Área ${randomUUID()}`, active: true }])
+    if (!legalArea) throw new Error('Legal area fixture was not created')
+    const [legalTopic] = await this.restFixture
+      .get(DrizzleLegalTopicsRepository)
+      .addMany([
+        { legalAreaId: legalArea.id, name: `Assunto ${randomUUID()}`, active: true },
+      ])
+    if (!legalTopic) throw new Error('Legal topic fixture was not created')
+    const clientDraft = ClientFaker.fake()
+    const client = await this.clientsRepository.add({
+      type: 'natural',
+      name: clientDraft.name,
+      taxId: clientDraft.taxId,
+      phone: clientDraft.phone,
+      email: clientDraft.email,
+    })
+    if (!client) throw new Error('Client fixture was not created')
+    const intake = await this.restFixture.get(DrizzleIntakesRepository).add({
+      clientId: client.id,
+      responsibleId: userId,
+      createdBy: userId,
+      updatedBy: userId,
+      origin: 'direct',
+      contactChannel: 'whatsapp',
+      urgency: 'normal',
+      status: 'registered',
+    })
+    return {
+      clientId: client.id,
+      intakeId: intake.id,
+      legalAreaId: legalArea.id,
+      legalTopicId: legalTopic.id,
+    }
+  }
+
+  private async assignCurrentCollaborator(caseId: string) {
+    if (!this.authCollaboratorId || !this.authUserId) {
+      throw new Error('An authenticated collaborator is required for a Case fixture')
+    }
+    await this.restFixture
+      .get<CaseMembersRepository>(CASE_MANAGEMENT_REPOSITORIES.caseMembers)
+      .addMany([
+        {
+          caseId,
+          collaboratorId: this.authCollaboratorId,
+          role: 'manager',
+          assignedAt: new Date(),
+          assignedBy: this.authUserId,
+          archivedLegacy: false,
+        },
+      ])
   }
 }

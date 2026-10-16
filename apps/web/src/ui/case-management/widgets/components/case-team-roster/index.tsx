@@ -1,6 +1,10 @@
 import { useRef } from 'react'
-import { CaseMemberRole } from '@hms/core/case-management/domain/structures'
+import {
+  CaseMemberRole,
+  LegalCaseStatus,
+} from '@hms/core/case-management/domain/structures'
 
+import { CaseTeamErrorState } from '@/ui/case-management/widgets/components/case-team/case-team-error-state'
 import { MemberActions } from '@/ui/case-management/widgets/components/case-team/team-member-row/member-actions'
 import { TeamMutationDialog } from '@/ui/case-management/widgets/components/case-team/team-mutation-dialog'
 import { CaseTeamMemberSelector } from '@/ui/case-management/widgets/components/case-team-member-selector'
@@ -54,8 +58,13 @@ export const CaseTeamRoster = ({ caseId }: CaseTeamRosterProps) => {
           <h2 id='case-team-roster-title' className='font-serif text-lg font-semibold'>
             Equipe do caso
           </h2>
-          <p className='text-sm text-muted-foreground'>
-            Integrantes com acesso ativo e seus níveis de atuação.
+          <p
+            className='text-sm text-muted-foreground'
+            role={caseTeam?.status === LegalCaseStatus.Closed ? 'status' : undefined}
+          >
+            {caseTeam?.status === LegalCaseStatus.Closed
+              ? 'Caso encerrado: equipe e histórico estão disponíveis somente para consulta.'
+              : 'Integrantes com acesso ativo e seus níveis de atuação.'}
           </p>
         </div>
         <div className='flex flex-wrap items-center gap-3'>
@@ -76,17 +85,7 @@ export const CaseTeamRoster = ({ caseId }: CaseTeamRosterProps) => {
       </header>
 
       {error ? (
-        <div
-          className='flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4'
-          role='alert'
-        >
-          <p className='text-sm text-foreground'>
-            Não foi possível carregar a equipe deste caso.
-          </p>
-          <Button type='button' variant='outline' onClick={handleRetry}>
-            Tentar novamente
-          </Button>
-        </div>
+        <CaseTeamErrorState onRetry={handleRetry} />
       ) : (
         <div className='overflow-x-auto rounded-xl border border-border bg-card'>
           <Table className='min-w-[620px]'>

@@ -151,4 +151,23 @@ describe('Update Case Task Controller [PATCH /cases/:caseId/tasks/:caseTaskId]',
       version: task.version,
     })
   })
+  it('denies task update for an Admin without membership despite broad read access', async () => {
+    const admin = await fixture.registerCollaborator({ profile: 'admin' })
+    const legalCase = await fixture.registerLegalCase({
+      clientId: admin.clientId,
+      legalAreaId: admin.legalAreaId,
+      legalTopicId: admin.legalTopicId,
+    })
+    const task = await fixture.registerCaseTask(legalCase.id)
+    await request(fixture.app.getHttpServer())
+      .patch(`/cases/${legalCase.id}/tasks/${task.id}`)
+      .send({ version: task.version, title: 'Unauthorized update' })
+      .expect(403)
+    expect(await fixture.findCaseTask(task.id)).toMatchObject({
+      id: task.id,
+      title: task.title,
+      version: task.version,
+    })
+    expect(await fixture.findCaseMembers(legalCase.id)).toEqual([])
+  })
 })

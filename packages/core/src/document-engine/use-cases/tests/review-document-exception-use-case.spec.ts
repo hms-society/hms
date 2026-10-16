@@ -1,15 +1,17 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { Mocked } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
+import { mock, type MockProxy } from 'vitest-mock-extended'
 import { ReviewDocumentExceptionUseCase } from '../review-document-exception-use-case'
 import type { DocumentExceptionsRepository } from '../../interfaces/document-exceptions-repository'
 import type { DocumentExceptionAuditLogsRepository } from '../../interfaces/document-exception-audit-logs-repository'
 import type { DocumentException } from '../../domain/entities/document-exception'
 import { DocumentExceptionStatus, DocumentExceptionType } from '../../domain/structures'
+import type { CaseAccessProvider } from '../../../case-management/interfaces/case-access-provider'
 
 describe('ReviewDocumentExceptionUseCase', () => {
   let useCase: ReviewDocumentExceptionUseCase
-  let exceptionsRepositoryMock: Mocked<DocumentExceptionsRepository>
-  let auditLogsRepositoryMock: Mocked<DocumentExceptionAuditLogsRepository>
+  let exceptionsRepositoryMock: MockProxy<DocumentExceptionsRepository>
+  let auditLogsRepositoryMock: MockProxy<DocumentExceptionAuditLogsRepository>
+  let caseAccessProvider: MockProxy<CaseAccessProvider>
 
   const mockPendingException: DocumentException = {
     id: 'exc-123',
@@ -26,25 +28,22 @@ describe('ReviewDocumentExceptionUseCase', () => {
   }
 
   beforeEach(() => {
-    exceptionsRepositoryMock = {
-      create: vi.fn(),
-      findById: vi.fn().mockResolvedValue(mockPendingException),
-      updateStatus: vi.fn().mockResolvedValue({
-        ...mockPendingException,
-        status: DocumentExceptionStatus.APPROVED,
-        reviewedBy: 'supervisor-001',
-      }),
-      hasExpiredExceptionsForCase: vi.fn(),
-      findExpiredProvisionalAcceptances: vi.fn(),
-    } as unknown as Mocked<DocumentExceptionsRepository>
+    exceptionsRepositoryMock = mock<DocumentExceptionsRepository>()
+    exceptionsRepositoryMock.findById.mockResolvedValue(mockPendingException)
+    exceptionsRepositoryMock.updateStatus.mockResolvedValue({
+      ...mockPendingException,
+      status: DocumentExceptionStatus.APPROVED,
+      reviewedBy: 'supervisor-001',
+    })
 
-    auditLogsRepositoryMock = {
-      create: vi.fn().mockResolvedValue(undefined),
-    } as unknown as Mocked<DocumentExceptionAuditLogsRepository>
+    auditLogsRepositoryMock = mock<DocumentExceptionAuditLogsRepository>()
+    auditLogsRepositoryMock.create.mockResolvedValue(undefined)
+    caseAccessProvider = mock<CaseAccessProvider>()
 
     useCase = new ReviewDocumentExceptionUseCase(
       exceptionsRepositoryMock,
       auditLogsRepositoryMock,
+      caseAccessProvider,
     )
   })
 
@@ -56,6 +55,11 @@ describe('ReviewDocumentExceptionUseCase', () => {
     })
 
     expect(result.status).toBe(DocumentExceptionStatus.APPROVED)
+    expect(caseAccessProvider.authorize).toHaveBeenCalledWith({
+      caseId: 'case-789',
+      actorId: 'supervisor-001',
+      intent: 'manage_document_exception',
+    })
     expect(exceptionsRepositoryMock.updateStatus).toHaveBeenCalledWith(
       'exc-123',
       expect.objectContaining({

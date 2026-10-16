@@ -74,7 +74,9 @@ export class ListRescheduleSlotsUseCase
         date as `${number}-${number}-${number}`,
         date as `${number}-${number}-${number}`,
       ),
-      this.appointmentsRepository.listOverlapping(dayStart, dayEnd, [schedule.id]),
+      this.appointmentsRepository.listOverlapping(dayStart, dayEnd, [schedule.id], {
+        statuses: ['scheduled'],
+      }),
     ])
     const weekday = weekdayForDate(date)
     const weekly = schedule.weeklyAvailability.find((item) => item.weekday === weekday)

@@ -3,6 +3,7 @@ import type { CaseTeamScope } from '../../interfaces/case-team-scope'
 import type { CaseMembersRepository } from '../../interfaces/case-members-repository'
 import type { CaseTeamHistoriesRepository } from '../../interfaces/case-team-histories-repository'
 import type { CaseTeamOperationsRepository } from '../../interfaces/case-team-operations-repository'
+import type { CaseCreationOperationsRepository } from '../../interfaces/case-creation-operations-repository'
 import type { CaseCollaboratorsProvider } from '../../interfaces/case-collaborators-provider'
 import type { LegalCasesRepository } from '../../interfaces/legal-cases-repository'
 import type { CollaboratorsRepository } from '#identity/interfaces/collaborators-repository'
@@ -23,12 +24,14 @@ export function createCaseTeamScopeMocks() {
   const caseMembersRepository = mock<CaseMembersRepository>()
   const caseTeamHistoriesRepository = mock<CaseTeamHistoriesRepository>()
   const caseTeamOperationsRepository = mock<CaseTeamOperationsRepository>()
+  const caseCreationOperationsRepository = mock<CaseCreationOperationsRepository>()
   const caseCollaboratorsProvider = mock<CaseCollaboratorsProvider>()
   const scope: CaseTeamScope = {
     legalCasesRepository,
     caseMembersRepository,
     caseTeamHistoriesRepository,
     caseTeamOperationsRepository,
+    caseCreationOperationsRepository,
     caseCollaboratorsProvider,
   }
 
@@ -38,6 +41,7 @@ export function createCaseTeamScopeMocks() {
     caseMembersRepository,
     caseTeamHistoriesRepository,
     caseTeamOperationsRepository,
+    caseCreationOperationsRepository,
     caseCollaboratorsProvider,
   }
 }

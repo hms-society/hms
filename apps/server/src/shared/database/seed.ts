@@ -172,10 +172,15 @@ async function bootstrap() {
     })
 
     const schedulingSeed = await app.get(SchedulingSeeder).run({
-      intakeId: intakeSeed.documentProductionIntake.id,
+      appointments: [
+        intakeSeed.documentProductionIntake,
+        ...intakeSeed.intakes.filter(
+          ({ id }) => id !== intakeSeed.documentProductionIntake.id,
+        ),
+      ].map(({ id: intakeId, clientId }) => ({ intakeId, clientId })),
       pendingMarkersIntakeId: intakeSeed.pendingMarkersIntake.id,
-      clientId: client.id,
       assignedLawyerId: lawyer.id,
+      lawyerIds,
     })
 
     const consultationSeed = await app.get(ConsultationSeeder).run({

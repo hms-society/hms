@@ -47,6 +47,12 @@ describe('List Reschedule Slots Use Case', () => {
 
     expect(result.length).toBeGreaterThan(0)
     expect(appointmentsRepository.replaceIfRevisionMatches).not.toHaveBeenCalled()
+    expect(appointmentsRepository.listOverlapping).toHaveBeenCalledWith(
+      expect.any(Date),
+      expect.any(Date),
+      [schedule.id],
+      { statuses: ['scheduled'] },
+    )
   })
 
   it('uses the selected lawyer timezone and preserves the appointment duration', async () => {

@@ -2,7 +2,7 @@
 @url = {{BASE_URL}}/cases
 
 # Manual smoke test for case-document version endpoints.
-# Run `pnpm seed` and start the API before executing these requests.
+# Start the API and use a Case assigned to the signed-in lawyer.
 # The manual and AI requests create persisted versions; use development data only.
 # The AI request enqueues Gemini generation when Gemini is the configured provider
 # and may consume external API quota. It is not run by CI.
@@ -61,3 +61,17 @@ Accept: application/json
     ]
   }
 }
+
+### Get an accessible case document
+# @prompt caseId Enter the case ID
+# @prompt documentId Enter the legal-piece document ID
+GET {{url}}/{{caseId}}/documents/{{documentId}}
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}
+Accept: application/json
+
+### Download a selected version
+# @prompt caseId Enter the case ID
+# @prompt documentId Enter the legal-piece document ID
+# @prompt versionId Enter the version ID
+GET {{url}}/{{caseId}}/documents/{{documentId}}/file?versionId={{versionId}}
+Authorization: Bearer {{signInAsSeededLawyer.response.body.$.accessToken}}

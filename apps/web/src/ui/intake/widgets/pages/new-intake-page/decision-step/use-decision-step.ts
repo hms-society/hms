@@ -2,7 +2,7 @@ import type { IntakeFormData } from '@hms/validation/intake'
 import { useFormContext } from 'react-hook-form'
 import { useEffect, useState } from 'react'
 
-import type { LawyerOption } from './use-lawyer-selector-dialog'
+import type { LawyerOption } from '@/ui/identity/widgets/components/lawyer-selector-dialog'
 
 export type IntakeDecision = IntakeFormData['decision']
 export type MeetingMode = NonNullable<IntakeFormData['meetingMode']>

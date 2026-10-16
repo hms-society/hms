@@ -164,6 +164,10 @@ export function useChecklistDossierTab({
       persistedCase.status === LegalCaseStatus.LegalProduction,
   )
   const hasChecklistDecision = Boolean(checklistGateDecision)
+  const isChecklistApproved =
+    checklistGateDecision === CaseChecklistGateDecision.Approved ||
+    checklistGateDecision === CaseChecklistGateDecision.ApprovedWithException
+  const isDossierHomologated = Boolean(persistedCase?.dossierGate.homologatedAt)
   const activities = buildDocumentaryActivities({
     caseChecklistItems: persistedChecklistItems,
     checklistGate: persistedCase?.checklistGate,
@@ -257,6 +261,7 @@ export function useChecklistDossierTab({
   }
 
   function handleValidateChecklistItem(itemId: string) {
+    if (isReviewDisabled) return
     const checklistItem = displayChecklistItems.find((item) => item.id === itemId)
 
     if (checklistItem?.documentFileId) {
@@ -290,6 +295,7 @@ export function useChecklistDossierTab({
   }
 
   function handleOpenChecklistItemDetail(itemId: string) {
+    if (isReviewDisabled) return
     return navigateTo('lawyerCaseChecklistItem', {
       params: { caseId, checklistItemId: itemId },
     })
@@ -403,6 +409,8 @@ export function useChecklistDossierTab({
     isReviewDisabled,
     isHomologatingDossier: homologationMutation.isPending,
     hasChecklistDecision,
+    isChecklistApproved,
+    isDossierHomologated,
     isReviewingChecklistGate:
       mutation.isPending || addComplementaryItemMutation.isPending,
     mandatoryItemsCount,
@@ -626,21 +634,14 @@ function getChecklistGateReviewerName(
   return decidedBy
 }
 
-function formatChecklistGateDecisionDate(value: Date | string) {
-  const date = new Date(value)
-  const day = new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    timeZone: 'America/Sao_Paulo',
-    year: 'numeric',
-  }).format(date)
-  const time = new Intl.DateTimeFormat('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'America/Sao_Paulo',
-  }).format(date)
+const CHECKLIST_GATE_DECISION_DATE_FORMATTER = new Intl.DateTimeFormat('pt-BR', {
+  dateStyle: 'short',
+  timeStyle: 'short',
+  timeZone: 'America/Sao_Paulo',
+})
 
-  return `${day} ${time}`
+function formatChecklistGateDecisionDate(value: Date | string) {
+  return CHECKLIST_GATE_DECISION_DATE_FORMATTER.format(new Date(value)).replace(',', '')
 }
 
 function formatChecklistValidationTime(date: Date) {
