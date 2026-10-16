@@ -20,10 +20,10 @@ export interface SchedulesRepository {
   removeAll(): Promise<void>
   findById(id: string): Promise<Schedule | null>
   findByCollaboratorId(collaboratorId: string): Promise<Schedule | null>
-  findBlockedPeriodsByScheduleId(scheduleId: string): Promise<BlockedPeriod[]>
   findBlockedPeriodById(
     id: string,
   ): Promise<(BlockedPeriod & { scheduleId: string }) | null>
+  findBlockedPeriodsByScheduleId(scheduleId: string): Promise<BlockedPeriod[]>
   createSchedule(data: CreateScheduleInput): Promise<Schedule | any>
   updateWeeklyAvailability(
     scheduleId: string,
