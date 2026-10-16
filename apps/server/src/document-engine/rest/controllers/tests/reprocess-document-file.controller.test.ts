@@ -79,7 +79,7 @@ describe('Reprocess Document File Controller [POST /document-validation/document
   it('marks a persisted file for processing and publishes its event', async () => {
     const batch = await fixture.documentBatchesRepository.add({
       readableId: `LOTE-${randomUUID()}`,
-      channel: DocumentBatchChannel.InternalUpload,
+      channel: DocumentBatchChannel.WhatsApp,
       sender: 'lawyer@hms.com',
       inTriageBox: false,
       clientId,
@@ -129,7 +129,7 @@ describe('Reprocess Document File Controller [POST /document-validation/document
     const unmatchedHash = 'b'.repeat(64)
     const batch = await fixture.documentBatchesRepository.add({
       readableId: `LOTE-${randomUUID()}`,
-      channel: DocumentBatchChannel.InternalUpload,
+      channel: DocumentBatchChannel.WhatsApp,
       sender: 'lawyer@hms.com',
       inTriageBox: false,
       clientId,
@@ -206,10 +206,10 @@ describe('Reprocess Document File Controller [POST /document-validation/document
     const legalCase = await fixture.createCaseWithCurrentCollaborator()
     const batch = await fixture.documentBatchesRepository.add({
       readableId: `LOTE-${randomUUID()}`,
-      channel: DocumentBatchChannel.InternalUpload,
+      channel: DocumentBatchChannel.WhatsApp,
       sender: 'lawyer@hms.com',
       inTriageBox: false,
-      clientId,
+      clientId: legalCase.clientId,
       createdBy: userId,
       status: 'identified',
       files: [
@@ -269,10 +269,10 @@ describe('Reprocess Document File Controller [POST /document-validation/document
     const legalCase = await fixture.createCaseWithCurrentCollaborator()
     const batch = await fixture.documentBatchesRepository.add({
       readableId: `LOTE-${randomUUID()}`,
-      channel: DocumentBatchChannel.InternalUpload,
+      channel: DocumentBatchChannel.WhatsApp,
       sender: 'lawyer@hms.com',
       inTriageBox: false,
-      clientId,
+      clientId: legalCase.clientId,
       createdBy: userId,
       status: 'identified',
       files: [

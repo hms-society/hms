@@ -51,6 +51,7 @@ const WEEKLY_AVAILABILITIES_BY_LAWYER: WeeklyAvailability[][] = [
 
 const APPOINTMENT_DAY_OFFSETS = [0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4]
 const APPOINTMENT_UTC_HOURS = [12, 14, 12, 14, 16, 12, 14, 16, 12, 14, 12, 13, 15]
+const SCHEDULING_TIME_ZONE = 'America/Sao_Paulo'
 
 @Injectable()
 export class SchedulingSeeder {
@@ -66,7 +67,7 @@ export class SchedulingSeeder {
     await this.schedulesRepository.removeAll()
   }
 
-  async run(references: SchedulingSeedReferences) {
+  async run(references: SchedulingSeedReferences, now = new Date()) {
     const lawyerIds = [
       references.assignedLawyerId,
       ...references.lawyerIds.filter(
@@ -90,7 +91,7 @@ export class SchedulingSeeder {
       throw new AppError('The assigned lawyer schedule could not be seeded', 'Seed Error')
     }
 
-    const monday = nextMonday(new Date())
+    const monday = firstMondayOfCurrentMonth(now)
     const blockDate = civilDate(monday, 2)
     const blockedPeriod = await this.schedulesRepository.createBlockedPeriod({
       scheduleId: createdSchedule.id,
@@ -157,11 +158,18 @@ export class SchedulingSeeder {
   }
 }
 
-function nextMonday(now: Date): Date {
-  const daysUntilMonday = (8 - now.getUTCDay()) % 7 || 7
-  return new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + daysUntilMonday),
-  )
+function firstMondayOfCurrentMonth(now: Date): Date {
+  const dateParts = new Intl.DateTimeFormat('en-US', {
+    timeZone: SCHEDULING_TIME_ZONE,
+    year: 'numeric',
+    month: 'numeric',
+  }).formatToParts(now)
+  const year = Number(dateParts.find(({ type }) => type === 'year')?.value)
+  const month = Number(dateParts.find(({ type }) => type === 'month')?.value)
+  const firstDay = new Date(Date.UTC(year, month - 1, 1))
+  const daysUntilMonday = (8 - firstDay.getUTCDay()) % 7
+  firstDay.setUTCDate(firstDay.getUTCDate() + daysUntilMonday)
+  return firstDay
 }
 
 function civilDate(date: Date, daysAfter: number): CalendarDate {

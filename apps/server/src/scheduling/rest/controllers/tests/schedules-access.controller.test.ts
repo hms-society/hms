@@ -65,4 +65,26 @@ describe('Schedules controller access', () => {
       .set('Authorization', fixture.authenticateAs(attendantUser))
       .expect(201)
   })
+
+  it('prevents a lawyer from reading or changing another lawyer schedule', async () => {
+    const { user: firstLawyerUser, collaborator: firstLawyer } =
+      await fixture.registerLawyer()
+    const { collaborator: secondLawyer } = await fixture.registerLawyer()
+    const seeded = await fixture.seedAppointment(secondLawyer.id, firstLawyer.id)
+    const authorization = fixture.authenticateAs(firstLawyerUser)
+
+    await request(fixture.app.getHttpServer())
+      .get(`/schedules/collaborator/${secondLawyer.id}`)
+      .set('Authorization', authorization)
+      .expect(403)
+
+    await request(fixture.app.getHttpServer())
+      .put('/schedules/duration')
+      .send({ scheduleId: seeded.schedule.id, defaultDurationMinutes: 60 })
+      .set('Authorization', authorization)
+      .expect(403)
+
+    const unchanged = await fixture.schedulesRepository.findById(seeded.schedule.id)
+    expect(unchanged?.appointmentDurationInMinutes).not.toBe(60)
+  })
 })

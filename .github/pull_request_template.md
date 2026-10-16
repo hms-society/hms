@@ -1,43 +1,63 @@
-## Objetivo
+## 🎯 Objetivo
+Descreva brevemente o problema resolvido, o propósito deste Pull Request, o resultado esperado e exclusões explícitas de escopo.
 
-Descreva o problema e o comportamento resultante, com exclusões de escopo relevantes.
+## 🎫 Tickets Jira Relacionados
+Liste as chaves e links dos tickets do Jira relacionados a este PR (ex: `SCRUM-123`), ou coloque `Nenhum`.
 
-## Rastreabilidade
+## 📜 Rastreabilidade de PRD e Spec
+- **URL do PRD (Confluence):** 
+- **Spec SDD:** 
+- **Plano / Revisão:** 
+- **Critérios cobertos:** (ex: `RF-01`, `CA-02`)
 
-- Tickets Jira (chaves e links, ou nenhum):
-- PRD Confluence (quando aplicável):
-- Spec e revisão (ou manutenção direta):
-- Evaluation / resultados dos checks:
-- Critérios cobertos (`RF-*`, `CA-*`):
-- PR predecessor / `stacked-pr` (quando aplicável):
+## 🛠️ Módulos e Caminhos Específicos Afetados (Obrigatório)
+Marque os módulos e liste os caminhos completos dos arquivos ou pastas específicas criadas ou alteradas:
+- [ ] `apps/web` (Frontend / Interface)
+  *Arquivos alterados:* 
+  - 
+- [ ] `apps/server` (Backend / API)
+  *Arquivos alterados:* 
+  - 
+- [ ] `packages/core` (Regras de Domínio)
+  *Arquivos alterados:* 
+  - 
+- [ ] `supabase` (Banco de Dados / Migrations / Seeders)
+  *Arquivos alterados:* 
+  - 
 
-## Escopo técnico
+## 💼 Alterações em Regras de Negócio
+Descreva se houve mudanças de comportamento, validação, autorização ou workflow (comportamento anterior vs. novo comportamento e razões). Caso não haja, declare: `Nenhuma — não há alteração de comportamento, validação, autorização ou workflow.`
 
-| Ação (Create / Modify / Delete) | Boundary | Caminhos / alteração |
-| --- | --- | --- |
-| | Core / Validation / Server / Web / documentação | |
+## 🧪 Testes Manuais
+Detalhe os cenários de testes manuais realizados para validação deste PR:
 
-Descreva mudanças de regra de negócio, permissão, interface pública ou persistência;
-declare nenhuma quando não houver.
+### ⚙️ Pré-requisitos e Ambiente
+- Serviços/containers necessários (ex: DB/Auth saudáveis)
+- Usuários ou dados de seed utilizados (ex: `admin@hmsadvogados.com.br`)
+- Rota ou entrypoint inicial
 
-## Verificação
+### 📝 Passos para Reprodução
+1. 
+2. 
+3. 
 
-Use os comandos reais dos workspaces afetados, conforme Tooling. Não marque checks
-não executados como aprovados. Evidência reutilizada deve identificar candidato,
-limites e por que permanece aplicável; CI deve referir-se ao head atual de cada PR.
+### ✅ Resultado Esperado
+- Comportamento esperado em caso de sucesso
+- Comportamento em fluxos de erro ou exceção (se aplicável)
 
-| Check | Tipo (Automated / Manual / Visual) | Comando / procedimento | Resultado | Artefatos / limites |
-| --- | --- | --- | --- | --- |
-| | | | | |
+### 📱 Responsividade e Acessibilidade (se UI)
+- Viewports testados e suporte a navegação por teclado
 
-Inclua lint/formatação, tipos, arquitetura, complexidade, testes/coverage,
-integration/build e mutation quando exigidos pelo contrato e Rules. Registre
-mutation bloqueado se ainda não houver tooling. Para Manual, descreva apenas
-cenários concisos executáveis por Playwright CLI/terminal com ambiente e resultado
-observado. Para UI, inclua os viewports/teclado e comparações visuais exigidos.
-Identifique transporte mocked e fluxos reais REST/Auth separadamente.
+## ⚡ Validação Automatizada e Qualidade
+Marque as verificações executadas e aprovadas localmente antes do envio:
+- [ ] `pnpm test` (Testes automatizados passando sem falhas)
+- [ ] `pnpm check-types` (Sem erros de tipagem no TypeScript)
+- [ ] `pnpm check` (Código formatado e sem alertas pelo Biome)
 
-## Documentação e limitações
+### 📊 Comandos Executados e Resultados
+```bash
+# Cole aqui os comandos executados e o resumo dos resultados
+```
 
-Informe o alinhamento documental, achados abertos, checks pendentes/bloqueados,
-falhas históricas relevantes e qualquer entrega parcial ou dispensa explícita.
+## ⚠️ Limitações Conhecidas
+Liste lacunas temporárias, pendências conhecidas não bloqueantes ou limitações do ambiente, ou declare `Nenhuma`.

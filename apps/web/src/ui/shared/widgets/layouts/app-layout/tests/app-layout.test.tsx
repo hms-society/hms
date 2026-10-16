@@ -150,4 +150,24 @@ describe('AppLayout', () => {
       screen.getByRole('link', { name: 'Intakes' }).getAttribute('aria-current'),
     ).toBeNull()
   })
+
+  it('marks only the most specific matching route as active', () => {
+    useAppLayoutMock.mockReturnValue({
+      pathname: ROUTES.appointmentsCalendar,
+      isSidebarCollapsed: false,
+      sidebarItems: SIDEBAR_ITEMS[CollaboratorProfile.Lawyer],
+      handleSidebarToggle,
+    })
+
+    render(<AppLayout />)
+
+    expect(
+      screen
+        .getByRole('link', { name: 'Agenda de consultas' })
+        .getAttribute('aria-current'),
+    ).toBe('page')
+    expect(
+      screen.getByRole('link', { name: 'Minha Agenda' }).getAttribute('aria-current'),
+    ).toBeNull()
+  })
 })

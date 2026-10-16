@@ -23,6 +23,7 @@ export type Intake = Entity & {
   closureReason?: IntakeClosureReason
   closureNotes?: string
   closedAt?: Date
+  contractedAt?: Date
   version: number
   createdAt: Date
   updatedAt: Date
@@ -41,6 +42,7 @@ export type IntakeUpdate = Partial<
       | 'closureNotes'
       | 'closureReason'
       | 'closedAt'
+      | 'contractedAt'
       | 'contactChannel'
       | 'demandNotes'
       | 'legalAreaId'
