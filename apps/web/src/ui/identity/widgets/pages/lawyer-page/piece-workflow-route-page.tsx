@@ -288,7 +288,15 @@ export function PieceWorkflowRoutePage({
           </div>
           <div className='min-w-0 overflow-y-auto bg-muted/50 p-4 sm:p-6'>
             <div className='mx-auto max-w-[900px] overflow-hidden rounded-lg border bg-card shadow-sm'>
-              {version.content ? (
+              {isHomologated ? (
+                <PieceFilePreview
+                  caseId={caseId}
+                  documentId={documentId}
+                  versionId={version.id}
+                  versionNumber={version.versionNumber}
+                  homologated
+                />
+              ) : version.content ? (
                 <DocumentEditor
                   content={version.content}
                   onChange={() => undefined}

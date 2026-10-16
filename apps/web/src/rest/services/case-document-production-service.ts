@@ -171,4 +171,13 @@ export const CaseDocumentProductionService = (restClient: RestClient) => ({
       `/cases/${caseId}/documents/${documentId}/file${versionQuery}`,
     )
   },
+  getHomologatedDocumentFile(
+    caseId: string,
+    documentId: string,
+    versionId: string,
+  ): Promise<RestResponse<Blob>> {
+    return restClient.getFile(
+      `/cases/${caseId}/documents/${documentId}/versions/${versionId}/homologated-file`,
+    )
+  },
 })

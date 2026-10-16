@@ -54,6 +54,17 @@ describe('CaseDocumentProductionService', () => {
       {},
     )
   })
+
+  it('requests the final PDF for a homologated version', async () => {
+    const restClient = makeRestClient()
+    const service = CaseDocumentProductionService(restClient)
+
+    await service.getHomologatedDocumentFile('case-1', 'document-1', 'version-2')
+
+    expect(restClient.getFile).toHaveBeenCalledWith(
+      '/cases/case-1/documents/document-1/versions/version-2/homologated-file',
+    )
+  })
 })
 
 function makeRestClient(): RestClient {

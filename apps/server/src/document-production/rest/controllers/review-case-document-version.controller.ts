@@ -10,7 +10,10 @@ import {
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import type { ReviewCaseDocumentVersionUseCase } from '@hms/core/document-production/use-cases'
 import { ReviewCaseDocumentVersionUseCase as ReviewCaseDocumentVersionUseCaseClass } from '@hms/core/document-production/use-cases'
-import type { DocumentVersionsRepository } from '@hms/core/document-production/interfaces'
+import type {
+  DocumentsRepository,
+  DocumentVersionsRepository,
+} from '@hms/core/document-production/interfaces'
 import type {
   CaseMembersRepository,
   LegalCasesRepository,
@@ -37,6 +40,8 @@ export class ReviewCaseDocumentVersionController {
   constructor(
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.versions)
     versionsRepository: DocumentVersionsRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.documents)
+    documentsRepository: DocumentsRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.legalCases)
     legalCasesRepository: LegalCasesRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.caseMembers)
@@ -45,6 +50,7 @@ export class ReviewCaseDocumentVersionController {
   ) {
     this.useCase = new ReviewCaseDocumentVersionUseCaseClass(
       versionsRepository,
+      documentsRepository,
       legalCasesRepository,
       caseMembersRepository,
     )
