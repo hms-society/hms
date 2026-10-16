@@ -28,6 +28,7 @@ import {
   SaveEditableCaseDocumentVersionController,
   SubmitCaseDocumentVersionForReviewController,
   ReviewCaseDocumentVersionController,
+  HomologateCaseDocumentVersionController,
 } from '@/document-production/rest/controllers'
 
 @Module({
@@ -61,6 +62,7 @@ import {
     SaveEditableCaseDocumentVersionController,
     SubmitCaseDocumentVersionForReviewController,
     ReviewCaseDocumentVersionController,
+    HomologateCaseDocumentVersionController,
   ],
   exports: [DocumentProductionMessagingModule],
 })

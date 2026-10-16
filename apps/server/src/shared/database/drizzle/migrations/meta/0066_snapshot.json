@@ -430,12 +430,7 @@
               "asc": true,
               "nulls": "last"
             },
-            {
-              "expression": "id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
+            { "expression": "id", "isExpression": false, "asc": true, "nulls": "last" }
           ],
           "isUnique": false,
           "concurrently": false,
@@ -463,12 +458,7 @@
               "asc": true,
               "nulls": "last"
             },
-            {
-              "expression": "kind",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
+            { "expression": "kind", "isExpression": false, "asc": true, "nulls": "last" }
           ],
           "isUnique": true,
           "where": "\"case_team_history\".\"operation_id\" IS NOT NULL AND \"case_team_history\".\"kind\" <> 'legacy_imported'",
@@ -1174,12 +1164,7 @@
           "primaryKey": false,
           "notNull": true
         },
-        "body": {
-          "name": "body",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
+        "body": { "name": "body", "type": "text", "primaryKey": false, "notNull": true },
         "status": {
           "name": "status",
           "type": "text",
@@ -1355,12 +1340,7 @@
           "primaryKey": false,
           "notNull": true
         },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
+        "name": { "name": "name", "type": "text", "primaryKey": false, "notNull": true },
         "is_active": {
           "name": "is_active",
           "type": "boolean",
@@ -1886,12 +1866,7 @@
           "primaryKey": false,
           "notNull": true
         },
-        "unit": {
-          "name": "unit",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
+        "unit": { "name": "unit", "type": "text", "primaryKey": false, "notNull": true },
         "sent_at": {
           "name": "sent_at",
           "type": "timestamp with time zone",
@@ -1922,12 +1897,7 @@
               "asc": true,
               "nulls": "last"
             },
-            {
-              "expression": "unit",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
+            { "expression": "unit", "isExpression": false, "asc": true, "nulls": "last" }
           ],
           "isUnique": true,
           "concurrently": false,
@@ -2264,12 +2234,7 @@
               "asc": true,
               "nulls": "last"
             },
-            {
-              "expression": "type",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
+            { "expression": "type", "isExpression": false, "asc": true, "nulls": "last" }
           ],
           "isUnique": true,
           "where": "\"client_consents\".\"revoked_at\" IS NULL",
@@ -2313,12 +2278,7 @@
           "primaryKey": false,
           "notNull": true
         },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
+        "name": { "name": "name", "type": "text", "primaryKey": false, "notNull": false },
         "legal_name": {
           "name": "legal_name",
           "type": "text",
@@ -2380,12 +2340,7 @@
           "primaryKey": false,
           "notNull": false
         },
-        "city": {
-          "name": "city",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
+        "city": { "name": "city", "type": "text", "primaryKey": false, "notNull": false },
         "state": {
           "name": "state",
           "type": "text",
@@ -2438,12 +2393,7 @@
         "clients_phone_idx": {
           "name": "clients_phone_idx",
           "columns": [
-            {
-              "expression": "phone",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
+            { "expression": "phone", "isExpression": false, "asc": true, "nulls": "last" }
           ],
           "isUnique": false,
           "concurrently": false,
@@ -2939,12 +2889,7 @@
       "name": "users",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
         "email": {
           "name": "email",
           "type": "varchar(254)",
@@ -3083,12 +3028,7 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
+        "name": { "name": "name", "type": "text", "primaryKey": false, "notNull": true },
         "active": {
           "name": "active",
           "type": "boolean",
@@ -3152,12 +3092,7 @@
           "primaryKey": false,
           "notNull": true
         },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
+        "name": { "name": "name", "type": "text", "primaryKey": false, "notNull": true },
         "active": {
           "name": "active",
           "type": "boolean",
@@ -3349,12 +3284,7 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
+        "name": { "name": "name", "type": "text", "primaryKey": false, "notNull": true },
         "description": {
           "name": "description",
           "type": "text",
@@ -3860,12 +3790,7 @@
       "name": "documents",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
         "title": {
           "name": "title",
           "type": "text",
@@ -3929,12 +3854,7 @@
       "name": "document_packages",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
         "context_type": {
           "name": "context_type",
           "type": "text",
@@ -4013,12 +3933,7 @@
       "name": "package_documents",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
         "document_package_id": {
           "name": "document_package_id",
           "type": "uuid",
@@ -4446,12 +4361,7 @@
           "primaryKey": false,
           "notNull": true
         },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
+        "name": { "name": "name", "type": "text", "primaryKey": false, "notNull": true },
         "access_token": {
           "name": "access_token",
           "type": "text",
@@ -4592,12 +4502,7 @@
       "name": "consultations",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
         "intake_id": {
           "name": "intake_id",
           "type": "uuid",
@@ -4834,24 +4739,14 @@
       "name": "consultation_outbox_events",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
         "consultation_id": {
           "name": "consultation_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
+        "name": { "name": "name", "type": "text", "primaryKey": false, "notNull": true },
         "payload": {
           "name": "payload",
           "type": "jsonb",
@@ -4881,12 +4776,7 @@
               "asc": true,
               "nulls": "last"
             },
-            {
-              "expression": "id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
+            { "expression": "id", "isExpression": false, "asc": true, "nulls": "last" }
           ],
           "isUnique": false,
           "where": "\"consultation_outbox_events\".\"published_at\" is null",
@@ -4909,12 +4799,7 @@
               "asc": true,
               "nulls": "last"
             },
-            {
-              "expression": "id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
+            { "expression": "id", "isExpression": false, "asc": true, "nulls": "last" }
           ],
           "isUnique": false,
           "concurrently": false,
@@ -4952,12 +4837,7 @@
       "name": "appointments",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
         "intake_id": {
           "name": "intake_id",
           "type": "uuid",
@@ -5079,24 +4959,14 @@
       "name": "appointment_changes",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
         "appointment_id": {
           "name": "appointment_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "kind": {
-          "name": "kind",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
+        "kind": { "name": "kind", "type": "text", "primaryKey": false, "notNull": true },
         "actor_id": {
           "name": "actor_id",
           "type": "uuid",
@@ -5180,12 +5050,7 @@
               "asc": true,
               "nulls": "last"
             },
-            {
-              "expression": "id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
+            { "expression": "id", "isExpression": false, "asc": true, "nulls": "last" }
           ],
           "isUnique": false,
           "concurrently": false,
@@ -5201,12 +5066,7 @@
               "asc": true,
               "nulls": "last"
             },
-            {
-              "expression": "id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
+            { "expression": "id", "isExpression": false, "asc": true, "nulls": "last" }
           ],
           "isUnique": false,
           "where": "\"appointment_changes\".\"published_at\" is null",
@@ -5229,12 +5089,7 @@
               "asc": true,
               "nulls": "last"
             },
-            {
-              "expression": "kind",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
+            { "expression": "kind", "isExpression": false, "asc": true, "nulls": "last" }
           ],
           "isUnique": true,
           "concurrently": false,
@@ -5323,12 +5178,7 @@
           "primaryKey": false,
           "notNull": true
         },
-        "erro": {
-          "name": "erro",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
+        "erro": { "name": "erro", "type": "text", "primaryKey": false, "notNull": false },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -5356,12 +5206,7 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
+        "name": { "name": "name", "type": "text", "primaryKey": false, "notNull": true },
         "description": {
           "name": "description",
           "type": "text",
@@ -6019,12 +5864,7 @@
           "primaryKey": false,
           "notNull": true
         },
-        "date": {
-          "name": "date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true
-        },
+        "date": { "name": "date", "type": "date", "primaryKey": false, "notNull": true },
         "count": {
           "name": "count",
           "type": "integer",
@@ -6571,12 +6411,7 @@
           "primaryKey": false,
           "notNull": true
         },
-        "type": {
-          "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
+        "type": { "name": "type", "type": "text", "primaryKey": false, "notNull": true },
         "status": {
           "name": "status",
           "type": "text",
@@ -6961,9 +6796,5 @@
   "roles": {},
   "policies": {},
   "views": {},
-  "_meta": {
-    "columns": {},
-    "schemas": {},
-    "tables": {}
-  }
+  "_meta": { "columns": {}, "schemas": {}, "tables": {} }
 }

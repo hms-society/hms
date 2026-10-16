@@ -36,10 +36,22 @@ export class DocxProvider implements DocumentFileExporter {
   async export(input: {
     readonly title: string
     readonly content: DocumentTemplateContent
+    readonly approval?: {
+      readonly approvedByName: string
+      readonly approvedByProfile: string
+      readonly approvedAt: Date
+    }
   }) {
     const document = new Document({
       title: input.title,
       creator: 'HMS',
+      lastModifiedBy: input.approval?.approvedByName ?? 'HMS',
+      subject: input.approval
+        ? `Homologação por ${input.approval.approvedByName}`
+        : undefined,
+      description: input.approval
+        ? `Versão homologada em ${input.approval.approvedAt.toISOString()} pelo perfil ${input.approval.approvedByProfile}.`
+        : undefined,
       numbering: {
         config: [
           {

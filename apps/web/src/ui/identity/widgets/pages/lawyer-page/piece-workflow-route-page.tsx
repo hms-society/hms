@@ -160,7 +160,9 @@ export function PieceWorkflowRoutePage({
                       ? 'Requer ajustes'
                       : 'Submetido para revisão'
                   : isReadOnlyVersion
-                    ? `Somente leitura · v${version.versionNumber}`
+                    ? version.status === 'approved'
+                      ? `Aprovada · v${version.versionNumber}`
+                      : `Somente leitura · v${version.versionNumber}`
                     : reviewRequest
                       ? `Requer ajustes · v${version.versionNumber}`
                       : `Em elaboração · v${version.versionNumber}`}
