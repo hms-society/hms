@@ -164,6 +164,7 @@ describe('Homologate Case Document Version Controller', () => {
       approvedByCollaboratorProfile: 'lawyer',
       approvedAt: new Date('2026-10-16T15:00:00.000Z'),
     }
+    let homologationPersisted = false
 
     versionsRepository.findById.mockResolvedValue(version)
     legalCasesRepository.findById.mockResolvedValue(legalCase)
@@ -171,8 +172,13 @@ describe('Homologate Case Document Version Controller', () => {
       collaboratorId,
     ])
     documentPackagesRepository.findByContext.mockResolvedValue(documentPackage)
-    homologationsRepository.findByDocumentVersionId.mockResolvedValue(undefined)
-    homologationsRepository.add.mockResolvedValue(homologation)
+    homologationsRepository.findByDocumentVersionId.mockImplementation(async () =>
+      homologationPersisted ? homologation : undefined,
+    )
+    homologationsRepository.add.mockImplementation(async () => {
+      homologationPersisted = true
+      return homologation
+    })
     documentsRepository.findById.mockResolvedValue(document)
     documentFileExporter.export.mockRejectedValue(new Error('export failed'))
 
