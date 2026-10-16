@@ -43,8 +43,8 @@ export class RecordDocumentValidationDecisionUseCase {
     private readonly documentValidationLogsRepository: DocumentValidationLogsRepository,
     private readonly caseAccessProvider: CaseAccessProvider,
     private readonly getDocumentValidation: GetDocumentValidationUseCase,
-    private readonly uploads: ClientDocumentUploadsRepository,
     private readonly caseChecklistUpdateProvider?: CaseChecklistUpdateProvider,
+    private readonly uploads?: ClientDocumentUploadsRepository,
   ) {}
 
   async execute(request: RecordDocumentValidationDecisionRequest) {
@@ -62,7 +62,7 @@ export class RecordDocumentValidationDecisionUseCase {
     }
 
     await this.authorizeDecisionCases(request, currentDocument, actorId)
-    const upload = await this.uploads.findByStoragePath(currentDocument.storagePath)
+    const upload = await this.uploads?.findByStoragePath(currentDocument.storagePath)
     if (upload && !upload.publishedAt)
       throw new BadRequestError(
         'Valide o documento pelo item do checklist antes de disponibilizá-lo ao cliente.',

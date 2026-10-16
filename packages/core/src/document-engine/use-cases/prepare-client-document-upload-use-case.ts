@@ -2,12 +2,12 @@ import type { ClientDocumentUpload } from '../domain/entities'
 import { ConflictError } from '#shared/domain/errors/conflict-error'
 import type { ClientDocumentUploadsRepository } from '../interfaces'
 import type { PrepareChecklistUpload, ChecklistUploadTicket } from '../domain/structures'
-import type { StorageProvider, DatetimeProvider, IdProvider } from '#shared/interfaces'
+import type { ClientDocumentUploadStorageProvider, DatetimeProvider, IdProvider } from '#shared/interfaces'
 import { AppError } from '#shared/domain/errors/app-error'
 export class PrepareClientDocumentUploadUseCase {
   constructor(
     private readonly uploads: ClientDocumentUploadsRepository,
-    private readonly storage: StorageProvider,
+    private readonly storage: ClientDocumentUploadStorageProvider,
     private readonly clock: DatetimeProvider,
     private readonly ids: IdProvider,
   ) {}

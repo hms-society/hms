@@ -12,7 +12,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 import { ListConsultationClientDocumentsUseCase } from '../list-consultation-client-documents-use-case'
 import type { ResolveConsultationClientDocumentUseCase } from '../resolve-consultation-client-document-use-case'
-import type { ConsultationsRepository } from '../../interfaces'
+import type { ConsultationClientDocumentsRepository } from '../../interfaces'
 import type { CollaboratorsRepository, UsersRepository } from '#identity/interfaces'
 import type {
   DocumentPackagesRepository,
@@ -23,7 +23,7 @@ import { ConsultationFaker } from '../../domain/entities/fakers'
 import { CollaboratorFaker, UserFaker } from '#identity/domain/entities/fakers'
 describe('List Consulta client documents', () => {
   it('filters pending and foreign assigned stages independently of Formalização', async () => {
-    const consultations = mock<ConsultationsRepository>()
+    const consultations = mock<ConsultationClientDocumentsRepository>()
     const packages = mock<DocumentPackagesRepository>()
     const inclusions = mock<PackageDocumentsRepository>()
     const documents = mock<DocumentsRepository>()
@@ -60,7 +60,7 @@ describe('List Consulta client documents', () => {
   it('returns no content for an Admin operational account', async () => {
     const collaborators = mock<CollaboratorsRepository>()
     collaborators.findById.mockResolvedValue(CollaboratorFaker.administrative())
-    const consultations = mock<ConsultationsRepository>()
+    const consultations = mock<ConsultationClientDocumentsRepository>()
     expect(
       await new ListConsultationClientDocumentsUseCase(
         consultations,
@@ -101,7 +101,7 @@ describe('List Consulta client documents', () => {
       mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       createdAt: version.createdAt,
     }
-    let consultations: MockProxy<ConsultationsRepository>
+    let consultations: MockProxy<ConsultationClientDocumentsRepository>
     let packages: MockProxy<DocumentPackagesRepository>
     let inclusions: MockProxy<PackageDocumentsRepository>
     let documents: MockProxy<DocumentsRepository>
@@ -111,7 +111,7 @@ describe('List Consulta client documents', () => {
     let useCase: ListConsultationClientDocumentsUseCase
     const request = { clientId: completed.clientId, actorId: actor.id }
     beforeEach(() => {
-      consultations = mock<ConsultationsRepository>()
+      consultations = mock<ConsultationClientDocumentsRepository>()
       packages = mock<DocumentPackagesRepository>()
       inclusions = mock<PackageDocumentsRepository>()
       documents = mock<DocumentsRepository>()

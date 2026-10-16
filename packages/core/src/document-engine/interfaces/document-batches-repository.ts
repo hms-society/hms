@@ -27,14 +27,6 @@ export type PaginatedTriageBatches = {
 }
 
 export interface DocumentBatchesRepository {
-  publishChecklistUpload(request: {
-    documentId: string
-    fileId: string
-    clientId: string
-    caseId: string
-    checklistItemId: string
-    reviewedAt: Date
-  }): Promise<boolean>
   add(batch: CreateDocumentBatchRecord): Promise<DocumentBatch>
   addFiles(
     batchId: string,

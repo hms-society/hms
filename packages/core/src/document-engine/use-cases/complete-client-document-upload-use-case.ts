@@ -16,7 +16,7 @@ import type {
   ClientDocumentUpload,
   DocumentBatchFile,
 } from '../domain/entities'
-import type { StorageProvider } from '#shared/interfaces'
+import type { ClientDocumentUploadStorageProvider } from '#shared/interfaces'
 import type { CollaboratorsRepository } from '#identity/interfaces'
 import { BadRequestError } from '#shared/domain/errors/bad-request-error'
 export class CompleteClientDocumentUploadUseCase {
@@ -24,7 +24,7 @@ export class CompleteClientDocumentUploadUseCase {
     private readonly uploads: ClientDocumentUploadsRepository,
     private readonly documents: ClientDocumentsRepository,
     private readonly batches: DocumentBatchesRepository,
-    private readonly storage: StorageProvider,
+    private readonly storage: ClientDocumentUploadStorageProvider,
     private readonly collaborators: CollaboratorsRepository,
     private readonly transaction: ClientDocumentReceiptTransactionProvider,
   ) {}

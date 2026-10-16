@@ -12,7 +12,8 @@ import {
 import type {
   DocumentValidationsRepository,
   DocumentValidationLogsRepository,
-  DocumentBatchesRepository,
+  DocumentValidationReviewRepository,
+  ChecklistUploadPublicationRepository,
   ClientDocumentUploadsRepository,
 } from '../interfaces'
 import type { DocumentValidationRecord } from '../domain/entities'
@@ -25,11 +26,11 @@ export class ConfirmReceivedClientDocumentReviewUseCase
 {
   constructor(
     private readonly resolve: ResolveClientDocumentUseCase,
-    private readonly validations: DocumentValidationsRepository,
+    private readonly validations: DocumentValidationsRepository & DocumentValidationReviewRepository,
     private readonly logs: DocumentValidationLogsRepository,
     private readonly collaborators: CollaboratorsRepository,
     private readonly access: CaseAccessProvider,
-    private readonly batches: DocumentBatchesRepository,
+    private readonly batches: ChecklistUploadPublicationRepository,
     private readonly uploads: ClientDocumentUploadsRepository,
   ) {}
 

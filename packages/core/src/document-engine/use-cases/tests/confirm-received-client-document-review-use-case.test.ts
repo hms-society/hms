@@ -13,7 +13,8 @@ import {
 import type {
   DocumentValidationsRepository,
   DocumentValidationLogsRepository,
-  DocumentBatchesRepository,
+  DocumentValidationReviewRepository,
+  ChecklistUploadPublicationRepository,
   ClientDocumentUploadsRepository,
 } from '../../interfaces'
 import {
@@ -26,11 +27,11 @@ import { ConfirmReceivedClientDocumentReviewUseCase } from '../confirm-received-
 
 describe('Confirm Received Client Document Review Use Case', () => {
   let resolve: MockProxy<ResolveClientDocumentUseCase>
-  let validations: MockProxy<DocumentValidationsRepository>
+  let validations: MockProxy<DocumentValidationsRepository & DocumentValidationReviewRepository>
   let logs: MockProxy<DocumentValidationLogsRepository>
   let collaborators: MockProxy<CollaboratorsRepository>
   let access: MockProxy<CaseAccessProvider>
-  let batches: MockProxy<DocumentBatchesRepository>
+  let batches: MockProxy<ChecklistUploadPublicationRepository>
   let uploads: MockProxy<ClientDocumentUploadsRepository>
   let useCase: ConfirmReceivedClientDocumentReviewUseCase
   const actor = CollaboratorFaker.legal()
@@ -52,10 +53,10 @@ describe('Confirm Received Client Document Review Use Case', () => {
     humanCorrection: { decision: 'previous', reason: 'Preserved note' },
   })
   beforeEach(() => {
-    batches = mock<DocumentBatchesRepository>()
+    batches = mock<ChecklistUploadPublicationRepository>()
     uploads = mock<ClientDocumentUploadsRepository>()
     resolve = mock<ResolveClientDocumentUseCase>()
-    validations = mock<DocumentValidationsRepository>()
+    validations = mock<DocumentValidationsRepository & DocumentValidationReviewRepository>()
     logs = mock<DocumentValidationLogsRepository>()
     collaborators = mock<CollaboratorsRepository>()
     access = mock<CaseAccessProvider>()

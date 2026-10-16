@@ -2,11 +2,11 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mock } from 'vitest-mock-extended'
 import { PrepareClientDocumentUploadUseCase } from '../prepare-client-document-upload-use-case'
 import type { ClientDocumentUploadsRepository } from '../../interfaces'
-import type { StorageProvider, DatetimeProvider, IdProvider } from '#shared/interfaces'
+import type { ClientDocumentUploadStorageProvider, DatetimeProvider, IdProvider } from '#shared/interfaces'
 import { ClientDocumentUploadFaker } from '../../domain/entities/fakers'
 describe('Prepare client upload', () => {
   const uploads = mock<ClientDocumentUploadsRepository>()
-  const storage = mock<StorageProvider>()
+  const storage = mock<ClientDocumentUploadStorageProvider>()
   const clock = mock<DatetimeProvider>()
   const ids = mock<IdProvider>()
   const upload = ClientDocumentUploadFaker.fake()

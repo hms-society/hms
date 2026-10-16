@@ -25,7 +25,6 @@ export type ConsultationUpdate = Partial<
 }
 
 export interface ConsultationsRepository {
-  findByClientId(clientId: string): Promise<readonly Consultation[]>
   add(consultation: Consultation): Promise<Consultation>
   addMany(consultations: readonly Consultation[]): Promise<readonly Consultation[]>
   findById(consultationId: string): Promise<Consultation | undefined>

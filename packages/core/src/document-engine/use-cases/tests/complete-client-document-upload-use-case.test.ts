@@ -8,7 +8,7 @@ import type {
   DocumentBatchesRepository,
   ClientDocumentReceiptTransactionProvider,
 } from '../../interfaces'
-import type { StorageProvider } from '#shared/interfaces'
+import type { ClientDocumentUploadStorageProvider } from '#shared/interfaces'
 import type { CollaboratorsRepository } from '#identity/interfaces'
 import { CollaboratorFaker } from '#identity/domain/entities/fakers'
 import {
@@ -21,7 +21,7 @@ describe('Complete client upload', () => {
   const uploads = mock<ClientDocumentUploadsRepository>()
   const documents = mock<ClientDocumentsRepository>()
   const batches = mock<DocumentBatchesRepository>()
-  const storage = mock<StorageProvider>()
+  const storage = mock<ClientDocumentUploadStorageProvider>()
   const collaborators = mock<CollaboratorsRepository>()
   const transaction = mock<ClientDocumentReceiptTransactionProvider>()
   const actor = CollaboratorFaker.legal()

@@ -46,21 +46,6 @@ export type RecordDocumentResendRequestInput = {
 }
 
 export interface DocumentValidationsRepository {
-  replace(
-    documentFileId: string,
-    changes: Pick<
-      DocumentValidationRecord,
-      'status' | 'reviewedBy' | 'reviewedAt' | 'humanCorrection'
-    > & {
-      checklistItemId?: string
-    },
-    expected: {
-      clientId: string
-      caseId?: string
-      checklistItemId?: string
-      reviewedAt?: Date
-    },
-  ): Promise<boolean>
   list(filters?: ListDocumentValidationsFilters): Promise<DocumentValidationRecord[]>
   findDuplicateByHash(
     hashSha256: string,

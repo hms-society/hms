@@ -2,7 +2,7 @@ import { ConsultationStatus } from '../domain/structures'
 import { CollaboratorProfile, UserStatus } from '#identity/domain/structures'
 import { ForbiddenError } from '#shared/domain/errors/forbidden-error'
 import { NotFoundError } from '#shared/domain/errors/not-found-error'
-import type { ConsultationsRepository } from '../interfaces'
+import type { ConsultationClientDocumentsRepository } from '../interfaces'
 import type {
   DocumentPackagesRepository,
   PackageDocumentsRepository,
@@ -13,7 +13,7 @@ import type { ResolveConsultationClientDocumentUseCase } from './resolve-consult
 import type { ConsultationClientDocument } from '../domain/structures/consultation-client-document'
 export class ListConsultationClientDocumentsUseCase {
   constructor(
-    private readonly consultations: ConsultationsRepository,
+    private readonly consultations: ConsultationClientDocumentsRepository,
     private readonly packages: DocumentPackagesRepository,
     private readonly packageDocuments: PackageDocumentsRepository,
     private readonly documents: DocumentsRepository,

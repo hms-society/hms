@@ -48,8 +48,8 @@ describe('Record Document Validation Decision Use Case', () => {
       documentValidationLogsRepository,
       caseAccessProvider,
       getDocumentValidation,
-      uploads,
       caseChecklistUpdateProvider,
+      uploads,
     )
   })
 
