@@ -15,6 +15,7 @@ export class LegalCaseFaker {
       legalAreaId: faker.string.uuid(),
       legalTopicId: faker.string.uuid(),
       title: faker.lorem.sentence(),
+      status: LegalCaseStatus.Documentation,
       lifecycleStatus: LegalCaseLifecycleStatus.Active,
       workflowStage: LegalCaseStatus.Documentation,
       teamVersion: 0,
