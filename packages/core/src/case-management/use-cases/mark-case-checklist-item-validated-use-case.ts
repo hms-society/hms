@@ -25,7 +25,11 @@ export class MarkCaseChecklistItemValidatedUseCase
   ) {}
 
   async execute(request: Request): Promise<CaseChecklistItem> {
-    await this.caseAccessProvider.authorize({ caseId: request.caseId, actorId: request.actorId, intent: CaseAccessIntent.WriteContent })
+    await this.caseAccessProvider.authorize({
+      caseId: request.caseId,
+      actorId: request.actorId,
+      intent: CaseAccessIntent.WriteContent,
+    })
     const checklistItem =
       await this.caseChecklistItemsRepository.markAsValidatedByDocument({
         caseId: request.caseId,
@@ -39,9 +43,15 @@ export class MarkCaseChecklistItemValidatedUseCase
   }
 
   async executeByDocumentFileId(request: Omit<Request, 'caseId' | 'checklistItemId'>) {
-    const owner = await this.caseChecklistItemsRepository.findByDocumentFileId(request.documentFileId)
+    const owner = await this.caseChecklistItemsRepository.findByDocumentFileId(
+      request.documentFileId,
+    )
     if (!owner) throw new LegalCaseNotFoundError()
-    await this.caseAccessProvider.authorize({ caseId: owner.caseId, actorId: request.actorId, intent: CaseAccessIntent.WriteContent })
+    await this.caseAccessProvider.authorize({
+      caseId: owner.caseId,
+      actorId: request.actorId,
+      intent: CaseAccessIntent.WriteContent,
+    })
     const checklistItem = await this.caseChecklistItemsRepository.findByDocumentFileId(
       request.documentFileId,
     )
