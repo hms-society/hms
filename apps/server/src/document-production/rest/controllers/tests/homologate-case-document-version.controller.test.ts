@@ -31,7 +31,7 @@ describe('Homologate Case Document Version Controller', () => {
       findByDocumentVersionId: vi.fn(),
       add: vi.fn(),
       attachArtifact: vi.fn(),
-      remove: vi.fn(),
+      remove: vi.fn().mockResolvedValue(undefined),
     }
     legalCasesRepository = { findById: vi.fn() }
     caseMembersRepository = { findActiveCollaboratorIdsByCaseId: vi.fn() }
