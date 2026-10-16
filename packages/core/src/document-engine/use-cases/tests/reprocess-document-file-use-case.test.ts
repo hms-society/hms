@@ -4,6 +4,7 @@ import { CaseAccessIntent } from '../../../case-management/domain/structures/cas
 import type { CaseAccessProvider } from '../../../case-management/interfaces'
 import type { DocumentBatchFile } from '#document-engine/domain/entities/document-batch'
 import { DocumentValidationDocumentFaker } from '#document-engine/domain/entities/fakers'
+import { DocumentBatchChannel } from '#document-engine/domain/structures'
 import { DocumentFileProcessingRequestedEvent } from '#document-engine/domain/events'
 import type {
   DocumentBatchesRepository,
@@ -32,6 +33,8 @@ describe('Reprocess Document File Use Case', () => {
     const document = DocumentValidationDocumentFaker.fake({
       id: 'file-1',
       checklistLink: { caseId: 'case-current' },
+      channel: DocumentBatchChannel.WhatsApp,
+      clientId: 'client-current',
     })
     file = {
       id: document.id,
@@ -61,6 +64,7 @@ describe('Reprocess Document File Use Case', () => {
       caseId: 'case-current',
       actorId: 'actor-1',
       intent: CaseAccessIntent.WriteContent,
+      expectedClientId: 'client-current',
     })
     expect(validations.recordProcessing).toHaveBeenCalledExactlyOnceWith(file.id)
     expect(broker.publish).toHaveBeenCalledExactlyOnceWith(
@@ -112,12 +116,42 @@ describe('Reprocess Document File Use Case', () => {
 
   it('retains independent document reprocessing without inventing a Case owner', async () => {
     validations.findByFileId.mockResolvedValue(
-      DocumentValidationDocumentFaker.fake({ id: file.id, checklistLink: undefined }),
+      DocumentValidationDocumentFaker.fake({
+        id: file.id,
+        checklistLink: undefined,
+        channel: DocumentBatchChannel.WhatsApp,
+      }),
     )
     await useCase.execute({ documentFileId: file.id, actorId: 'actor-1' })
     expect(access.authorize).not.toHaveBeenCalled()
     expect(validations.recordProcessing).toHaveBeenCalledWith(file.id)
     expect(broker.publish).toHaveBeenCalledOnce()
+  })
+
+  it('does not send internal uploads for automatic processing', async () => {
+    validations.findByFileId.mockResolvedValue(
+      DocumentValidationDocumentFaker.fake({
+        id: file.id,
+        checklistLink: { caseId: 'case-current' },
+        channel: DocumentBatchChannel.InternalUpload,
+        clientId: 'client-current',
+      }),
+    )
+
+    await expect(
+      useCase.execute({ documentFileId: file.id, actorId: 'actor-1' }),
+    ).rejects.toThrow('Este arquivo não admite processamento automático.')
+
+    expect(access.authorize).toHaveBeenCalledExactlyOnceWith({
+      caseId: 'case-current',
+      actorId: 'actor-1',
+      intent: CaseAccessIntent.WriteContent,
+      expectedClientId: 'client-current',
+    })
+    expect(batches.findFileById).not.toHaveBeenCalled()
+    expect(validations.recordProcessing).not.toHaveBeenCalled()
+    expect(broker.publish).not.toHaveBeenCalled()
+    expect(getValidation.execute).not.toHaveBeenCalled()
   })
 
   it('rejects missing validation ownership before finding the file or publishing', async () => {

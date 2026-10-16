@@ -15,6 +15,7 @@ export interface DocumentValidationLogsRepository {
     reason?: string
     message?: string
     metadata?: Record<string, unknown>
+    createdAt?: Date
   }): Promise<DocumentValidationLog>
 
   listByDocumentFileId(documentFileId: string): Promise<DocumentValidationLog[]>
