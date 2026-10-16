@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { and, count, desc, eq, gte, ilike, lte } from 'drizzle-orm'
 import type { SQL } from 'drizzle-orm'
 import type { AuditEvent, AuditEventEntityType } from '@hms/core/shared/domain/structures'
+import type { AuditEventCreation, AuditEventWriter } from '@hms/core/shared/interfaces'
 import type {
   AuditLogExportRecord,
   AuditLogsRepository,
@@ -17,7 +18,7 @@ import { auditEventModel } from '@/shared/database/drizzle/models/audit-event-mo
 @Injectable()
 export class DrizzleAuditLogsRepository
   extends DrizzleRepository
-  implements AuditLogsRepository
+  implements AuditLogsRepository, AuditEventWriter
 {
   // biome-ignore lint/complexity/noUselessConstructor: Nest needs the dependency metadata on this provider.
   constructor(drizzle: DrizzleClient) {
@@ -64,6 +65,23 @@ export class DrizzleAuditLogsRepository
       .limit(1)
 
     return event ? this.mapAuditEvent(event) : undefined
+  }
+
+  async add(event: AuditEventCreation): Promise<void> {
+    await this.database.insert(auditEventModel).values({
+      occurredAt: event.occurredAt,
+      actorId: event.actorId,
+      actorProfile: event.actorProfile,
+      entityType: event.entityType,
+      entityId: event.entityId,
+      action: event.action,
+      origin: event.origin,
+      status: event.status,
+      beforeData: event.beforeData,
+      afterData: event.afterData,
+      metadata: event.metadata,
+      justification: event.justification,
+    })
   }
 
   async recordExport(record: AuditLogExportRecord): Promise<void> {

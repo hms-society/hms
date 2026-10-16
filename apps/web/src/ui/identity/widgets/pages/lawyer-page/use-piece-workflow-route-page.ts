@@ -108,7 +108,10 @@ export function usePieceWorkflowRoutePage({
     undefined,
   )?.createdByCollaboratorId
   const isReadOnlyVersion = Boolean(
-    mode === 'editor' && version && currentVersion && version.id !== currentVersion.id,
+    mode === 'editor' &&
+      version &&
+      (version.status === 'approved' ||
+        (currentVersion && version.id !== currentVersion.id)),
   )
   const editingSourceVersion = document?.versions.find(
     (item) => item.id === editingSourceVersionId,

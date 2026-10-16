@@ -5,4 +5,5 @@ export const DOCUMENT_PRODUCTION_REPOSITORIES = {
   documents: Symbol('DOCUMENT_PRODUCTION_REPOSITORIES.documents'),
   documentPackages: Symbol('DOCUMENT_PRODUCTION_REPOSITORIES.documentPackages'),
   packageDocuments: Symbol('DOCUMENT_PRODUCTION_REPOSITORIES.packageDocuments'),
+  versionHomologations: Symbol('DOCUMENT_PRODUCTION_REPOSITORIES.versionHomologations'),
 } as const
