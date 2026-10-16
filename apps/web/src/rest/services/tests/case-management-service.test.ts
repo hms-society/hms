@@ -4,6 +4,24 @@ import type { RestClient } from '@hms/core/shared/interfaces'
 import { CaseManagementService } from '../case-management-service'
 
 describe('CaseManagementService', () => {
+  it('reads an opening source and forwards explicit creation without actor injection', async () => {
+    const client = makeRestClient()
+    const service = CaseManagementService(client)
+    const request = {
+      intakeId: 'intake-1',
+      title: 'Case',
+      legalAreaId: 'area-1',
+      legalTopicId: 'topic-1',
+      initialManagerCollaboratorId: 'manager-1',
+      operationId: 'operation-1',
+      team: [],
+    }
+    await service.getCaseOpeningSource('intake-1')
+    await service.createLegalCase(request)
+    expect(client.get).toHaveBeenCalledWith('/cases/opening-sources/intake-1')
+    expect(client.post).toHaveBeenCalledWith('/cases', request)
+  })
+
   it('encodes Admin search and pagination in the request URL', async () => {
     const restClient = makeRestClient()
     await CaseManagementService(restClient).listAllCasesForAdmin({

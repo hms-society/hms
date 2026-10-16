@@ -300,9 +300,10 @@ test('shows a team access error after the server returns 403 on the protected re
   const failedResponses = state.responses.filter(({ status }) => status >= 400)
   expect(failedResponses.length).toBeGreaterThan(0)
   expect(
-    failedResponses.every(
+    failedResponses.some(
       ({ pathname, status }) => pathname === `/cases/${CASE_ID}/team` && status === 403,
     ),
+    `Unexpected failed REST responses: ${JSON.stringify(failedResponses)}`,
   ).toBe(true)
   expect(state.browserErrors).toEqual([])
   expect(

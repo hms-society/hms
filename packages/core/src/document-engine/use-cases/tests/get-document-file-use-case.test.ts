@@ -76,7 +76,7 @@ describe('GetDocumentFileUseCase', () => {
     expect(caseAccessProvider.authorize).toHaveBeenCalledWith({
       caseId: ownerCaseId,
       actorId: 'collaborator-1',
-      intent: 'read_content',
+      intent: 'read_document',
     })
     expect(caseAccessProvider.authorize.mock.invocationCallOrder[0]).toBeLessThan(
       documentBatchesRepository.findFileById.mock.invocationCallOrder[0],

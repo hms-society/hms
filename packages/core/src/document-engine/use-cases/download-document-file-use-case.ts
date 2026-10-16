@@ -25,7 +25,7 @@ export class DownloadDocumentFileUseCase {
     await this.caseAccessProvider.authorize({
       caseId: validation.checklistLink.caseId,
       actorId,
-      intent: CaseAccessIntent.ReadContent,
+      intent: CaseAccessIntent.ReadDocument,
       ...(validation.clientId ? { expectedClientId: validation.clientId } : {}),
     })
 

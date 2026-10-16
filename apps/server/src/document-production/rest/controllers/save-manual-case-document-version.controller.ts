@@ -8,7 +8,10 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
-import type { LegalCasesRepository } from '@hms/core/case-management/interfaces'
+import type {
+  CaseAccessProvider,
+  LegalCasesRepository,
+} from '@hms/core/case-management/interfaces'
 import { SaveManualLegalCaseDocumentVersionUseCase } from '@hms/core/case-management/use-cases'
 import type {
   DocumentFileExporter,
@@ -24,6 +27,7 @@ import { saveManualDocumentVersionSchema } from '@hms/validation/document-produc
 import { ZodValidationPipe } from 'nestjs-zod'
 
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
+import { CASE_MANAGEMENT_ACCESS } from '@/case-management/constants/case-management-access'
 import { CasesController } from '@/case-management/decorators'
 import { DOCUMENT_PRODUCTION_PROVIDERS } from '@/document-production/constants/document-production-providers'
 import { DOCUMENT_PRODUCTION_REPOSITORIES } from '@/document-production/constants/document-production-repositories'
@@ -53,6 +57,7 @@ export class SaveManualCaseDocumentVersionController {
     @Inject(PROVISION_PROVIDERS.fileStorage) storage: FileStorageProvider,
     datetime: DatetimeProvider,
     ids: IdProvider,
+    @Inject(CASE_MANAGEMENT_ACCESS.access) caseAccessProvider: CaseAccessProvider,
   ) {
     this.useCase = new SaveManualLegalCaseDocumentVersionUseCase(
       cases,
@@ -64,6 +69,7 @@ export class SaveManualCaseDocumentVersionController {
       storage,
       datetime,
       ids,
+      caseAccessProvider,
     )
   }
 

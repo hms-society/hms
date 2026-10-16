@@ -171,8 +171,8 @@ export async function mockCaseManagementRoutes(page: Page, options: FixtureOptio
     legalTopic: 'Aposentadoria por idade',
     openedAt: '2026-10-01T12:00:00.000Z',
     updatedAt: '2026-10-02T12:00:00.000Z',
-    checklistGate: { decision: 'pending', decidedAt: null, reason: null },
-    dossierGate: { decision: 'pending', decidedAt: null, reason: null },
+    checklistGate: { decidedAt: null, reason: null },
+    dossierGate: {},
     team: members.map((member) => ({
       collaboratorId: member.collaboratorId,
       name: member.professionalName,
@@ -227,6 +227,10 @@ export async function mockCaseManagementRoutes(page: Page, options: FixtureOptio
       await route.fulfill(json(caseTeam))
       return
     }
+    if (pathname === `/cases/${CASE_ID}/tasks` && request.method() === 'GET') {
+      await route.fulfill(json([]))
+      return
+    }
     if (pathname === `/cases/${CASE_ID}/team/history`) {
       await route.fulfill(
         json({
@@ -237,6 +241,10 @@ export async function mockCaseManagementRoutes(page: Page, options: FixtureOptio
           totalPages: 0,
         }),
       )
+      return
+    }
+    if (pathname === `/cases/${CASE_ID}/tasks` && request.method() === 'GET') {
+      await route.fulfill(json([]))
       return
     }
     if (pathname === '/cases/team-candidates') {

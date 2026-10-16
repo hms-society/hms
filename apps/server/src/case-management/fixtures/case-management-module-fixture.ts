@@ -1,4 +1,7 @@
+import { eq } from 'drizzle-orm'
 import { CaseManagementAccessModule } from '@/case-management/access'
+import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
+import { legalCaseModel } from '@/case-management/database/drizzle/models'
 import type { INestApplication, Type } from '@nestjs/common'
 import type { TestingModuleBuilder } from '@nestjs/testing'
 import type {
@@ -52,6 +55,7 @@ import { RestFixture } from '@/shared/rest/tests/rest-fixture'
 import { SupabaseAuthFixture } from '@/shared/rest/tests/supabase-auth-fixture'
 import { ProvisionModule } from '@/shared/provision/provision.module'
 import { CaseIdentityTransactionModule } from '@/shared/database/case-identity-transaction.module'
+import { CaseManagementProvisionModule } from '@/case-management/provision/case-management-provision.module'
 
 type RegisteredCollaborator = {
   collaboratorId: string
@@ -309,6 +313,15 @@ export class CaseManagementModuleFixture {
     )
   }
 
+  findCasesByIntakeId(intakeId: string) {
+    return this.app
+      .get(DrizzleClient)
+      .requireDatabase()
+      .select({ id: legalCaseModel.id })
+      .from(legalCaseModel)
+      .where(eq(legalCaseModel.intakeId, intakeId))
+  }
+
   findCaseMembers(caseId: string) {
     return this.caseMembersRepository.listByCaseId(caseId)
   }
@@ -463,6 +476,7 @@ export class CaseManagementModuleFixture {
       LegalCatalogModule,
       CaseManagementDatabaseModule,
       CaseManagementAccessModule,
+      CaseManagementProvisionModule,
       CaseIdentityTransactionModule,
       IntakeDatabaseModule,
       ProvisionModule,

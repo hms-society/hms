@@ -59,7 +59,7 @@ describe('GetDocumentValidationUseCase', () => {
     expect(access.authorize).toHaveBeenCalledWith({
       caseId: 'case-1',
       actorId: 'collaborator-1',
-      intent: 'read_content',
+      intent: 'read_document',
     })
     expect(result.checklistLink).toEqual({
       caseId: 'case-1',

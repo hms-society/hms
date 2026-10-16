@@ -48,7 +48,7 @@ describe('List Document Validations Use Case', () => {
     expect(access.authorize).toHaveBeenCalledExactlyOnceWith({
       caseId: 'case-1',
       actorId: 'actor-1',
-      intent: CaseAccessIntent.ReadContent,
+      intent: CaseAccessIntent.ReadDocument,
     })
     expect(validations.list).toHaveBeenCalledExactlyOnceWith({
       caseId: 'case-1',

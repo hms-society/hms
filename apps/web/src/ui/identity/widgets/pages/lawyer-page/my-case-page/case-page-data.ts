@@ -5,7 +5,10 @@ import type {
   CaseTeamMember,
   CaseTimelineItem,
 } from './types'
-import { LegalCaseStatus } from '@hms/core/case-management/domain/structures'
+import {
+  CaseMemberRole,
+  LegalCaseStatus,
+} from '@hms/core/case-management/domain/structures'
 
 export const MOCK_ACTIVITIES: ActivityItem[] = [
   {
@@ -72,34 +75,35 @@ export const CASE_TEAM: CaseTeamMember[] = [
   {
     initials: 'RM',
     name: 'Dr. Ricardo Mendes',
-    role: 'Advogado Principal - Responsável Técnico',
+    role: CaseMemberRole.Manager,
     className: 'bg-primary text-primary-foreground',
   },
   {
     initials: 'MC',
     name: 'Mariana Costa',
-    role: 'Advogada Auxiliar - Execução',
+    role: CaseMemberRole.Collaborator,
     className: 'bg-accent text-accent-foreground',
   },
   {
     initials: 'JP',
     name: 'João Pedro Silva',
-    role: 'Paralegal - Edição',
+    role: CaseMemberRole.Collaborator,
     className: 'bg-highlight text-highlight-foreground',
   },
   {
     initials: 'BO',
     name: 'Beatriz Oliveira',
-    role: 'Estagiária - Visualização',
+    role: CaseMemberRole.Collaborator,
     className: 'bg-muted text-foreground',
   },
 ]
 
-const CASE_STAGES: CaseStage[] = [
+export const CASE_STAGES: CaseStage[] = [
   {
     icon: 'file-text',
     label: 'Documentação',
     status: 'Documentação',
+    isActive: true,
   },
   { icon: 'pencil', label: 'Produção Jurídica' },
   { icon: 'inbox', label: 'Protocolo / Entrega' },

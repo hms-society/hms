@@ -10,7 +10,6 @@ import type {
   DocumentVersionsRepository,
   PackageDocumentsRepository,
 } from '../../document-production/interfaces'
-import { CollaboratorProfile } from '#shared/domain/structures'
 import type { CollaboratorProfile as CollaboratorProfileValue } from '#shared/domain/structures'
 import type { Broker, DatetimeProvider, IdProvider } from '../../shared/interfaces'
 import { CaseChecklistGateDecision, LegalCaseStatus } from '../domain/structures'
@@ -18,6 +17,8 @@ import { LegalCaseDocumentGenerationError } from '../domain/errors/legal-case-do
 import { LegalCaseNotFoundError } from '../domain/errors/legal-case-not-found-error'
 import type { LegalCase } from '../domain/entities'
 import type { LegalCasesRepository } from '../interfaces'
+import type { CaseAccessProvider } from '../interfaces'
+import { CaseAccessIntent } from '../domain/structures'
 
 type Request = {
   readonly caseId: string
@@ -29,6 +30,15 @@ type Request = {
 }
 
 type Response = { documentGenerationId: string; documentId: string }
+type PackageDocument = Awaited<
+  ReturnType<PackageDocumentsRepository['findByDocumentPackageId']>
+>[number]
+type Generation = NonNullable<
+  Awaited<ReturnType<DocumentGenerationsRepository['findLatestByDocumentId']>>
+>
+type DocumentVersion = NonNullable<
+  Awaited<ReturnType<DocumentVersionsRepository['findById']>>
+>
 
 export class GenerateLegalCaseDocumentRevisionUseCase
   implements UseCase<Request, Response>
@@ -42,6 +52,7 @@ export class GenerateLegalCaseDocumentRevisionUseCase
     private readonly broker: Broker,
     private readonly datetime: DatetimeProvider,
     private readonly ids: IdProvider,
+    private readonly caseAccessProvider: CaseAccessProvider,
   ) {}
 
   async execute(request: Request): Promise<Response> {
@@ -53,9 +64,22 @@ export class GenerateLegalCaseDocumentRevisionUseCase
     }
     const legalCase = await this.cases.findById(request.caseId)
     if (!legalCase) throw new LegalCaseNotFoundError()
-    await this.assertCaseAccess(request, legalCase.id)
+    await this.caseAccessProvider.authorize({
+      caseId: legalCase.id,
+      actorId: request.requestedByCollaboratorId,
+      intent: CaseAccessIntent.WriteContent,
+    })
     this.assertDossierReady(legalCase)
 
+    const packageDocument = await this.findPackageDocument(legalCase, request.documentId)
+    const revisionBase = await this.findRevisionBase(request, legalCase, packageDocument)
+    return this.publishRevision(request, instructions, packageDocument, revisionBase)
+  }
+
+  private async findPackageDocument(
+    legalCase: LegalCase,
+    documentId: string,
+  ): Promise<PackageDocument> {
     const documentPackage = await this.packages.findByContext({
       type: 'case',
       caseId: legalCase.id,
@@ -65,16 +89,50 @@ export class GenerateLegalCaseDocumentRevisionUseCase
       documentPackage.id,
     )
     const packageDocument = packageDocuments.find(
-      ({ documentId }) => documentId === request.documentId,
+      (item) => item.documentId === documentId,
     )
     if (!packageDocument) throw new LegalCaseNotFoundError()
+    return packageDocument
+  }
 
+  private async findRevisionBase(
+    request: Request,
+    legalCase: LegalCase,
+    packageDocument: PackageDocument,
+  ): Promise<{ generation: Generation; sourceVersion: DocumentVersion }> {
     const [generation, sourceVersion, latestVersion] = await Promise.all([
       this.generations.findLatestByDocumentId(request.documentId),
       this.versions.findById(request.sourceDocumentVersionId),
       this.versions.findLatestByDocumentId(request.documentId),
     ])
     if (!generation) throw new LegalCaseNotFoundError()
+    this.assertRevisionBaseIsValid(
+      request,
+      legalCase,
+      packageDocument,
+      generation,
+      sourceVersion,
+      latestVersion,
+    )
+    if (
+      generation.status === DocumentGenerationStatus.Pending ||
+      generation.status === DocumentGenerationStatus.Running
+    ) {
+      throw new LegalCaseDocumentGenerationError(
+        'A peça já possui uma geração em andamento.',
+      )
+    }
+    return { generation, sourceVersion }
+  }
+
+  private assertRevisionBaseIsValid(
+    request: Request,
+    legalCase: LegalCase,
+    packageDocument: PackageDocument,
+    generation: Generation,
+    sourceVersion: DocumentVersion | null | undefined,
+    latestVersion: DocumentVersion | null | undefined,
+  ): asserts sourceVersion is DocumentVersion {
     if (
       generation.source.type !== 'case' ||
       generation.source.id !== legalCase.id ||
@@ -87,15 +145,15 @@ export class GenerateLegalCaseDocumentRevisionUseCase
     ) {
       throw new LegalCaseNotFoundError()
     }
-    if (
-      generation.status === DocumentGenerationStatus.Pending ||
-      generation.status === DocumentGenerationStatus.Running
-    ) {
-      throw new LegalCaseDocumentGenerationError(
-        'A peça já possui uma geração em andamento.',
-      )
-    }
+  }
 
+  private async publishRevision(
+    request: Request,
+    instructions: string,
+    packageDocument: PackageDocument,
+    revisionBase: { generation: Generation; sourceVersion: DocumentVersion },
+  ): Promise<Response> {
+    const { generation, sourceVersion } = revisionBase
     const documentGenerationId = this.ids.generate()
     const occurredAt = this.datetime.now()
     const source: DocumentGenerationSource = {
@@ -120,16 +178,6 @@ export class GenerateLegalCaseDocumentRevisionUseCase
       }),
     )
     return { documentGenerationId, documentId: request.documentId }
-  }
-
-  private async assertCaseAccess(request: Request, caseId: string): Promise<void> {
-    if (request.requestedByCollaboratorProfile === CollaboratorProfile.Admin) return
-    const assignedCases = await this.cases.listByTeamMember(
-      request.requestedByCollaboratorId,
-    )
-    if (!assignedCases.some((item) => item.id === caseId)) {
-      throw new LegalCaseNotFoundError()
-    }
   }
 
   private assertDossierReady(legalCase: LegalCase): void {

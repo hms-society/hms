@@ -44,7 +44,7 @@ export class GetDocumentValidationUseCase {
     await this.caseAccessProvider.authorize({
       caseId,
       actorId,
-      intent: CaseAccessIntent.ReadContent,
+      intent: CaseAccessIntent.ReadDocument,
     })
   }
 

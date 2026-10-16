@@ -24,7 +24,7 @@ export class GetDocumentFileUseCase implements UseCase<Request, DocumentBatchFil
       await this.caseAccessProvider.authorize({
         caseId: validation.checklistLink.caseId,
         actorId,
-        intent: CaseAccessIntent.ReadContent,
+        intent: CaseAccessIntent.ReadDocument,
       })
     }
 
