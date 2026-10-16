@@ -42,6 +42,11 @@ export class GenerateFinalDocumentArtifactUseCase {
     const exportedFile = await this.documentFileExporter.export({
       title: `${document.title} - versão final`,
       content: version.content,
+      approval: {
+        approvedByName: homologation.approvedByCollaboratorName,
+        approvedByProfile: homologation.approvedByCollaboratorProfile,
+        approvedAt: homologation.approvedAt,
+      },
     })
     const fileName = `${this.normalizeFileName(document.title)}-final.${exportedFile.extension}`
     const file = await this.fileStorageProvider.save({

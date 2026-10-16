@@ -95,6 +95,11 @@ describe('Generate Final Document Artifact Use Case', () => {
     expect(documentFileExporter.export).toHaveBeenCalledWith({
       title: 'Procuração - versão final',
       content: version.content,
+      approval: {
+        approvedByName: homologation.approvedByCollaboratorName,
+        approvedByProfile: homologation.approvedByCollaboratorProfile,
+        approvedAt: homologation.approvedAt,
+      },
     })
     expect(fileStorageProvider.save).toHaveBeenCalled()
   })
