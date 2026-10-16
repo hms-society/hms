@@ -21,6 +21,14 @@ export const Sidebar = ({
   const { mutate: signOut, isPending } = useSignOutAction()
   const { hasUnread } = useCommunication()
   const normalizedActivePath = activePath.replace(/\/$/, '') || '/'
+  const activeRoutePath = sidebarItems
+    .map((item) => ROUTES[item.route].replace(/\/$/, '') || '/')
+    .filter(
+      (routePath) =>
+        normalizedActivePath === routePath ||
+        (routePath !== ROUTES.home && normalizedActivePath.startsWith(`${routePath}/`)),
+    )
+    .sort((left, right) => right.length - left.length)[0]
 
   return (
     <aside
@@ -72,10 +80,7 @@ export const Sidebar = ({
           {sidebarItems?.map((item) => {
             const routePath = ROUTES[item.route]
             const normalizedRoutePath = routePath.replace(/\/$/, '') || '/'
-            const isActive =
-              normalizedActivePath === normalizedRoutePath ||
-              (normalizedRoutePath !== ROUTES.home &&
-                normalizedActivePath.startsWith(`${normalizedRoutePath}/`))
+            const isActive = normalizedRoutePath === activeRoutePath
 
             return (
               <Anchor

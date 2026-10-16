@@ -184,6 +184,18 @@ export class DrizzleSchedulesRepository implements CalendarSchedulesRepository {
     return results.map((item) => this.mapBlockedPeriod(item))
   }
 
+  async findBlockedPeriodById(
+    id: string,
+  ): Promise<(BlockedPeriod & { scheduleId: string }) | null> {
+    const [item] = await this.db
+      .select()
+      .from(blockedPeriods)
+      .where(eq(blockedPeriods.id, id))
+      .limit(1)
+
+    return item ? { ...this.mapBlockedPeriod(item), scheduleId: item.scheduleId } : null
+  }
+
   async deleteBlockedPeriod(id: string): Promise<void> {
     await this.db.delete(blockedPeriods).where(eq(blockedPeriods.id, id))
   }

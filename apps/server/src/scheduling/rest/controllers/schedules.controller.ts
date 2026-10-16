@@ -116,7 +116,14 @@ export class SchedulesController {
     @Param('id') id: string,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    if (collaborator.profile !== 'admin') return { success: false }
+    const blockedPeriod = await this.schedulesRepository.findBlockedPeriodById(id)
+    if (!blockedPeriod) return { success: false }
+
+    await this.authorizeScheduleAccessUseCase.execute({
+      actor: collaborator,
+      scheduleId: blockedPeriod.scheduleId,
+      operation: 'write',
+    })
     await this.schedulesRepository.deleteBlockedPeriod(id)
     return { success: true }
   }
