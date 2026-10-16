@@ -71,6 +71,24 @@ describe('Schedule', () => {
     expect(screen.queryByText('Configurar agenda')).toBeNull()
   })
 
+  it('hides schedule controls when access is denied', () => {
+    const accessDeniedError = Object.assign(new Error('Agenda não autorizada.'), {
+      title: 'Acesso Negado',
+    })
+
+    useConsultationMock.mockReturnValue({
+      ...useConsultationMock(),
+      error: accessDeniedError,
+    })
+
+    render(<Schedule />)
+
+    expect(screen.getByRole('alert').textContent).toContain('Acesso não permitido')
+    expect(screen.queryByText('Duração padrão da consulta')).toBeNull()
+    expect(screen.queryByText('Disponibilidade semanal')).toBeNull()
+    expect(screen.queryByText('Adicionar bloqueio')).toBeNull()
+  })
+
   it('updates duration and toggles a day availability', async () => {
     render(<Schedule />)
 

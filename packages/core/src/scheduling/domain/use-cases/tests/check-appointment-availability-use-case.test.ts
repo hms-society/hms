@@ -73,4 +73,30 @@ describe('Check Appointment Availability Use Case', () => {
       }),
     ).resolves.toBe(false)
   })
+
+  it('rejects a slot on the final day of a multi-day blocked period', async () => {
+    const schedule = ScheduleFaker.fake({
+      weeklyAvailability: [
+        { weekday: 'wednesday', timeRanges: [{ startsAt: '09:00', endsAt: '12:00' }] },
+      ],
+    })
+
+    await expect(
+      useCase.execute({
+        schedule,
+        startsAt: new Date('2026-08-12T12:00:00.000Z'),
+        endsAt: new Date('2026-08-12T12:45:00.000Z'),
+        blockedPeriods: [
+          {
+            id: 'blocked-period-1',
+            startsOn: '2026-08-10',
+            endsOn: '2026-08-12',
+            reason: 'Férias',
+            createdAt: new Date(),
+          },
+        ],
+        appointments: [],
+      }),
+    ).resolves.toBe(false)
+  })
 })

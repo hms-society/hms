@@ -118,7 +118,7 @@ export class ListCalendarUseCase implements UseCase<Request, readonly CalendarEv
       return matchesEventFilter(event, query.event) ? [event] : []
     })
 
-    if (!query.clientId && query.event !== 'no_show') {
+    if (query.event !== 'no_show') {
       for (const block of blocks) {
         const schedule = appointmentsBySchedule.get(block.scheduleId)
         const lawyer = schedule ? lawyers.get(schedule.collaboratorId) : undefined

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, Timer, CalendarDays, Plus, Trash2, Loader2, X } from 'lucide-react'
+import { Timer, CalendarDays, Plus, Trash2, Loader2, X } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -167,6 +167,7 @@ export const Schedule = () => {
   const {
     schedule,
     isLoading,
+    error,
     updateDuration,
     isUpdatingDuration,
     updateTimeZone,
@@ -179,6 +180,9 @@ export const Schedule = () => {
     removeBlock,
     isRemovingBlock,
   } = useConsultation()
+
+  const isAccessDenied =
+    (error as { title?: string } | null | undefined)?.title === 'Acesso Negado'
 
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null)
@@ -392,19 +396,27 @@ export const Schedule = () => {
     )
   }
 
+  if (isAccessDenied) {
+    return (
+      <div className='flex min-h-64 w-full items-center justify-center px-4'>
+        <div
+          role='alert'
+          className='w-full max-w-xl rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center'
+        >
+          <h1 className='font-serif text-xl font-semibold text-foreground'>
+            Acesso não permitido
+          </h1>
+          <p className='mt-2 text-sm text-muted-foreground'>
+            Você não tem permissão para visualizar ou alterar esta agenda.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className='flex flex-col gap-6 max-w-5xl pt-4 md:pt-8 px-4 sm:px-6 w-full mx-auto pb-10'>
       <div className='flex flex-col gap-4'>
-        <Button
-          asChild
-          className='w-fit rounded-none px-0 text-primary hover:bg-transparent hover:text-primary/80'
-          variant='ghost'
-        >
-          <a href='/agenda'>
-            <ArrowLeft className='size-4' aria-hidden='true' />
-            Voltar para o calendário
-          </a>
-        </Button>
         <div className='flex flex-col gap-1'>
           <h1 className='text-ring font-serif text-[20px] sm:text-[24px] font-semibold'>
             Configurar agenda
