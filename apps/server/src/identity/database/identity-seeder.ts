@@ -88,15 +88,19 @@ const DEFAULT_USERS: UserSeed[] = [
     status: 'active',
   },
   {
-    email: 'gildarcio@hmsadvogados.com.br',
+    email: 'gildarcio.lawyer@hmsadvogados.com.br',
     status: 'active',
   },
   {
-    email: 'samuel@hmsadvogados.com.br',
+    email: 'samuel.lawyer@hmsadvogados.com.br',
     status: 'active',
   },
   {
-    email: 'sofia@hmsadvogados.com.br',
+    email: 'sofia.lawyer@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'hudson.lawyer@hmsadvogados.com.br',
     status: 'active',
   },
   {
@@ -121,6 +125,14 @@ const DEFAULT_USERS: UserSeed[] = [
   },
   {
     email: 'sofia.admin@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'hudson.attendant@hmsadvogados.com.br',
+    status: 'active',
+  },
+  {
+    email: 'hudson.admin@hmsadvogados.com.br',
     status: 'active',
   },
 ]
@@ -196,6 +208,18 @@ const DEFAULT_PERSON_ADMINISTRATIVE_COLLABORATORS: AdministrativeCollaboratorSee
     jobTitle: 'Administrador',
     profile: 'admin',
   },
+  {
+    email: 'hudson.attendant@hmsadvogados.com.br',
+    professionalName: 'Hudson',
+    jobTitle: 'Atendente',
+    profile: 'attendant',
+  },
+  {
+    email: 'hudson.admin@hmsadvogados.com.br',
+    professionalName: 'Hudson',
+    jobTitle: 'Administrador',
+    profile: 'admin',
+  },
 ]
 
 const DEFAULT_LEGAL_COLLABORATORS: LegalCollaboratorSeed[] = [
@@ -242,21 +266,27 @@ const DEFAULT_LEGAL_COLLABORATORS: LegalCollaboratorSeed[] = [
     profile: 'intern',
   },
   {
-    email: 'gildarcio@hmsadvogados.com.br',
+    email: 'gildarcio.lawyer@hmsadvogados.com.br',
     professionalName: 'Gildárcio',
     jobTitle: 'Estagiário',
     profile: 'lawyer',
   },
   {
-    email: 'samuel@hmsadvogados.com.br',
+    email: 'samuel.lawyer@hmsadvogados.com.br',
     professionalName: 'Samuel',
     jobTitle: 'Estagiário',
     profile: 'lawyer',
   },
   {
-    email: 'sofia@hmsadvogados.com.br',
+    email: 'sofia.lawyer@hmsadvogados.com.br',
     professionalName: 'Sofia',
     jobTitle: 'Estagiário',
+    profile: 'lawyer',
+  },
+  {
+    email: 'hudson.lawyer@hmsadvogados.com.br',
+    professionalName: 'Hudson',
+    jobTitle: 'Advogado',
     profile: 'lawyer',
   },
 ]
