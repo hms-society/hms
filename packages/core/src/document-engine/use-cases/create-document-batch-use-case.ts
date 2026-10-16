@@ -30,6 +30,29 @@ export class CreateDocumentBatchUseCase {
   ) {}
 
   async execute(request: CreateDocumentBatchRequest): Promise<DocumentBatch> {
+    const context = await this.resolveReceiptContext(request)
+    const day = this.resolveDay()
+    const skipProcessing =
+      request.channel === DocumentBatchChannel.InternalUpload ||
+      request.skipProcessing === true
+    const files = request.files.map((file) => ({
+      ...file,
+      status: skipProcessing
+        ? DocumentValidationStatus.AwaitingValidation
+        : DocumentValidationStatus.Processing,
+    }))
+    const existing = await this.reuseDailyBatch(
+      request,
+      context.resolvedClientId,
+      day,
+      files,
+    )
+    const batch = existing ?? (await this.addBatch(request, context, day, files))
+    if (!skipProcessing) await this.publishProcessingEvents(batch, files)
+    return batch
+  }
+
+  private async resolveReceiptContext(request: CreateDocumentBatchRequest) {
     let status: DocumentBatchStatus = DocumentBatchStatus.Received
     let inTriageBox = true
     let resolvedClientId = request.clientId
@@ -62,6 +85,10 @@ export class CreateDocumentBatchUseCase {
       }
     }
 
+    return { status, inTriageBox, resolvedClientId }
+  }
+
+  private resolveDay() {
     const now = this.datetimeProvider.now()
     const year = now.getUTCFullYear()
     const month = String(now.getUTCMonth() + 1).padStart(2, '0')
@@ -71,47 +98,51 @@ export class CreateDocumentBatchUseCase {
     const startOfDay = new Date(Date.UTC(year, now.getUTCMonth(), now.getUTCDate()))
     const endOfDay = new Date(Date.UTC(year, now.getUTCMonth(), now.getUTCDate() + 1))
 
-    const files = request.files.map((file) => ({
-      ...file,
-      status: request.skipProcessing
-        ? DocumentValidationStatus.AwaitingValidation
-        : DocumentValidationStatus.Processing,
-    }))
+    return { dateString, dateStringNoDashes, startOfDay, endOfDay }
+  }
 
-    if (resolvedClientId && !request.readableId) {
-      const dailyBatch = await this.documentBatchesRepository.findDailyByClient(
-        resolvedClientId,
-        startOfDay,
-        endOfDay,
-      )
+  private async reuseDailyBatch(
+    request: CreateDocumentBatchRequest,
+    resolvedClientId: string | undefined,
+    day: ReturnType<CreateDocumentBatchUseCase['resolveDay']>,
+    files: CreateDocumentBatchRequest['files'],
+  ): Promise<DocumentBatch | undefined> {
+    if (!resolvedClientId || request.readableId) return undefined
+    const dailyBatch = await this.documentBatchesRepository.findDailyByClient(
+      resolvedClientId,
+      day.startOfDay,
+      day.endOfDay,
+      request.channel,
+    )
+    if (dailyBatch?.channel !== request.channel) return undefined
+    return this.documentBatchesRepository.addFiles(dailyBatch.id, files)
+  }
 
-      if (dailyBatch) {
-        const batch = await this.documentBatchesRepository.addFiles(dailyBatch.id, files)
-
-        if (!request.skipProcessing) await this.publishProcessingEvents(batch, files)
-
-        return batch
-      }
-    }
-
-    const count = await this.dailyCountersRepository.incrementAndGet('LOTE', dateString)
+  private async addBatch(
+    request: CreateDocumentBatchRequest,
+    context: Awaited<ReturnType<CreateDocumentBatchUseCase['resolveReceiptContext']>>,
+    day: ReturnType<CreateDocumentBatchUseCase['resolveDay']>,
+    files: CreateDocumentBatchRequest['files'],
+  ): Promise<DocumentBatch> {
+    const count = await this.dailyCountersRepository.incrementAndGet(
+      'LOTE',
+      day.dateString,
+    )
     const sequence = String(count).padStart(4, '0')
 
-    const readableId = request.readableId ?? `LOTE-${dateStringNoDashes}-${sequence}`
+    const readableId = request.readableId ?? `LOTE-${day.dateStringNoDashes}-${sequence}`
 
     const batch = await this.documentBatchesRepository.add({
       readableId,
-      status,
+      status: context.status,
       channel: request.channel,
       sender: request.sender,
-      inTriageBox,
-      clientId: resolvedClientId,
+      inTriageBox: context.inTriageBox,
+      clientId: context.resolvedClientId,
       intakeId: request.intakeId,
       createdBy: request.createdBy,
       files,
     })
-
-    if (!request.skipProcessing) await this.publishProcessingEvents(batch, files)
 
     return batch
   }

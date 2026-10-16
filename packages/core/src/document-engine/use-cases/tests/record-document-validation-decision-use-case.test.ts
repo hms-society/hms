@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
-import { DocumentValidationDocumentFaker } from '../../domain/entities/fakers'
+import {
+  ClientDocumentUploadFaker,
+  DocumentValidationDocumentFaker,
+} from '../../domain/entities/fakers'
 import {
   DocumentValidationDecision,
   DocumentValidationLogAction,
@@ -11,6 +14,7 @@ import type {
   CaseChecklistUpdateProvider,
   DocumentValidationLogsRepository,
   DocumentValidationsRepository,
+  ClientDocumentUploadsRepository,
 } from '../../interfaces'
 import type { CaseAccessProvider } from '../../../case-management/interfaces/case-access-provider'
 import type { GetDocumentValidationUseCase } from '../get-document-validation-use-case'
@@ -24,9 +28,11 @@ describe('Record Document Validation Decision Use Case', () => {
   let caseChecklistUpdateProvider: MockProxy<CaseChecklistUpdateProvider>
   let caseAccessProvider: MockProxy<CaseAccessProvider>
   let getDocumentValidation: MockProxy<GetDocumentValidationUseCase>
+  let uploads: MockProxy<ClientDocumentUploadsRepository>
   let useCase: RecordDocumentValidationDecisionUseCase
 
   beforeEach(() => {
+    uploads = mock<ClientDocumentUploadsRepository>()
     documentValidationsRepository = mock<DocumentValidationsRepository>()
     documentValidationLogsRepository = mock<DocumentValidationLogsRepository>()
     caseChecklistUpdateProvider = mock<CaseChecklistUpdateProvider>()
@@ -43,6 +49,7 @@ describe('Record Document Validation Decision Use Case', () => {
       caseAccessProvider,
       getDocumentValidation,
       caseChecklistUpdateProvider,
+      uploads,
     )
   })
 
@@ -111,6 +118,7 @@ describe('Record Document Validation Decision Use Case', () => {
     const ownerCaseId = '00000000-0000-4000-8000-000000000701'
     const targetCaseId = '00000000-0000-4000-8000-000000000704'
     const document = DocumentValidationDocumentFaker.fake({
+      clientId: 'client-current',
       checklistLink: { caseId: ownerCaseId },
     })
     documentValidationsRepository.findByFileId.mockResolvedValue(document)
@@ -128,13 +136,13 @@ describe('Record Document Validation Decision Use Case', () => {
       caseId: ownerCaseId,
       actorId: 'collaborator-1',
       intent: 'write_content',
-      expectedClientId: document.clientId,
+      expectedClientId: 'client-current',
     })
     expect(caseAccessProvider.authorize).toHaveBeenNthCalledWith(2, {
       caseId: targetCaseId,
       actorId: 'collaborator-1',
       intent: 'write_content',
-      expectedClientId: document.clientId,
+      expectedClientId: 'client-current',
     })
     expect(caseAccessProvider.authorize.mock.invocationCallOrder[1]).toBeLessThan(
       documentValidationsRepository.recordDecision.mock.invocationCallOrder[0],
@@ -438,5 +446,25 @@ describe('Record Document Validation Decision Use Case', () => {
     ).rejects.toThrow('O documento original é obrigatório')
 
     expect(documentValidationsRepository.recordDecision).not.toHaveBeenCalled()
+  })
+  it('rejects Motor validation of an unpublished checklist upload before all mutation', async () => {
+    const document = DocumentValidationDocumentFaker.fake()
+    documentValidationsRepository.findByFileId.mockResolvedValue(document)
+    uploads.findByStoragePath.mockResolvedValue(
+      ClientDocumentUploadFaker.fake({ storagePath: document.storagePath }),
+    )
+    await expect(
+      useCase.execute({
+        documentFileId: document.id,
+        actorId: 'actor',
+        reviewedBy: 'reviewer',
+        decision: DocumentValidationDecision.Validate,
+      }),
+    ).rejects.toThrow('Valide o documento pelo item do checklist')
+    expect(documentValidationsRepository.recordDecision).not.toHaveBeenCalled()
+    expect(documentValidationLogsRepository.add).not.toHaveBeenCalled()
+    expect(
+      caseChecklistUpdateProvider.linkValidatedDocumentToChecklist,
+    ).not.toHaveBeenCalled()
   })
 })

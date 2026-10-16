@@ -2,6 +2,7 @@ import type {
   CaseChecklistUpdateProvider,
   DocumentValidationLogsRepository,
   DocumentValidationsRepository,
+  ClientDocumentUploadsRepository,
 } from '../interfaces'
 import {
   DocumentValidationDecision,
@@ -12,7 +13,7 @@ import type {
   DocumentValidationDocument,
   DocumentValidationExtractedField,
 } from '../domain/entities'
-import { AppError } from '../../shared/domain/errors'
+import { AppError, BadRequestError } from '../../shared/domain/errors'
 import type { CaseAccessProvider } from '../../case-management/interfaces/case-access-provider'
 import { CaseAccessIntent } from '../../case-management/domain/structures/case-access-intent'
 import type { GetDocumentValidationUseCase } from './get-document-validation-use-case'
@@ -43,6 +44,7 @@ export class RecordDocumentValidationDecisionUseCase {
     private readonly caseAccessProvider: CaseAccessProvider,
     private readonly getDocumentValidation: GetDocumentValidationUseCase,
     private readonly caseChecklistUpdateProvider?: CaseChecklistUpdateProvider,
+    private readonly uploads?: ClientDocumentUploadsRepository,
   ) {}
 
   async execute(request: RecordDocumentValidationDecisionRequest) {
@@ -60,6 +62,11 @@ export class RecordDocumentValidationDecisionUseCase {
     }
 
     await this.authorizeDecisionCases(request, currentDocument, actorId)
+    const upload = await this.uploads?.findByStoragePath(currentDocument.storagePath)
+    if (upload && !upload.publishedAt)
+      throw new BadRequestError(
+        'Valide o documento pelo item do checklist antes de disponibilizá-lo ao cliente.',
+      )
     if (
       this.isDuplicateDecisionAlreadyRecorded(currentDocument, request) &&
       !request.caseId &&
