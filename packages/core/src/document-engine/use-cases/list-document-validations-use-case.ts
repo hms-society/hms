@@ -36,7 +36,7 @@ export class ListDocumentValidationsUseCase {
       await this.caseAccessProvider.authorize({
         caseId: request.caseId,
         actorId: request.actorId,
-        intent: CaseAccessIntent.ReadContent,
+        intent: CaseAccessIntent.ReadDocument,
       })
     }
 

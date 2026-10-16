@@ -18,11 +18,13 @@ import type {
   IdProvider,
 } from '../../shared/interfaces'
 import { FindDocumentPendingMarkersUseCase } from '../../document-production/use-cases'
-import { CollaboratorProfile } from '#shared/domain/structures'
+import { ForbiddenError } from '../../shared/domain/errors/forbidden-error'
 import type { CollaboratorProfile as CollaboratorProfileValue } from '#shared/domain/structures'
 import { LegalCaseDocumentGenerationError } from '../domain/errors/legal-case-document-generation-error'
 import { LegalCaseNotFoundError } from '../domain/errors/legal-case-not-found-error'
+import { CaseAccessIntent, LegalCaseLifecycleStatus } from '../domain/structures'
 import type { LegalCasesRepository } from '../interfaces'
+import type { CaseAccessProvider } from '../interfaces'
 
 type Request = {
   readonly caseId: string
@@ -31,6 +33,10 @@ type Request = {
   readonly createdByCollaboratorId: string
   readonly createdByCollaboratorProfile: CollaboratorProfileValue
   readonly content: DocumentTemplateContent
+}
+type ManualSource = {
+  document: NonNullable<Awaited<ReturnType<DocumentsRepository['findById']>>>
+  sourceVersion: NonNullable<Awaited<ReturnType<DocumentVersionsRepository['findById']>>>
 }
 
 export class SaveManualLegalCaseDocumentVersionUseCase
@@ -48,23 +54,31 @@ export class SaveManualLegalCaseDocumentVersionUseCase
     private readonly storage: FileStorageProvider,
     private readonly datetime: DatetimeProvider,
     private readonly ids: IdProvider,
+    private readonly caseAccessProvider: CaseAccessProvider,
   ) {}
 
   async execute(request: Request): Promise<DocumentVersion> {
     const legalCase = await this.cases.findById(request.caseId)
     if (!legalCase) throw new LegalCaseNotFoundError()
-    if (request.createdByCollaboratorProfile !== CollaboratorProfile.Admin) {
-      const assignedCases = await this.cases.listByTeamMember(
-        request.createdByCollaboratorId,
-      )
-      if (!assignedCases.some(({ id }) => id === legalCase.id)) {
-        throw new LegalCaseNotFoundError()
-      }
+    if (legalCase.lifecycleStatus === LegalCaseLifecycleStatus.Closed) {
+      throw new ForbiddenError('Casos encerrados permitem apenas leitura.')
     }
+    await this.caseAccessProvider.authorize({
+      caseId: legalCase.id,
+      actorId: request.createdByCollaboratorId,
+      intent: CaseAccessIntent.WriteContent,
+    })
+    const source = await this.findManualSource(request, legalCase.id)
+    return this.persistManualVersion(request, source)
+  }
 
+  private async findManualSource(
+    request: Request,
+    caseId: string,
+  ): Promise<ManualSource> {
     const documentPackage = await this.packages.findByContext({
       type: 'case',
-      caseId: legalCase.id,
+      caseId,
     })
     if (!documentPackage) throw new LegalCaseNotFoundError()
     const packageDocuments = await this.packageDocuments.findByDocumentPackageId(
@@ -90,7 +104,14 @@ export class SaveManualLegalCaseDocumentVersionUseCase
         'A versão de origem não pertence a esta peça.',
       )
     }
+    return { document, sourceVersion }
+  }
 
+  private async persistManualVersion(
+    request: Request,
+    source: ManualSource,
+  ): Promise<DocumentVersion> {
+    const { document, sourceVersion } = source
     const latestVersion = await this.versions.findLatestByDocumentId(document.id)
     const versionNumber = (latestVersion?.versionNumber ?? 0) + 1
     const versionId = this.ids.generate()
@@ -110,6 +131,26 @@ export class SaveManualLegalCaseDocumentVersionUseCase
       content: exportedFile.content,
     })
 
+    return this.addManualVersion(
+      request,
+      document,
+      sourceVersion,
+      file,
+      versionId,
+      versionNumber,
+      pendingMarkers,
+    )
+  }
+
+  private async addManualVersion(
+    request: Request,
+    document: ManualSource['document'],
+    sourceVersion: ManualSource['sourceVersion'],
+    file: Awaited<ReturnType<FileStorageProvider['save']>>,
+    versionId: string,
+    versionNumber: number,
+    pendingMarkers: Awaited<ReturnType<FindDocumentPendingMarkersUseCase['execute']>>,
+  ): Promise<DocumentVersion> {
     try {
       return await this.versions.add({
         id: versionId,

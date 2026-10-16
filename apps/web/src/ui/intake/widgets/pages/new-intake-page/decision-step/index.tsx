@@ -32,7 +32,7 @@ import {
 
 import type { StepRef } from '../demand-step'
 import { useDecisionStep } from '@/ui/intake/widgets/pages/new-intake-page/decision-step/use-decision-step'
-import { LawyerSelectorDialog } from './lawyer-selector-dialog'
+import { LawyerSelectorDialog } from '@/ui/identity/widgets/components/lawyer-selector-dialog'
 
 const CANAIS_VIRTUAIS = [
   { value: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
@@ -64,6 +64,8 @@ export const DecisionStep = forwardRef<StepRef>((_, ref) => {
     selectedLawyer,
     selectedLawyerDetails,
     selectedTime,
+    isDateBlocked,
+    isTimeUnavailable,
     virtualChannel,
     handleDateChange,
     handleDecisionChange,
@@ -276,6 +278,7 @@ export const DecisionStep = forwardRef<StepRef>((_, ref) => {
                 selected={selectedDate}
                 defaultMonth={selectedDate}
                 onSelect={handleDateChange}
+                disabled={isDateBlocked}
                 locale={ptBR}
                 className='mx-auto w-full max-w-[380px] bg-transparent p-0 [--cell-size:2rem]'
               />
@@ -297,7 +300,7 @@ export const DecisionStep = forwardRef<StepRef>((_, ref) => {
                     <button
                       type='button'
                       key={h}
-                      disabled={h === '14:00'}
+                      disabled={h === '14:00' || isTimeUnavailable(h)}
                       onClick={() => handleTimeChange(h)}
                       className={`h-11 rounded-lg border text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                         selectedTime === h
@@ -412,6 +415,8 @@ export const DecisionStep = forwardRef<StepRef>((_, ref) => {
         onOpenChange={setIsLawyerDialogOpen}
         selectedLawyer={selectedLawyer}
         onSelect={handleLawyerChange}
+        description='Busque por nome ou refine pelos campos jurídicos.'
+        helperText='Os horários serão recalculados para o advogado selecionado.'
       />
     </div>
   )

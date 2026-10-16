@@ -187,10 +187,10 @@ function ensureCaseIsWritable(
   intent: CaseAccessIntentType,
   lifecycleStatus: LegalCaseLifecycleStatus | undefined,
 ): void {
-  if (
-    intent !== CaseAccessIntent.ReadContent &&
-    lifecycleStatus === LegalCaseLifecycleStatus.Closed
-  ) {
+  const isReadIntent =
+    intent === CaseAccessIntent.ReadContent || intent === CaseAccessIntent.ReadDocument
+  const isClosed = lifecycleStatus === LegalCaseLifecycleStatus.Closed
+  if (!isReadIntent && isClosed) {
     throw new ForbiddenError('Casos encerrados permitem apenas leitura.')
   }
 }

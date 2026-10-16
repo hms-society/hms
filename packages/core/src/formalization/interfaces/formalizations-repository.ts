@@ -2,6 +2,7 @@ import type { Formalization, FormalizationCreation } from '../domain/entities'
 import type { ReplaceFormalizationParams } from './replace-formalization-params'
 
 export interface FormalizationsRepository {
+  findByClientId(clientId: string): Promise<readonly Formalization[]>
   findById(formalizationId: string): Promise<Formalization | undefined>
   findByIntakeId(intakeId: string): Promise<Formalization | undefined>
   addOrGet(formalization: FormalizationCreation): Promise<Formalization>

@@ -46,7 +46,7 @@ describe('GetCaseDocumentExceptionsUseCase', () => {
     expect(caseAccessProvider.authorize).toHaveBeenCalledWith({
       caseId: 'case-789',
       actorId: 'actor-1',
-      intent: 'read_content',
+      intent: 'read_document',
     })
   })
 

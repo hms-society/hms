@@ -5,6 +5,7 @@ import { DocumentValidationDocumentFaker } from '../../../document-engine/domain
 import { DocumentValidationStatus } from '../../../document-engine/domain/structures'
 import { DocumentSpecificationStatus } from '../../../document-production/domain/structures'
 import { PaginationResponse } from '../../../shared/responses/pagination-response'
+import { ForbiddenError } from '../../../shared/domain/errors/forbidden-error'
 import { LegalCaseFaker } from '../../domain/entities/fakers'
 import {
   CaseChecklistItemStatus,
@@ -12,7 +13,11 @@ import {
   LegalCaseLifecycleStatus,
   LegalCaseStatus,
 } from '../../domain/structures'
-import type { CaseChecklistItemsRepository, LegalCasesRepository } from '../../interfaces'
+import type {
+  CaseAccessProvider,
+  CaseChecklistItemsRepository,
+  LegalCasesRepository,
+} from '../../interfaces'
 import type { DocumentValidationsRepository } from '../../../document-engine/interfaces'
 import type { DocumentSpecificationsRepository } from '../../../document-production/interfaces'
 import { GetCaseDocumentGenerationContextUseCase } from '../get-case-document-generation-context-use-case'
@@ -22,6 +27,7 @@ describe('Get Case Document Generation Context Use Case', () => {
   let checklist: MockProxy<CaseChecklistItemsRepository>
   let validations: MockProxy<DocumentValidationsRepository>
   let specifications: MockProxy<DocumentSpecificationsRepository>
+  let access: MockProxy<CaseAccessProvider>
   let useCase: GetCaseDocumentGenerationContextUseCase
 
   beforeEach(() => {
@@ -29,11 +35,14 @@ describe('Get Case Document Generation Context Use Case', () => {
     checklist = mock<CaseChecklistItemsRepository>()
     validations = mock<DocumentValidationsRepository>()
     specifications = mock<DocumentSpecificationsRepository>()
+    access = mock<CaseAccessProvider>()
+    access.authorize.mockResolvedValue()
     useCase = new GetCaseDocumentGenerationContextUseCase(
       cases,
       checklist,
       validations,
       specifications,
+      access,
     )
   })
 
@@ -49,7 +58,6 @@ describe('Get Case Document Generation Context Use Case', () => {
       dossierGate: { homologatedAt: now },
     })
     cases.findById.mockResolvedValue(legalCase)
-    cases.listByTeamMember.mockResolvedValue([{ id: caseId } as never])
     checklist.listByCaseId.mockResolvedValue([
       {
         id: itemId,
@@ -146,5 +154,26 @@ describe('Get Case Document Generation Context Use Case', () => {
       collaboratorId: 'collaborator-id',
     })
     expect(closedResult.canGenerate).toBe(false)
+  })
+
+  it('denies Admin-flagged requests when the shared case access boundary rejects the current actor', async () => {
+    const caseId = 'case-1'
+    cases.findById.mockResolvedValue(LegalCaseFaker.fake({ id: caseId }))
+    access.authorize.mockRejectedValue(
+      new ForbiddenError('Acesso jurídico ao Caso não autorizado.'),
+    )
+
+    await expect(
+      useCase.execute({ caseId, collaboratorId: 'admin-id', isAdmin: true }),
+    ).rejects.toBeInstanceOf(ForbiddenError)
+
+    expect(access.authorize).toHaveBeenCalledWith({
+      caseId,
+      actorId: 'admin-id',
+      intent: 'read_document',
+    })
+    expect(checklist.listByCaseId).not.toHaveBeenCalled()
+    expect(validations.list).not.toHaveBeenCalled()
+    expect(specifications.list).not.toHaveBeenCalled()
   })
 })

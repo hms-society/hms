@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { Appointment, Schedule } from '@hms/core/scheduling/domain/entities'
 import type {
-  AppointmentsRepository,
+  CalendarAppointmentsRepository,
+  CalendarSchedulesRepository,
   SchedulingDatabase,
   SchedulingDatabaseRepositories,
-  SchedulesRepository,
 } from '@hms/core/scheduling/interfaces'
 
 import { DrizzleAppointmentWriteTransactionProvider } from '@/scheduling/database/drizzle/repositories/drizzle-appointment-write-transaction-provider'
@@ -39,10 +39,10 @@ describe('appointment write transaction ordering', () => {
     const appointmentsRepository = {
       findById,
       findByIdForUpdate,
-    } as unknown as AppointmentsRepository
+    } as unknown as CalendarAppointmentsRepository
     const schedulesRepository = {
       findByIdForUpdate: findScheduleByIdForUpdate,
-    } as unknown as SchedulesRepository
+    } as unknown as CalendarSchedulesRepository
     const scope = {
       appointmentsRepository,
       schedulesRepository,
@@ -83,8 +83,10 @@ describe('appointment write transaction ordering', () => {
           appointmentsRepository: {
             findById,
             findByIdForUpdate,
-          } as unknown as AppointmentsRepository,
-          schedulesRepository: { findByIdForUpdate } as unknown as SchedulesRepository,
+          } as unknown as CalendarAppointmentsRepository,
+          schedulesRepository: {
+            findByIdForUpdate,
+          } as unknown as CalendarSchedulesRepository,
         }),
     } satisfies SchedulingDatabase
     const provider = new DrizzleAppointmentWriteTransactionProvider(database)
@@ -121,10 +123,10 @@ describe('appointment write transaction ordering', () => {
           appointmentsRepository: {
             findById,
             findByIdForUpdate,
-          } as unknown as AppointmentsRepository,
+          } as unknown as CalendarAppointmentsRepository,
           schedulesRepository: {
             findByIdForUpdate: findScheduleByIdForUpdate,
-          } as unknown as SchedulesRepository,
+          } as unknown as CalendarSchedulesRepository,
         }),
     } satisfies SchedulingDatabase
     const provider = new DrizzleAppointmentWriteTransactionProvider(database)
@@ -150,24 +152,24 @@ describe('appointment write transaction ordering', () => {
       appointmentsRepository: {
         findById: vi.fn().mockResolvedValue(firstAppointment),
         findByIdForUpdate: vi.fn().mockResolvedValue(movedAppointment),
-      } as unknown as AppointmentsRepository,
+      } as unknown as CalendarAppointmentsRepository,
       schedulesRepository: {
         findByIdForUpdate: vi
           .fn()
           .mockResolvedValue({ id: firstAppointment.scheduleId } as Schedule),
-      } as unknown as SchedulesRepository,
+      } as unknown as CalendarSchedulesRepository,
     } as SchedulingDatabaseRepositories
     const secondAppointment = { ...firstAppointment, scheduleId: 'schedule-2' }
     const secondScope = {
       appointmentsRepository: {
         findById: vi.fn().mockResolvedValue(secondAppointment),
         findByIdForUpdate: vi.fn().mockResolvedValue(secondAppointment),
-      } as unknown as AppointmentsRepository,
+      } as unknown as CalendarAppointmentsRepository,
       schedulesRepository: {
         findByIdForUpdate: vi
           .fn()
           .mockResolvedValue({ id: secondAppointment.scheduleId } as Schedule),
-      } as unknown as SchedulesRepository,
+      } as unknown as CalendarSchedulesRepository,
     } as SchedulingDatabaseRepositories
     let attempt = 0
     const database = {

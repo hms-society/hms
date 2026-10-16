@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Timer, CalendarDays, Plus, Trash2, Loader2, X } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -8,15 +8,44 @@ import { Switch } from '@/ui/shadcn/switch'
 import { Input } from '@/ui/shadcn/input'
 import { Label } from '@/ui/shadcn/label'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/shadcn/select'
+import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
 } from '@/ui/shadcn/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/ui/shadcn/alert-dialog'
 import { useConsultation } from './use-schedule'
 
-const DEFAULT_WEEKLY_AVAILABILITY = [
+type ScheduleSlot = {
+  start: string
+  end: string
+}
+
+type ScheduleDay = {
+  id: string
+  name: string
+  active: boolean
+  slots: ScheduleSlot[]
+}
+
+const DEFAULT_WEEKLY_AVAILABILITY: ScheduleDay[] = [
   { id: 'monday', name: 'Segunda-feira', active: true, slots: [] },
   { id: 'tuesday', name: 'Terça-feira', active: true, slots: [] },
   { id: 'wednesday', name: 'Quarta-feira', active: true, slots: [] },
@@ -25,6 +54,78 @@ const DEFAULT_WEEKLY_AVAILABILITY = [
   { id: 'saturday', name: 'Sábado', active: false, slots: [] },
   { id: 'sunday', name: 'Domingo', active: false, slots: [] },
 ]
+
+const WEEKDAY_NAMES: Record<string, string> = {
+  monday: 'Segunda-feira',
+  tuesday: 'Terça-feira',
+  wednesday: 'Quarta-feira',
+  thursday: 'Quinta-feira',
+  friday: 'Sexta-feira',
+  saturday: 'Sábado',
+  sunday: 'Domingo',
+}
+
+const TIME_ZONES = [
+  { value: 'America/Sao_Paulo', label: 'Brasília (UTC−03:00)' },
+  { value: 'America/Manaus', label: 'Manaus (UTC−04:00)' },
+  { value: 'America/Rio_Branco', label: 'Rio Branco (UTC−05:00)' },
+  { value: 'America/Noronha', label: 'Fernando de Noronha (UTC−02:00)' },
+  { value: 'UTC', label: 'UTC (UTC±00:00)' },
+]
+function normalizeWeeklyAvailability(
+  rawAvailability: unknown,
+  useDefaultDays: boolean,
+): ScheduleDay[] {
+  const rawDays = Array.isArray(rawAvailability) ? rawAvailability : []
+  if (rawDays.length === 0 && !useDefaultDays) {
+    return DEFAULT_WEEKLY_AVAILABILITY.map((day) => ({
+      ...day,
+      active: false,
+      slots: [],
+    }))
+  }
+
+  const daysById = new Map<string, ScheduleDay>(
+    rawDays.map((day: any) => {
+      const id = day.id ?? day.weekday
+      const slots =
+        day.slots ??
+        (day.timeRanges ?? []).map((range: any) => ({
+          start: range.start ?? range.startsAt,
+          end: range.end ?? range.endsAt,
+        }))
+
+      return [
+        id,
+        {
+          id,
+          name: day.name ?? WEEKDAY_NAMES[id] ?? id,
+          active: day.active ?? slots.length > 0,
+          slots,
+        },
+      ] as [string, ScheduleDay]
+    }),
+  )
+
+  return DEFAULT_WEEKLY_AVAILABILITY.map(
+    (defaultDay) =>
+      daysById.get(defaultDay.id) ??
+      (rawDays.length === 0 && useDefaultDays
+        ? defaultDay
+        : { ...defaultDay, active: false, slots: [] }),
+  )
+}
+
+function toWeeklyAvailabilityPayload(days: ScheduleDay[]) {
+  return days.map((day) => ({
+    weekday: day.id,
+    active: day.active,
+    timeRanges: day.slots.map((slot) => ({
+      startsAt: slot.start,
+      endsAt: slot.end,
+    })),
+  }))
+}
 
 function formatBlockedDateRange(startsOn?: string, endsOn?: string) {
   if (!startsOn || startsOn.includes('NaN') || startsOn === 'Data inválida') {
@@ -66,8 +167,12 @@ export const Schedule = () => {
   const {
     schedule,
     isLoading,
+    error,
     updateDuration,
     isUpdatingDuration,
+    updateTimeZone,
+    isUpdatingTimeZone,
+    hasFutureAppointments,
     updateAvailability,
     isUpdatingAvailability,
     addBlock,
@@ -75,6 +180,9 @@ export const Schedule = () => {
     removeBlock,
     isRemovingBlock,
   } = useConsultation()
+
+  const isAccessDenied =
+    (error as { title?: string } | null | undefined)?.title === 'Acesso Negado'
 
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null)
@@ -85,26 +193,92 @@ export const Schedule = () => {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [blockReason, setBlockReason] = useState('')
+  const [blockError, setBlockError] = useState<string | null>(null)
+  const [timeZoneDraft, setTimeZoneDraft] = useState('America/Sao_Paulo')
+  const [pendingTimeZone, setPendingTimeZone] = useState<string | null>(null)
+  const [isTimeZoneConfirmationOpen, setIsTimeZoneConfirmationOpen] = useState(false)
+  const [isCheckingFutureAppointments, setIsCheckingFutureAppointments] = useState(false)
 
   const rawAvailability =
     (schedule as any)?.weeklyAvailability ?? (schedule as any)?.availability ?? []
-  const weeklyAvailability =
-    rawAvailability.length > 0 ? rawAvailability : DEFAULT_WEEKLY_AVAILABILITY
+  const normalizedWeeklyAvailability = normalizeWeeklyAvailability(
+    rawAvailability,
+    !schedule,
+  )
+  const [weeklyAvailabilityDraft, setWeeklyAvailabilityDraft] = useState<
+    ScheduleDay[] | null
+  >(null)
+  const weeklyAvailability = weeklyAvailabilityDraft ?? normalizedWeeklyAvailability
   const blockedPeriods = schedule?.blockedPeriods ?? []
+  const scheduleId = schedule?.id ?? null
+  const previousScheduleId = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (previousScheduleId.current !== scheduleId) {
+      previousScheduleId.current = scheduleId
+      setWeeklyAvailabilityDraft(null)
+    }
+  }, [scheduleId])
+
+  useEffect(() => {
+    setTimeZoneDraft(schedule?.timeZone ?? 'America/Sao_Paulo')
+  }, [schedule?.timeZone])
 
   const currentDuration =
     schedule?.appointmentDurationInMinutes ??
     (schedule as any)?.defaultDurationMinutes ??
     45
 
+  const persistTimeZone = async (timeZone: string) => {
+    const previousTimeZone = timeZoneDraft
+    setTimeZoneDraft(timeZone)
+    try {
+      await updateTimeZone(timeZone)
+    } catch {
+      setTimeZoneDraft(previousTimeZone)
+    }
+  }
+
+  const handleTimeZoneChange = async (timeZone: string) => {
+    if (timeZone === timeZoneDraft || isCheckingFutureAppointments) return
+
+    setIsCheckingFutureAppointments(true)
+    try {
+      if (await hasFutureAppointments()) {
+        setPendingTimeZone(timeZone)
+        setIsTimeZoneConfirmationOpen(true)
+        return
+      }
+
+      await persistTimeZone(timeZone)
+    } finally {
+      setIsCheckingFutureAppointments(false)
+    }
+  }
+
+  const handleConfirmTimeZoneChange = async () => {
+    if (!pendingTimeZone) return
+
+    await persistTimeZone(pendingTimeZone)
+    setPendingTimeZone(null)
+    setIsTimeZoneConfirmationOpen(false)
+  }
+
+  const handleCancelTimeZoneChange = () => {
+    setPendingTimeZone(null)
+    setIsTimeZoneConfirmationOpen(false)
+  }
+
   const handleToggleDay = async (dayId: string, currentActive: boolean) => {
-    const updated = weeklyAvailability.map((day: any) =>
+    const updated = weeklyAvailability.map((day) =>
       day.id === dayId ? { ...day, active: !currentActive } : day,
     )
+    setWeeklyAvailabilityDraft(updated)
 
     try {
-      await updateAvailability(updated)
+      await updateAvailability(toWeeklyAvailabilityPayload(updated))
     } catch (error) {
+      setWeeklyAvailabilityDraft(null)
       console.error('Erro ao atualizar dia:', error)
     }
   }
@@ -119,7 +293,7 @@ export const Schedule = () => {
   const handleAddSlot = async () => {
     if (!selectedDayId) return
 
-    const updated = weeklyAvailability.map((day: any) => {
+    const updated = weeklyAvailability.map((day) => {
       if (day.id === selectedDayId) {
         const currentSlots = day.slots ?? []
         return {
@@ -130,17 +304,19 @@ export const Schedule = () => {
       }
       return day
     })
+    setWeeklyAvailabilityDraft(updated)
 
     try {
-      await updateAvailability(updated)
+      await updateAvailability(toWeeklyAvailabilityPayload(updated))
       setModalOpen(false)
     } catch (error) {
+      setWeeklyAvailabilityDraft(null)
       console.error('Erro ao adicionar intervalo:', error)
     }
   }
 
   const handleRemoveSlot = async (dayId: string, slotIndex: number) => {
-    const updated = weeklyAvailability.map((day: any) => {
+    const updated = weeklyAvailability.map((day) => {
       if (day.id === dayId) {
         const newSlots = (day.slots ?? []).filter(
           (_: any, idx: number) => idx !== slotIndex,
@@ -152,10 +328,12 @@ export const Schedule = () => {
       }
       return day
     })
+    setWeeklyAvailabilityDraft(updated)
 
     try {
-      await updateAvailability(updated)
+      await updateAvailability(toWeeklyAvailabilityPayload(updated))
     } catch (error) {
+      setWeeklyAvailabilityDraft(null)
       console.error('Erro ao remover intervalo:', error)
     }
   }
@@ -164,15 +342,27 @@ export const Schedule = () => {
     setStartDate('')
     setEndDate('')
     setBlockReason('')
+    setBlockError(null)
     setModalBlockOpen(true)
   }
 
   const handleAddBlock = async () => {
-    if (!startDate) return
+    if (!startDate) {
+      setBlockError('Informe a data inicial do bloqueio.')
+      return
+    }
+
+    const normalizedEndDate = endDate || startDate
+    if (normalizedEndDate < startDate) {
+      setBlockError('A data final deve ser igual ou posterior à data inicial.')
+      return
+    }
+
+    setBlockError(null)
     try {
       await addBlock({
         startDate,
-        endDate: endDate || startDate,
+        endDate: normalizedEndDate,
         reason: blockReason.trim() || 'Bloqueio de agenda',
       })
 
@@ -180,8 +370,13 @@ export const Schedule = () => {
       setStartDate('')
       setEndDate('')
       setBlockReason('')
+      setBlockError(null)
     } catch (error) {
-      console.error('Erro ao adicionar bloqueio:', error)
+      setBlockError(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível criar o bloqueio. Tente novamente.',
+      )
     }
   }
 
@@ -201,15 +396,35 @@ export const Schedule = () => {
     )
   }
 
+  if (isAccessDenied) {
+    return (
+      <div className='flex min-h-64 w-full items-center justify-center px-4'>
+        <div
+          role='alert'
+          className='w-full max-w-xl rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center'
+        >
+          <h1 className='font-serif text-xl font-semibold text-foreground'>
+            Acesso não permitido
+          </h1>
+          <p className='mt-2 text-sm text-muted-foreground'>
+            Você não tem permissão para visualizar ou alterar esta agenda.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className='flex flex-col gap-6 max-w-5xl pt-4 md:pt-8 px-4 sm:px-6 w-full mx-auto pb-10'>
-      <div className='flex flex-col gap-1'>
-        <h1 className='text-ring font-serif text-[20px] sm:text-[24px] font-semibold'>
-          Configurar agenda
-        </h1>
-        <p className='text-muted-foreground font-sans text-[13px] sm:text-[14px]'>
-          Defina sua disponibilidade semanal, duração de consulta e bloqueios
-        </p>
+      <div className='flex flex-col gap-4'>
+        <div className='flex flex-col gap-1'>
+          <h1 className='text-ring font-serif text-[20px] sm:text-[24px] font-semibold'>
+            Configurar agenda
+          </h1>
+          <p className='text-muted-foreground font-sans text-[13px] sm:text-[14px]'>
+            Defina sua disponibilidade semanal, duração de consulta e bloqueios
+          </p>
+        </div>
       </div>
 
       <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
@@ -255,6 +470,59 @@ export const Schedule = () => {
           })}
         </div>
       </div>
+
+      <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col gap-3'>
+        <div className='flex flex-col gap-1'>
+          <span className='text-[14px] font-semibold text-foreground'>
+            Fuso horário da agenda
+          </span>
+          <span className='text-[12px] text-muted-foreground'>
+            Usado para calcular e exibir os horários das consultas.
+          </span>
+        </div>
+        <Select
+          value={timeZoneDraft}
+          onValueChange={handleTimeZoneChange}
+          disabled={isUpdatingTimeZone || isCheckingFutureAppointments}
+        >
+          <SelectTrigger className='w-full sm:max-w-sm'>
+            <SelectValue placeholder='Selecione o fuso horário' />
+          </SelectTrigger>
+          <SelectContent>
+            {TIME_ZONES.map((timeZone) => (
+              <SelectItem key={timeZone.value} value={timeZone.value}>
+                {timeZone.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <AlertDialog
+        open={isTimeZoneConfirmationOpen}
+        onOpenChange={(open) => {
+          if (!open) handleCancelTimeZoneChange()
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Alterar fuso horário da agenda?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Existem consultas futuras nesta agenda. A alteração muda a forma como os
+              horários são exibidos para novos agendamentos, mas não desloca o instante
+              das consultas já confirmadas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelTimeZoneChange}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmTimeZoneChange}>
+              Confirmar alteração
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className='bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col gap-5'>
         <div className='flex items-center gap-2 pb-3 border-b border-border'>
@@ -477,10 +745,23 @@ export const Schedule = () => {
                 <Input
                   type='date'
                   value={endDate}
+                  min={startDate || undefined}
+                  aria-invalid={Boolean(blockError)}
+                  aria-describedby={blockError ? 'blocked-period-error' : undefined}
                   onChange={(e) => setEndDate(e.target.value)}
                 />
               </div>
             </div>
+
+            {blockError ? (
+              <p
+                id='blocked-period-error'
+                role='alert'
+                className='text-sm text-destructive'
+              >
+                {blockError}
+              </p>
+            ) : null}
 
             <div className='flex flex-col gap-2'>
               <Label className='text-[13px] text-foreground'>

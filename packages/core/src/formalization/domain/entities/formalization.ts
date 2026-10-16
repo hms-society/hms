@@ -32,6 +32,9 @@ export type Formalization = Entity & {
   signatureSubmittedAt?: Date
   signatureConfirmedAt?: Date
   signatureTerminalAt?: Date
+  completedAt?: Date
+  completedByCollaboratorId?: string
+  contractingConfirmationKey?: string
   cancelledAt?: Date
   cancelledByCollaboratorId?: string
   version: number

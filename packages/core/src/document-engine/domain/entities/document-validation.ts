@@ -38,6 +38,13 @@ export type DocumentValidationHumanCorrection = {
   originalDocumentId?: string
   extractedFields?: DocumentValidationExtractedField[]
   message?: string
+  checklistReview?: {
+    clientDocumentId: string
+    caseId: string
+    checklistItemId: string
+    actorId: string
+    reviewedAt: string
+  }
 }
 
 export type DocumentValidationDocument = Entity & {

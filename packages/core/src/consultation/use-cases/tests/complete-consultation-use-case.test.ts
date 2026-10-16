@@ -58,13 +58,17 @@ describe('Complete Consultation Use Case', () => {
     expect(outboxRepository.add).not.toHaveBeenCalled()
   })
 
-  it('completes inside the appointment lock and queues the domain event', async () => {
+  it('completes without a document package inside the appointment lock and queues the domain event', async () => {
     const consultation = ConsultationFaker.fake({
       attendanceFinalizedAt: new Date('2026-08-19T11:00:00.000Z'),
     })
     const completedAt = new Date('2026-08-19T12:00:00.000Z')
     const completed = {
-      ...consultation,
+      id: consultation.id,
+      clientId: consultation.clientId,
+      intakeId: consultation.intakeId,
+      appointmentId: consultation.appointmentId,
+      assignedLawyerId: consultation.assignedLawyerId,
       status: ConsultationStatus.Completed,
       primaryLegalQuestion: 'Qual é a orientação aplicável?',
       guidanceProvided: 'A orientação foi prestada.',
@@ -72,9 +76,6 @@ describe('Complete Consultation Use Case', () => {
     } as Consultation
     consultationsRepository.findById.mockResolvedValue(consultation)
     consultationsRepository.replace.mockResolvedValue(completed)
-    documentPackagesRepository.findByContext.mockResolvedValue({
-      confirmedAt: new Date('2026-08-19T11:30:00.000Z'),
-    } as Awaited<ReturnType<DocumentPackagesRepository['findByContext']>>)
     datetimeProvider.now.mockReturnValue(completedAt)
     idProvider.generate.mockReturnValue('outbox-event-id')
     outboxRepository.add.mockImplementation(async (event) => event)
@@ -107,6 +108,7 @@ describe('Complete Consultation Use Case', () => {
       occurredAt: completedAt,
     })
     expect(broker.publish).not.toHaveBeenCalled()
+    expect(documentPackagesRepository.findByContext).not.toHaveBeenCalled()
   })
 
   function makeUseCase() {
@@ -120,4 +122,272 @@ describe('Complete Consultation Use Case', () => {
       idProvider,
     )
   }
+  it('completes without a package through the direct broker path when no appointment transaction is configured', async () => {
+    const consultation = ConsultationFaker.fake({ attendanceFinalizedAt: new Date() })
+    const completed = ConsultationFaker.fake({
+      id: consultation.id,
+      clientId: consultation.clientId,
+      intakeId: consultation.intakeId,
+      appointmentId: consultation.appointmentId,
+      assignedLawyerId: consultation.assignedLawyerId,
+      status: ConsultationStatus.Completed,
+      completedAt: new Date(),
+      primaryLegalQuestion: 'Questão apresentada',
+      guidanceProvided: 'Orientação apresentada',
+    })
+    consultationsRepository.findById.mockResolvedValue(consultation)
+    consultationsRepository.replace.mockResolvedValue(completed)
+    datetimeProvider.now.mockReturnValue(completed.completedAt as Date)
+    const useCase = new CompleteConsultationUseCase(
+      consultationsRepository,
+      documentPackagesRepository,
+      broker,
+      datetimeProvider,
+    )
+    expect(
+      await useCase.execute({
+        consultationId: consultation.id,
+        collaboratorId: consultation.assignedLawyerId,
+        collaboratorProfile: CollaboratorProfile.Lawyer,
+      }),
+    ).toBe(completed)
+    expect(documentPackagesRepository.findByContext).not.toHaveBeenCalled()
+    expect(broker.publish).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: expect.objectContaining({
+          consultationId: consultation.id,
+          completedBy: consultation.assignedLawyerId,
+        }),
+      }),
+    )
+  })
+  it.each([
+    false,
+    true,
+  ])('rejects a missing consultation with appointment transaction configured: %s', async (locked) => {
+    consultationsRepository.findById.mockResolvedValue(undefined)
+    const useCase = locked
+      ? makeUseCase()
+      : new CompleteConsultationUseCase(
+          consultationsRepository,
+          documentPackagesRepository,
+          broker,
+          datetimeProvider,
+        )
+    await expect(
+      useCase.execute({
+        consultationId: 'missing',
+        collaboratorId: 'actor',
+        collaboratorProfile: CollaboratorProfile.Lawyer,
+      }),
+    ).rejects.toThrow()
+    expect(consultationsRepository.replace).not.toHaveBeenCalled()
+    expect(broker.publish).not.toHaveBeenCalled()
+  })
+  it.each([
+    false,
+    true,
+  ])('rejects an unassigned lawyer with appointment transaction configured: %s', async (locked) => {
+    const consultation = ConsultationFaker.fake({ attendanceFinalizedAt: new Date() })
+    consultationsRepository.findById.mockResolvedValue(consultation)
+    appointmentTransactionProvider.runWithLockedAppointment.mockImplementation(
+      async (_id, operation) =>
+        operation({ appointmentId: consultation.appointmentId, status: 'scheduled' }),
+    )
+    const useCase = locked
+      ? makeUseCase()
+      : new CompleteConsultationUseCase(
+          consultationsRepository,
+          documentPackagesRepository,
+          broker,
+          datetimeProvider,
+        )
+    await expect(
+      useCase.execute({
+        consultationId: consultation.id,
+        collaboratorId: 'other-lawyer',
+        collaboratorProfile: CollaboratorProfile.Lawyer,
+      }),
+    ).rejects.toThrow()
+    expect(consultationsRepository.replace).not.toHaveBeenCalled()
+    expect(outboxRepository.add).not.toHaveBeenCalled()
+  })
+  it.each([
+    false,
+    true,
+  ])('rejects replaying an already completed stage with appointment transaction configured: %s', async (locked) => {
+    const consultation = ConsultationFaker.fake({
+      status: ConsultationStatus.Completed,
+      completedAt: new Date(),
+      attendanceFinalizedAt: new Date(),
+    })
+    consultationsRepository.findById.mockResolvedValue(consultation)
+    appointmentTransactionProvider.runWithLockedAppointment.mockImplementation(
+      async (_id, operation) =>
+        operation({ appointmentId: consultation.appointmentId, status: 'scheduled' }),
+    )
+    const useCase = locked
+      ? makeUseCase()
+      : new CompleteConsultationUseCase(
+          consultationsRepository,
+          documentPackagesRepository,
+          broker,
+          datetimeProvider,
+        )
+    await expect(
+      useCase.execute({
+        consultationId: consultation.id,
+        collaboratorId: consultation.assignedLawyerId,
+        collaboratorProfile: CollaboratorProfile.Lawyer,
+      }),
+    ).rejects.toThrow()
+    expect(consultationsRepository.replace).not.toHaveBeenCalled()
+  })
+  it.each([
+    false,
+    true,
+  ])('requires finalized attendance even without the obsolete package gate, transaction configured: %s', async (locked) => {
+    const consultation = ConsultationFaker.fake({ attendanceFinalizedAt: undefined })
+    consultationsRepository.findById.mockResolvedValue(consultation)
+    appointmentTransactionProvider.runWithLockedAppointment.mockImplementation(
+      async (_id, operation) =>
+        operation({ appointmentId: consultation.appointmentId, status: 'scheduled' }),
+    )
+    const useCase = locked
+      ? makeUseCase()
+      : new CompleteConsultationUseCase(
+          consultationsRepository,
+          documentPackagesRepository,
+          broker,
+          datetimeProvider,
+        )
+    await expect(
+      useCase.execute({
+        consultationId: consultation.id,
+        collaboratorId: consultation.assignedLawyerId,
+        collaboratorProfile: CollaboratorProfile.Lawyer,
+      }),
+    ).rejects.toThrow()
+    expect(documentPackagesRepository.findByContext).not.toHaveBeenCalled()
+    expect(consultationsRepository.replace).not.toHaveBeenCalled()
+  })
+  it.each([
+    false,
+    true,
+  ])('does not publish completion after failed persistence, transaction configured: %s', async (locked) => {
+    const consultation = ConsultationFaker.fake({ attendanceFinalizedAt: new Date() })
+    consultationsRepository.findById.mockResolvedValue(consultation)
+    consultationsRepository.replace.mockResolvedValue(undefined)
+    appointmentTransactionProvider.runWithLockedAppointment.mockImplementation(
+      async (_id, operation) =>
+        operation({ appointmentId: consultation.appointmentId, status: 'scheduled' }),
+    )
+    const useCase = locked
+      ? makeUseCase()
+      : new CompleteConsultationUseCase(
+          consultationsRepository,
+          documentPackagesRepository,
+          broker,
+          datetimeProvider,
+        )
+    await expect(
+      useCase.execute({
+        consultationId: consultation.id,
+        collaboratorId: consultation.assignedLawyerId,
+        collaboratorProfile: CollaboratorProfile.Admin,
+      }),
+    ).rejects.toThrow()
+    expect(broker.publish).not.toHaveBeenCalled()
+    expect(outboxRepository.add).not.toHaveBeenCalled()
+  })
+  it('rechecks consultation existence after acquiring the appointment lock', async () => {
+    const consultation = ConsultationFaker.fake({ attendanceFinalizedAt: new Date() })
+    consultationsRepository.findById
+      .mockResolvedValueOnce(consultation)
+      .mockResolvedValueOnce(undefined)
+    appointmentTransactionProvider.runWithLockedAppointment.mockImplementation(
+      async (_id, operation) =>
+        operation({ appointmentId: consultation.appointmentId, status: 'scheduled' }),
+    )
+    await expect(
+      makeUseCase().execute({
+        consultationId: consultation.id,
+        collaboratorId: consultation.assignedLawyerId,
+        collaboratorProfile: CollaboratorProfile.Lawyer,
+      }),
+    ).rejects.toThrow()
+    expect(consultationsRepository.replace).not.toHaveBeenCalled()
+  })
+  it('does not require an outbox provider for a configured locked completion capability', async () => {
+    const consultation = ConsultationFaker.fake({ attendanceFinalizedAt: new Date() })
+    const completed = ConsultationFaker.fake({
+      id: consultation.id,
+      clientId: consultation.clientId,
+      intakeId: consultation.intakeId,
+      appointmentId: consultation.appointmentId,
+      assignedLawyerId: consultation.assignedLawyerId,
+      status: ConsultationStatus.Completed,
+      completedAt: new Date(),
+    })
+    consultationsRepository.findById.mockResolvedValue(consultation)
+    consultationsRepository.replace.mockResolvedValue(completed)
+    appointmentTransactionProvider.runWithLockedAppointment.mockImplementation(
+      async (_id, operation) =>
+        operation({ appointmentId: consultation.appointmentId, status: 'scheduled' }),
+    )
+    expect(
+      await new CompleteConsultationUseCase(
+        consultationsRepository,
+        documentPackagesRepository,
+        broker,
+        datetimeProvider,
+        appointmentTransactionProvider,
+      ).execute({
+        consultationId: consultation.id,
+        collaboratorId: consultation.assignedLawyerId,
+        collaboratorProfile: CollaboratorProfile.Admin,
+      }),
+    ).toBe(completed)
+    expect(broker.publish).not.toHaveBeenCalled()
+  })
+  it('records a completion event with a deterministic fallback identifier when no ID provider is configured', async () => {
+    const consultation = ConsultationFaker.fake({ attendanceFinalizedAt: new Date() })
+    const completedAt = new Date('2026-10-12T12:00:00.000Z')
+    const completed = ConsultationFaker.fake({
+      id: consultation.id,
+      clientId: consultation.clientId,
+      intakeId: consultation.intakeId,
+      appointmentId: consultation.appointmentId,
+      assignedLawyerId: consultation.assignedLawyerId,
+      status: ConsultationStatus.Completed,
+      completedAt,
+    })
+    consultationsRepository.findById.mockResolvedValue(consultation)
+    consultationsRepository.replace.mockResolvedValue(completed)
+    datetimeProvider.now.mockReturnValue(completedAt)
+    appointmentTransactionProvider.runWithLockedAppointment.mockImplementation(
+      async (_id, operation) =>
+        operation({ appointmentId: consultation.appointmentId, status: 'scheduled' }),
+    )
+    expect(
+      await new CompleteConsultationUseCase(
+        consultationsRepository,
+        documentPackagesRepository,
+        broker,
+        datetimeProvider,
+        appointmentTransactionProvider,
+        outboxRepository,
+      ).execute({
+        consultationId: consultation.id,
+        collaboratorId: consultation.assignedLawyerId,
+        collaboratorProfile: CollaboratorProfile.Lawyer,
+      }),
+    ).toBe(completed)
+    expect(outboxRepository.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: `${completed.id}:${completedAt.toISOString()}`,
+        consultationId: completed.id,
+      }),
+    )
+  })
 })

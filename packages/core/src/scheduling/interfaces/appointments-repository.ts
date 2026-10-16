@@ -10,4 +10,5 @@ export interface AppointmentsRepository {
     startsAt: Date,
     endsAt: Date,
   ): Promise<Appointment | undefined>
+  hasFutureScheduled(scheduleId: string, from?: Date): Promise<boolean>
 }

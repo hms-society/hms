@@ -51,7 +51,7 @@ describe('List Document Validation Logs Use Case', () => {
     expect(access.authorize).toHaveBeenCalledExactlyOnceWith({
       caseId: 'case-current',
       actorId: 'actor-1',
-      intent: CaseAccessIntent.ReadContent,
+      intent: CaseAccessIntent.ReadDocument,
     })
     expect(logs.listByDocumentFileId).toHaveBeenCalledExactlyOnceWith('file-1')
     expect(access.authorize.mock.invocationCallOrder[0]).toBeLessThan(

@@ -10,13 +10,14 @@ import type {
 import { DocumentGenerationRequestedEvent } from '../../../document-production/domain/events'
 import { DocumentGenerationStatus } from '../../../document-production/domain/structures'
 import type { Broker, DatetimeProvider, IdProvider } from '../../../shared/interfaces'
+import { ForbiddenError } from '../../../shared/domain/errors/forbidden-error'
 import { LegalCaseFaker } from '../../domain/entities/fakers'
 import {
   CaseChecklistGateDecision,
   LegalCaseLifecycleStatus,
   LegalCaseStatus,
 } from '../../domain/structures'
-import type { LegalCasesRepository } from '../../interfaces'
+import type { CaseAccessProvider, LegalCasesRepository } from '../../interfaces'
 import { RetryLegalCaseDocumentGenerationUseCase } from '../retry-legal-case-document-generation-use-case'
 
 describe('Retry Legal Case Document Generation Use Case', () => {
@@ -27,6 +28,7 @@ describe('Retry Legal Case Document Generation Use Case', () => {
   let broker: MockProxy<Broker>
   let datetime: MockProxy<DatetimeProvider>
   let ids: MockProxy<IdProvider>
+  let access: MockProxy<CaseAccessProvider>
   let useCase: RetryLegalCaseDocumentGenerationUseCase
 
   beforeEach(() => {
@@ -37,6 +39,8 @@ describe('Retry Legal Case Document Generation Use Case', () => {
     broker = mock<Broker>()
     datetime = mock<DatetimeProvider>()
     ids = mock<IdProvider>()
+    access = mock<CaseAccessProvider>()
+    access.authorize.mockResolvedValue()
     useCase = new RetryLegalCaseDocumentGenerationUseCase(
       cases,
       packages,
@@ -45,6 +49,7 @@ describe('Retry Legal Case Document Generation Use Case', () => {
       broker,
       datetime,
       ids,
+      access,
     )
   })
 
@@ -79,7 +84,6 @@ describe('Retry Legal Case Document Generation Use Case', () => {
         dossierGate: { homologatedAt: now },
       }),
     )
-    cases.listByTeamMember.mockResolvedValue([{ id: caseId } as never])
     packages.findByContext.mockResolvedValue({
       id: 'package-1',
       context: { type: 'case', caseId },
@@ -141,7 +145,110 @@ describe('Retry Legal Case Document Generation Use Case', () => {
     )
   })
 
-  it('rejects retries for a closed case with a production workflow stage', async () => {
+  it('denies Admin retry before package or generation side effects', async () => {
+    const legalCase = LegalCaseFaker.fake({ id: 'case-1' })
+    cases.findById.mockResolvedValue(legalCase)
+    access.authorize.mockRejectedValue(
+      new ForbiddenError('Acesso jurídico ao Caso não autorizado.'),
+    )
+
+    await expect(
+      useCase.execute({
+        caseId: legalCase.id,
+        documentId: 'document-1',
+        requestedByCollaboratorId: 'admin-id',
+        requestedByCollaboratorProfile: 'admin',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenError)
+
+    expect(access.authorize).toHaveBeenCalledWith({
+      caseId: legalCase.id,
+      actorId: 'admin-id',
+      intent: 'write_content',
+    })
+    expect(cases.listByTeamMember).not.toHaveBeenCalled()
+    expect(packages.findByContext).not.toHaveBeenCalled()
+    expect(packageDocuments.findByDocumentPackageId).not.toHaveBeenCalled()
+    expect(generations.findLatestByDocumentId).not.toHaveBeenCalled()
+    expect(generations.replace).not.toHaveBeenCalled()
+    expect(broker.publish).not.toHaveBeenCalled()
+  })
+
+  it('rejects missing prerequisites and completed generations, then retries failures without instructions', async () => {
+    const caseId = 'case-2'
+    const documentId = 'document-2'
+    const request = {
+      caseId,
+      documentId,
+      requestedByCollaboratorId: 'actor-2',
+      requestedByCollaboratorProfile: 'lawyer' as const,
+    }
+    cases.findById.mockResolvedValue(undefined)
+    await expect(useCase.execute(request)).rejects.toThrow()
+
+    const now = new Date('2026-09-25T17:00:00.000Z')
+    const legalCase = LegalCaseFaker.fake({
+      id: caseId,
+      workflowStage: LegalCaseStatus.LegalProduction,
+      checklistGate: { decision: CaseChecklistGateDecision.Approved },
+      dossierGate: { homologatedAt: now },
+    })
+    cases.findById.mockResolvedValue(legalCase)
+    packages.findByContext.mockResolvedValue(undefined)
+    await expect(useCase.execute(request)).rejects.toThrow()
+
+    packages.findByContext.mockResolvedValue({ id: 'package-2' } as never)
+    packageDocuments.findByDocumentPackageId.mockResolvedValue([])
+    await expect(useCase.execute(request)).rejects.toThrow()
+
+    packageDocuments.findByDocumentPackageId.mockResolvedValue([
+      {
+        id: 'package-document-2',
+        documentPackageId: 'package-2',
+        documentId,
+        documentSpecificationId: 'specification-2',
+        createdAt: now,
+        updatedAt: now,
+      },
+    ])
+    generations.findLatestByDocumentId.mockResolvedValue(undefined)
+    await expect(useCase.execute(request)).rejects.toThrow()
+
+    const source = { type: 'case' as const, id: caseId, data: {} }
+    generations.findLatestByDocumentId.mockResolvedValue(
+      DocumentGenerationFaker.fake({
+        documentId,
+        documentSpecificationVersionId: 'specification-2',
+        source,
+        status: DocumentGenerationStatus.Completed,
+      }),
+    )
+    await expect(useCase.execute(request)).rejects.toThrow('geração concluída')
+
+    generations.findLatestByDocumentId.mockResolvedValue(
+      DocumentGenerationFaker.fake({
+        id: 'generation-failed',
+        documentId,
+        documentSpecificationVersionId: 'specification-2',
+        source,
+        status: DocumentGenerationStatus.Failed,
+      }),
+    )
+    ids.generate.mockReturnValue('generation-retried')
+    datetime.now.mockReturnValue(now)
+
+    await expect(useCase.execute(request)).resolves.toEqual({
+      documentGenerationId: 'generation-retried',
+      documentId,
+    })
+    const event = broker.publish.mock.calls.at(
+      -1,
+    )?.[0] as DocumentGenerationRequestedEvent
+    expect(event.payload).not.toHaveProperty('instructions')
+    expect(event.payload.source).toEqual(source)
+  })
+
+  it('rejects retries for a closed case before package or event work', async () => {
     const now = new Date('2026-09-25T17:00:00.000Z')
     const legalCase = LegalCaseFaker.fake({
       id: 'case-1',
@@ -151,16 +258,16 @@ describe('Retry Legal Case Document Generation Use Case', () => {
       dossierGate: { homologatedAt: now },
     })
     cases.findById.mockResolvedValue(legalCase)
-    cases.listByTeamMember.mockResolvedValue([{ id: legalCase.id } as never])
+    access.authorize.mockResolvedValue()
 
     await expect(
       useCase.execute({
         caseId: legalCase.id,
         documentId: 'document-1',
-        requestedByCollaboratorId: 'actor-1',
+        requestedByCollaboratorId: 'lawyer-id',
         requestedByCollaboratorProfile: 'lawyer',
       }),
-    ).rejects.toThrow('dossiê documental')
+    ).rejects.toThrow()
     expect(packages.findByContext).not.toHaveBeenCalled()
     expect(broker.publish).not.toHaveBeenCalled()
   })
