@@ -7,6 +7,9 @@ type Request = {
   readonly homologationId: string
   readonly collaboratorId: string
   readonly collaboratorProfile: string
+  readonly approvedByCollaboratorName?: string
+  readonly approvedByCollaboratorProfile?: string
+  readonly approvedAt?: Date
 }
 
 export class RecordDocumentVersionHomologationAuditUseCase
@@ -31,6 +34,13 @@ export class RecordDocumentVersionHomologationAuditUseCase
         caseId: request.caseId,
         documentVersionId: request.documentVersionId,
         homologationId: request.homologationId,
+        ...(request.approvedByCollaboratorName
+          ? { approvedByCollaboratorName: request.approvedByCollaboratorName }
+          : {}),
+        ...(request.approvedByCollaboratorProfile
+          ? { approvedByCollaboratorProfile: request.approvedByCollaboratorProfile }
+          : {}),
+        ...(request.approvedAt ? { approvedAt: request.approvedAt.toISOString() } : {}),
       },
     })
   }

@@ -27,6 +27,9 @@ describe('RecordDocumentVersionHomologationAuditUseCase', () => {
       homologationId: 'homologation-id',
       collaboratorId: 'collaborator-id',
       collaboratorProfile: 'lawyer',
+      approvedByCollaboratorName: 'Dra. Teste',
+      approvedByCollaboratorProfile: 'lawyer',
+      approvedAt: new Date('2026-10-15T11:59:00.000Z'),
     })
 
     expect(auditEventWriter.add).toHaveBeenCalledWith({
@@ -42,6 +45,9 @@ describe('RecordDocumentVersionHomologationAuditUseCase', () => {
         caseId: 'case-id',
         documentVersionId: 'version-id',
         homologationId: 'homologation-id',
+        approvedByCollaboratorName: 'Dra. Teste',
+        approvedByCollaboratorProfile: 'lawyer',
+        approvedAt: '2026-10-15T11:59:00.000Z',
       },
     })
   })

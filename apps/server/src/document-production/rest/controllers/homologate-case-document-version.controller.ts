@@ -147,6 +147,9 @@ export class HomologateCaseDocumentVersionController {
         homologationId: homologation.id,
         collaboratorId: collaborator.collaboratorId,
         collaboratorProfile: collaborator.profile,
+        approvedByCollaboratorName: homologation.approvedByCollaboratorName,
+        approvedByCollaboratorProfile: homologation.approvedByCollaboratorProfile,
+        approvedAt: homologation.approvedAt,
       })
 
       return { homologation: artifact, documentPackage }
