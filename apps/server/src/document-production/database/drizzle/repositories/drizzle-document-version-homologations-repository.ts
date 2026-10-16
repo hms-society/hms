@@ -73,4 +73,10 @@ export class DrizzleDocumentVersionHomologationsRepository
 
     return record ? this.mapper.toDomain(record) : undefined
   }
+
+  async remove(homologationId: string): Promise<void> {
+    await this.database
+      .delete(documentVersionHomologationModel)
+      .where(eq(documentVersionHomologationModel.id, homologationId))
+  }
 }

@@ -40,6 +40,9 @@ export class HomologateCaseDocumentVersionController {
   private readonly confirmPackage: ConfirmCaseDocumentPackageAfterHomologationUseCase
   private readonly recordAudit: RecordDocumentVersionHomologationAuditUseCase
   private readonly datetimeProvider: ServerDatetimeProvider
+  private readonly homologationsRepository: DocumentVersionHomologationsRepository
+  private readonly documentPackagesRepository: DocumentPackagesRepository
+  private readonly fileStorageProvider: FileStorageProvider
 
   constructor(
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.versions)
@@ -64,6 +67,9 @@ export class HomologateCaseDocumentVersionController {
     auditEventWriter: DrizzleAuditLogsRepository,
   ) {
     this.datetimeProvider = datetimeProvider
+    this.homologationsRepository = homologationsRepository
+    this.documentPackagesRepository = documentPackagesRepository
+    this.fileStorageProvider = fileStorageProvider
     this.homologate = new HomologateDocumentVersionUseCase(
       versionsRepository,
       homologationsRepository,
@@ -104,30 +110,61 @@ export class HomologateCaseDocumentVersionController {
     @Param('versionId', new ParseUUIDPipe()) documentVersionId: string,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    const homologation = await this.homologate.execute({
+    const initialPackage = await this.documentPackagesRepository.findByContext({
+      type: 'case',
       caseId,
-      documentId,
-      documentVersionId,
-      approvedByCollaboratorId: collaborator.collaboratorId,
-      approvedByCollaboratorName: collaborator.professionalName,
-      approvedByCollaboratorProfile: collaborator.profile,
-      approvedAt: this.datetimeProvider.now(),
     })
-    const artifact = await this.generateArtifact.execute({ documentVersionId })
-    const documentPackage = await this.confirmPackage.execute({
-      caseId,
-      documentVersionId,
-      collaboratorId: collaborator.collaboratorId,
-    })
-    await this.recordAudit.execute({
-      caseId,
-      documentId,
-      documentVersionId,
-      homologationId: homologation.id,
-      collaboratorId: collaborator.collaboratorId,
-      collaboratorProfile: collaborator.profile,
-    })
+    let homologation:
+      | Awaited<ReturnType<HomologateDocumentVersionUseCase['execute']>>
+      | undefined
+    let artifact:
+      | Awaited<ReturnType<GenerateFinalDocumentArtifactUseCase['execute']>>
+      | undefined
+    let documentPackage: Awaited<
+      ReturnType<ConfirmCaseDocumentPackageAfterHomologationUseCase['execute']>
+    >
 
-    return { homologation: artifact, documentPackage }
+    try {
+      homologation = await this.homologate.execute({
+        caseId,
+        documentId,
+        documentVersionId,
+        approvedByCollaboratorId: collaborator.collaboratorId,
+        approvedByCollaboratorName: collaborator.professionalName,
+        approvedByCollaboratorProfile: collaborator.profile,
+        approvedAt: this.datetimeProvider.now(),
+      })
+      artifact = await this.generateArtifact.execute({ documentVersionId })
+      documentPackage = await this.confirmPackage.execute({
+        caseId,
+        documentVersionId,
+        collaboratorId: collaborator.collaboratorId,
+      })
+      await this.recordAudit.execute({
+        caseId,
+        documentId,
+        documentVersionId,
+        homologationId: homologation.id,
+        collaboratorId: collaborator.collaboratorId,
+        collaboratorProfile: collaborator.profile,
+      })
+
+      return { homologation: artifact, documentPackage }
+    } catch (error) {
+      if (documentPackage?.confirmedAt && !initialPackage?.confirmedAt) {
+        await this.documentPackagesRepository
+          .reopen(documentPackage.id, this.datetimeProvider.now())
+          .catch(() => undefined)
+      }
+      if (artifact?.artifactFileId) {
+        await this.fileStorageProvider
+          .remove(artifact.artifactFileId)
+          .catch(() => undefined)
+      }
+      if (homologation) {
+        await this.homologationsRepository.remove(homologation.id).catch(() => undefined)
+      }
+      throw error
+    }
   }
 }

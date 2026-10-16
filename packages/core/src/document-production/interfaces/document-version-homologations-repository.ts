@@ -18,4 +18,5 @@ export interface DocumentVersionHomologationsRepository {
       createdAt: Date
     },
   ): Promise<DocumentVersionHomologation | undefined>
+  remove(homologationId: string): Promise<void>
 }
