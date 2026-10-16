@@ -24,9 +24,6 @@ export interface SchedulesRepository {
     id: string,
   ): Promise<(BlockedPeriod & { scheduleId: string }) | null>
   findBlockedPeriodsByScheduleId(scheduleId: string): Promise<BlockedPeriod[]>
-  findBlockedPeriodById(
-    id: string,
-  ): Promise<(BlockedPeriod & { scheduleId: string }) | null>
   createSchedule(data: CreateScheduleInput): Promise<Schedule | any>
   updateWeeklyAvailability(
     scheduleId: string,

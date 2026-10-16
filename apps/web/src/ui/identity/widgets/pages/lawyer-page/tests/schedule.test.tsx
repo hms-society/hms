@@ -224,8 +224,8 @@ describe('Schedule', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Adicionar intervalo' }))
 
     await waitFor(() => expect(updateAvailabilityMock).toHaveBeenCalledOnce())
-    expect(updateAvailabilityMock.mock.calls[0][0][0].slots).toEqual([
-      { start: '09:00', end: '14:00' },
+    expect(updateAvailabilityMock.mock.calls[0][0][0].timeRanges).toEqual([
+      { startsAt: '09:00', endsAt: '14:00' },
     ])
   })
 
