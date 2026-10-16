@@ -140,6 +140,16 @@ export const CaseDocumentProductionService = (restClient: RestClient) => ({
       { decision, ...(rejectionReason ? { rejectionReason } : {}) },
     )
   },
+  homologateVersion(
+    caseId: string,
+    documentId: string,
+    versionId: string,
+  ): Promise<RestResponse<unknown>> {
+    return restClient.post(
+      `/cases/${caseId}/documents/${documentId}/versions/${versionId}/homologate`,
+      {},
+    )
+  },
   generateRevision(
     caseId: string,
     documentId: string,

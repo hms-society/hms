@@ -54,6 +54,8 @@ export function PieceWorkflowRoutePage({
     isVersionDialogOpen,
     isStartingManualVersion,
     isGeneratingRevision,
+    isHomologating,
+    isHomologated,
     pendingGenerationVersion,
     versionActionError,
     isReviewConfirmed,
@@ -73,6 +75,7 @@ export function PieceWorkflowRoutePage({
     handleApplyPendingVariableValues,
     handleCloseReviewAction,
     handleConfirmReviewAction,
+    handleHomologateVersion,
     handleOpenReview,
     handleOpenReviewAction,
     handleReviewConfirmationChange,
@@ -155,7 +158,9 @@ export function PieceWorkflowRoutePage({
               >
                 {isReview
                   ? version.status === 'approved'
-                    ? 'Aprovada'
+                    ? isHomologated
+                      ? 'Homologada'
+                      : 'Aprovada'
                     : version.status === 'rejected'
                       ? 'Requer ajustes'
                       : 'Submetido para revisão'
@@ -175,9 +180,35 @@ export function PieceWorkflowRoutePage({
         </div>
         <div className='flex min-w-0 flex-wrap items-center gap-2'>
           {isReview ? (
-            <span className='text-xs text-muted-foreground'>
-              <Icon name='eye' className='mr-1 inline size-3.5' /> Modo leitura
-            </span>
+            <div className='flex flex-col items-end gap-1'>
+              <div className='flex items-center gap-2'>
+                {!isHomologated && version.status === 'approved' ? (
+                  <Button
+                    size='sm'
+                    className='h-8 rounded-full px-3 text-xs'
+                    disabled={
+                      isHomologating || !isReviewerEligible || pendingVariables.length > 0
+                    }
+                    onClick={handleHomologateVersion}
+                  >
+                    {isHomologating ? (
+                      <Icon name='refresh-cw' className='animate-spin' />
+                    ) : (
+                      <Icon name='check' />
+                    )}
+                    {isHomologating ? 'Homologando…' : 'Homologar versão'}
+                  </Button>
+                ) : null}
+                <span className='text-xs text-muted-foreground'>
+                  <Icon name='eye' className='mr-1 inline size-3.5' /> Modo leitura
+                </span>
+              </div>
+              {versionActionError && version.status === 'approved' ? (
+                <p role='alert' className='text-right text-xs text-destructive'>
+                  {versionActionError}
+                </p>
+              ) : null}
+            </div>
           ) : (
             <>
               <span className='text-xs text-muted-foreground' role='status'>
@@ -282,7 +313,11 @@ export function PieceWorkflowRoutePage({
                 className='flex flex-1 flex-col items-center justify-center gap-3 rounded-lg border border-badge-success-border bg-badge-success p-6 text-center text-badge-success-foreground'
               >
                 <Icon name='check' className='size-8' />
-                <p className='font-medium'>Documento revisado com sucesso</p>
+                <p className='font-medium'>
+                  {isHomologated
+                    ? 'Documento homologado com sucesso'
+                    : 'Documento revisado com sucesso'}
+                </p>
               </div>
             ) : (
               <>

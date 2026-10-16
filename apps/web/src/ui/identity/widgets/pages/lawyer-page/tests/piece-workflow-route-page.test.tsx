@@ -124,6 +124,8 @@ function buildPageState(): ReturnType<typeof usePieceWorkflowRoutePage> {
     isVersionDialogOpen: false,
     isStartingManualVersion: false,
     isGeneratingRevision: false,
+    isHomologating: false,
+    isHomologated: false,
     pendingGenerationVersion: null,
     versionActionError: undefined,
     isReviewConfirmed: false,
@@ -146,6 +148,7 @@ function buildPageState(): ReturnType<typeof usePieceWorkflowRoutePage> {
     handleApplyPendingVariableValues: vi.fn(),
     handleCloseReviewAction: vi.fn(),
     handleConfirmReviewAction: vi.fn(),
+    handleHomologateVersion: vi.fn(),
     handleOpenReview: vi.fn(),
     handleOpenReviewAction: vi.fn(),
     handleReviewConfirmationChange: vi.fn(),
@@ -229,6 +232,7 @@ describe('PieceWorkflowRoutePage', () => {
       mode: 'review',
       version: approvedVersion,
       currentVersion: approvedVersion,
+      pendingVariables: [],
     })
 
     render(
@@ -241,7 +245,10 @@ describe('PieceWorkflowRoutePage', () => {
     expect(screen.getByText('Aprovada')).not.toBeNull()
     expect(screen.queryByText('Alertas de revisão')).toBeNull()
     expect(screen.queryByText('Revisões dos membros')).toBeNull()
-    expect(screen.queryByRole('button', { name: 'Aprovar peça' })).toBeNull()
+    const homologateButton = screen.getByRole('button', { name: 'Homologar versão' })
+    expect(homologateButton).not.toBeNull()
+    fireEvent.click(homologateButton)
+    expect(pageState.handleHomologateVersion).toHaveBeenCalledOnce()
     expect(screen.queryByRole('button', { name: 'Solicitar ajustes' })).toBeNull()
     expect(screen.queryByRole('button', { name: 'Bloqueio' })).toBeNull()
   })
@@ -272,6 +279,33 @@ describe('PieceWorkflowRoutePage', () => {
       screen.getByRole('button', { name: 'Bloqueio' }).hasAttribute('disabled'),
     ).toBe(true)
     expect(screen.getByRole('checkbox').hasAttribute('disabled')).toBe(true)
+  })
+
+  it('shows the homologated state after final approval', () => {
+    const pageState = buildPageState()
+    const sourceVersion = pageState.document?.versions.find(
+      (version) => version.id === VERSION_ID,
+    )
+    if (!sourceVersion)
+      throw new Error('Expected the current version in the test fixture')
+
+    const approvedVersion = { ...sourceVersion, status: 'approved' as const }
+    usePieceWorkflowRoutePageMock.mockReturnValue({
+      ...pageState,
+      mode: 'review',
+      version: approvedVersion,
+      currentVersion: approvedVersion,
+      pendingVariables: [],
+      isHomologated: true,
+    })
+
+    render(
+      <PieceWorkflowRoutePage mode='review' caseId={CASE_ID} documentId={DOCUMENT_ID} />,
+    )
+
+    expect(screen.getByText('Homologada')).not.toBeNull()
+    expect(screen.getByText('Documento homologado com sucesso')).not.toBeNull()
+    expect(screen.queryByRole('button', { name: 'Homologar versão' })).toBeNull()
   })
 
   it('allows a different reviewer to decide after confirming responsibility', () => {

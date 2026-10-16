@@ -30,6 +30,8 @@ export function usePieceWorkflowRoutePage({
   const [reviewAction, setReviewAction] = useState<
     'adjustments' | 'block' | 'approval' | null
   >(null)
+  const [homologatedVersionId, setHomologatedVersionId] = useState<string | null>(null)
+  const [isHomologating, setIsHomologating] = useState(false)
   const [isReviewConfirmed, setIsReviewConfirmed] = useState(false)
   const [editedContent, setEditedContent] = useState<DocumentTemplateContent | null>(null)
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null)
@@ -282,6 +284,41 @@ export function usePieceWorkflowRoutePage({
     })
     await refetchDocument()
   }
+  async function handleHomologateVersion() {
+    if (
+      version?.status !== 'approved' ||
+      pendingVariables.length > 0 ||
+      !isReviewerEligible ||
+      homologatedVersionId === version.id
+    ) {
+      return
+    }
+
+    setIsHomologating(true)
+    setVersionActionError(undefined)
+    try {
+      const response = await caseDocumentProductionService.homologateVersion(
+        caseId,
+        documentId,
+        version.id,
+      )
+      if (response.isFailure) {
+        setVersionActionError(response.errorMessage)
+        return
+      }
+      setHomologatedVersionId(version.id)
+      await queryClient.invalidateQueries({
+        queryKey: ['case-document', caseId, documentId],
+      })
+      await refetchDocument()
+    } catch (error) {
+      setVersionActionError(
+        error instanceof Error ? error.message : 'Não foi possível homologar a versão.',
+      )
+    } finally {
+      setIsHomologating(false)
+    }
+  }
   function handleOpenReviewAction(action: 'adjustments' | 'block' | 'approval') {
     if (isReviewerEligible) setReviewAction(action)
   }
@@ -459,6 +496,8 @@ export function usePieceWorkflowRoutePage({
     isVersionDialogOpen,
     isStartingManualVersion,
     isGeneratingRevision,
+    isHomologating,
+    isHomologated: homologatedVersionId === version?.id,
     pendingGenerationVersion,
     versionActionError,
     isAuthor,
@@ -486,6 +525,7 @@ export function usePieceWorkflowRoutePage({
     handleApplyPendingVariableValues,
     handleCloseReviewAction,
     handleConfirmReviewAction,
+    handleHomologateVersion,
     handleOpenReview,
     handleOpenReviewAction,
     handleReviewConfirmationChange,

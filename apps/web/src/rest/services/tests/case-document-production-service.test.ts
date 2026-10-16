@@ -42,6 +42,18 @@ describe('CaseDocumentProductionService', () => {
       '/cases/case-1/documents/document-1/file?versionId=version-2',
     )
   })
+
+  it('homologates an approved document version', async () => {
+    const restClient = makeRestClient()
+    const service = CaseDocumentProductionService(restClient)
+
+    await service.homologateVersion('case-1', 'document-1', 'version-2')
+
+    expect(restClient.post).toHaveBeenCalledWith(
+      '/cases/case-1/documents/document-1/versions/version-2/homologate',
+      {},
+    )
+  })
 })
 
 function makeRestClient(): RestClient {
