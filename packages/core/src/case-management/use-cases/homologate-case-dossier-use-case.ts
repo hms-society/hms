@@ -34,7 +34,7 @@ export class HomologateCaseDossierUseCase implements UseCase<Request, LegalCase>
     await this.caseAccessProvider.authorize({
       caseId,
       actorId: homologatedBy,
-      intent: CaseAccessIntent.WriteContent,
+      intent: CaseAccessIntent.ManageChecklistGate,
     })
 
     if (
@@ -84,10 +84,14 @@ export class HomologateCaseDossierUseCase implements UseCase<Request, LegalCase>
     const hasPendingRequiredItem =
       !hasApprovedException &&
       (requiredItems.length === 0 ||
-        requiredItems.some((item) => item.status !== CaseChecklistItemStatus.Validated))
+        requiredItems.some(
+          (item) =>
+            item.status !== CaseChecklistItemStatus.Validated &&
+            item.status !== CaseChecklistItemStatus.Waived,
+        ))
     if (hasPendingRequiredItem) {
       throw new CaseChecklistGateReviewError(
-        'O dossiê não pode ser homologado enquanto houver documentos obrigatórios pendentes de validação.',
+        'O dossiê não pode ser homologado enquanto houver documentos obrigatórios pendentes de atendimento por validação ou dispensa.',
       )
     }
   }

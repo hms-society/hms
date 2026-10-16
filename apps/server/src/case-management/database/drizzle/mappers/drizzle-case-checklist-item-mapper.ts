@@ -16,6 +16,32 @@ export class DrizzleCaseChecklistItemMapper {
       title: record.title,
       isRequired: record.isRequired,
       status: record.status,
+      waiver:
+        record.waiverJustification &&
+        record.waiverActorId &&
+        record.waiverActorName &&
+        record.waivedAt
+          ? {
+              justification: record.waiverJustification,
+              actorId: record.waiverActorId,
+              actorName: record.waiverActorName,
+              grantedAt: record.waivedAt,
+            }
+          : undefined,
+      documentReference:
+        record.clientDocumentId &&
+        record.documentSource &&
+        record.documentAttachedAt &&
+        record.documentAttachedBy
+          ? {
+              clientDocumentId: record.clientDocumentId,
+              source: record.documentSource as NonNullable<
+                CaseChecklistItem['documentReference']
+              >['source'],
+              attachedAt: record.documentAttachedAt,
+              attachedBy: record.documentAttachedBy,
+            }
+          : undefined,
       documentFileId: record.documentFileId ?? undefined,
       documentFileName: record.documentFileName ?? undefined,
       validatedAt: record.validatedAt ?? undefined,

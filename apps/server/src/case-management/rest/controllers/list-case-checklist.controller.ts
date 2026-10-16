@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
 import type {
+  CaseAccessProvider,
   CaseChecklistItemsRepository,
   ChecklistTemplateItemsRepository,
   ChecklistTemplatesRepository,
@@ -18,6 +19,7 @@ import { ListCaseChecklistUseCase } from '@hms/core/case-management/use-cases'
 import type { CollaboratorSummary } from '@hms/core/identity/domain/entities'
 
 import { CASE_MANAGEMENT_REPOSITORIES } from '@/case-management/constants/case-management-repositories'
+import { CASE_MANAGEMENT_ACCESS } from '@/case-management/constants/case-management-access'
 import { CasesController } from '@/case-management/decorators'
 import { CaseChecklistItemResponseDto } from '@/case-management/rest/dtos'
 import { CurrentCollaborator } from '@/identity/decorators'
@@ -38,12 +40,14 @@ export class ListCaseChecklistController {
     checklistTemplatesRepository: ChecklistTemplatesRepository,
     @Inject(CASE_MANAGEMENT_REPOSITORIES.checklistTemplateItems)
     checklistTemplateItemsRepository: ChecklistTemplateItemsRepository,
+    @Inject(CASE_MANAGEMENT_ACCESS.access) accessProvider: CaseAccessProvider,
   ) {
     this.useCase = new ListCaseChecklistUseCase(
       legalCasesRepository,
       caseChecklistItemsRepository,
       checklistTemplatesRepository,
       checklistTemplateItemsRepository,
+      accessProvider,
     )
   }
 

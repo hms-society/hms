@@ -1,4 +1,6 @@
+import type { ChecklistDocumentWaiver } from '../structures/checklist-document-waiver'
 import type { Entity } from '#shared/domain/entities/entity'
+import type { ChecklistDocumentReference } from '../structures/checklist-document-reference'
 import type { CaseChecklistItemStatus } from '../structures'
 
 export type CaseChecklistItem = Entity & {
@@ -8,6 +10,8 @@ export type CaseChecklistItem = Entity & {
   title: string
   isRequired: boolean
   status: CaseChecklistItemStatus
+  waiver?: ChecklistDocumentWaiver
+  documentReference?: ChecklistDocumentReference
   documentFileId?: string
   documentFileName?: string
   validatedAt?: Date
@@ -15,15 +19,3 @@ export type CaseChecklistItem = Entity & {
   createdAt: Date
   updatedAt: Date
 }
-
-export type CaseChecklistItemCreation = Omit<
-  CaseChecklistItem,
-  | 'createdAt'
-  | 'documentFileId'
-  | 'documentFileName'
-  | 'id'
-  | 'status'
-  | 'updatedAt'
-  | 'validatedAt'
-  | 'validatedBy'
->

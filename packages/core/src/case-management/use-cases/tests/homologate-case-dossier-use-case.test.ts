@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mock, type MockProxy } from 'vitest-mock-extended'
 
-import { LegalCaseFaker } from '../../domain/entities/fakers'
+import { LegalCaseFaker, CaseChecklistItemFaker } from '../../domain/entities/fakers'
 import {
   CaseChecklistGateDecision,
   CaseChecklistItemStatus,
@@ -26,7 +26,10 @@ describe('Homologate Case Dossier Use Case', () => {
     })
   })
 
-  it('homologates a reviewed dossier when all required items are validated', async () => {
+  it.each([
+    CaseChecklistItemStatus.Validated,
+    CaseChecklistItemStatus.Waived,
+  ])('homologates a reviewed dossier when required items are fulfilled by %s', async (status) => {
     const legalCase = LegalCaseFaker.fake({
       checklistGate: { decision: CaseChecklistGateDecision.Approved },
       workflowStage: LegalCaseStatus.ReadyForLegalProduction,
@@ -39,7 +42,18 @@ describe('Homologate Case Dossier Use Case', () => {
     cases.findById.mockResolvedValue(legalCase)
     cases.listByTeamMember.mockResolvedValue([{ id: legalCase.id } as never])
     checklistItems.listByCaseId.mockResolvedValue([
-      { isRequired: true, status: CaseChecklistItemStatus.Validated } as never,
+      CaseChecklistItemFaker.fake({
+        status,
+        waiver:
+          status === CaseChecklistItemStatus.Waived
+            ? {
+                justification: 'Unavailable',
+                actorId: 'reviewer-1',
+                actorName: 'Manager',
+                grantedAt: new Date('2026-10-13T12:00:00Z'),
+              }
+            : undefined,
+      }),
     ])
     cases.homologateDossier.mockResolvedValue(homologatedCase)
 
@@ -135,7 +149,9 @@ describe('Homologate Case Dossier Use Case', () => {
 
     await expect(
       useCase.execute({ caseId: legalCase.id, homologatedBy: 'reviewer-1' }),
-    ).rejects.toThrow()
+    ).rejects.toThrow(
+      'O dossiê não pode ser homologado enquanto houver documentos obrigatórios pendentes de atendimento por validação ou dispensa.',
+    )
 
     checklistItems.listByCaseId.mockResolvedValue([
       { isRequired: true, status: CaseChecklistItemStatus.Validated } as never,

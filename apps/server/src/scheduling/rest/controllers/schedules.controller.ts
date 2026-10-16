@@ -1,14 +1,18 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Inject,
+  NotFoundException,
   Param,
   Post,
   Put,
   UseGuards,
 } from '@nestjs/common'
+import { weeklyAvailabilitySchema } from '@hms/validation/scheduling'
 import {
   AddBlockedPeriodUseCase,
   AuthorizeScheduleAccessUseCase,
@@ -77,9 +81,19 @@ export class SchedulesController {
       scheduleId: body.scheduleId,
       operation: 'write',
     })
+
+    const parseResult = weeklyAvailabilitySchema.safeParse(body.weeklyAvailability)
+
+    if (!parseResult.success) {
+      const firstIssue = parseResult.error.issues[0]
+      throw new BadRequestException(
+        firstIssue?.message ?? 'Disponibilidade semanal inválida',
+      )
+    }
+
     return this.schedulesRepository.updateWeeklyAvailability(
       body.scheduleId,
-      body.weeklyAvailability,
+      parseResult.data,
     )
   }
 
@@ -152,13 +166,16 @@ export class SchedulesController {
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
     const blockedPeriod = await this.schedulesRepository.findBlockedPeriodById(id)
-    if (!blockedPeriod) return { success: false }
+    if (!blockedPeriod) {
+      throw new NotFoundException('Bloqueio não encontrado')
+    }
 
     await this.authorizeScheduleAccessUseCase.execute({
       actor: collaborator,
       scheduleId: blockedPeriod.scheduleId,
       operation: 'write',
     })
+
     await this.schedulesRepository.deleteBlockedPeriod(id)
     return { success: true }
   }

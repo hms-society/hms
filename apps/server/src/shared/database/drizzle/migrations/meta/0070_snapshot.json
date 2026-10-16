@@ -1,5 +1,5 @@
 {
-  "id": "7bff9b29-2b3e-488b-9fce-4025c51f8083",
+  "id": "3cd7c50d-9782-4b36-947b-ee1b44822afd",
   "prevId": "ed327980-d699-4e41-bdbe-49d6cf708cfe",
   "version": "7",
   "dialect": "postgresql",
@@ -701,113 +701,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.case_closure_events": {
-      "name": "case_closure_events",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "case_id": {
-          "name": "case_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "type": {
-          "name": "type",
-          "type": "case_closure_event_type",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "actor_id": {
-          "name": "actor_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "occurred_at": {
-          "name": "occurred_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "outcome": {
-          "name": "outcome",
-          "type": "case_closure_outcome",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "notes": {
-          "name": "notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "reason": {
-          "name": "reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "case_closure_events_case_occurred_idx": {
-          "name": "case_closure_events_case_occurred_idx",
-          "columns": [
-            {
-              "expression": "case_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "occurred_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "case_closure_events_case_id_cases_id_fk": {
-          "name": "case_closure_events_case_id_cases_id_fk",
-          "tableFrom": "case_closure_events",
-          "tableTo": "cases",
-          "columnsFrom": ["case_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "case_closure_events_payload_check": {
-          "name": "case_closure_events_payload_check",
-          "value": "(\"case_closure_events\".\"type\" = 'closed' AND \"case_closure_events\".\"outcome\" IS NOT NULL AND \"case_closure_events\".\"reason\" IS NULL) OR (\"case_closure_events\".\"type\" = 'reopened' AND \"case_closure_events\".\"outcome\" IS NULL AND \"case_closure_events\".\"notes\" IS NULL AND \"case_closure_events\".\"reason\" IS NOT NULL AND char_length(btrim(\"case_closure_events\".\"reason\")) > 0)"
-        }
-      },
-      "isRLSEnabled": false
-    },
     "public.case_portal_access_grants": {
       "name": "case_portal_access_grants",
       "schema": "",
@@ -1038,46 +931,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'documentation'"
-        },
-        "lifecycle_status": {
-          "name": "lifecycle_status",
-          "type": "legal_case_lifecycle_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'active'"
-        },
-        "workflow_stage": {
-          "name": "workflow_stage",
-          "type": "legal_case_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "closure_outcome": {
-          "name": "closure_outcome",
-          "type": "case_closure_outcome",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "closure_notes": {
-          "name": "closure_notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "closed_at": {
-          "name": "closed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "closed_by": {
-          "name": "closed_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
         },
         "team_version": {
           "name": "team_version",
@@ -7073,7 +6926,7 @@
     "public.case_checklist_item_status": {
       "name": "case_checklist_item_status",
       "schema": "public",
-      "values": ["pending", "in_analysis", "validated"]
+      "values": ["pending", "in_analysis", "waived", "validated"]
     },
     "public.case_team_history_kind": {
       "name": "case_team_history_kind",
@@ -7091,34 +6944,10 @@
       "schema": "public",
       "values": ["manager", "collaborator"]
     },
-    "public.case_closure_event_type": {
-      "name": "case_closure_event_type",
-      "schema": "public",
-      "values": ["closed", "reopened"]
-    },
-    "public.case_closure_outcome": {
-      "name": "case_closure_outcome",
-      "schema": "public",
-      "values": [
-        "favorable",
-        "partially_favorable",
-        "unfavorable",
-        "agreement",
-        "product_delivered",
-        "withdrawal",
-        "mootness",
-        "other"
-      ]
-    },
     "public.case_portal_access_grant_status": {
       "name": "case_portal_access_grant_status",
       "schema": "public",
       "values": ["active", "revoked"]
-    },
-    "public.legal_case_lifecycle_status": {
-      "name": "legal_case_lifecycle_status",
-      "schema": "public",
-      "values": ["active", "closed"]
     },
     "public.legal_case_status": {
       "name": "legal_case_status",
