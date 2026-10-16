@@ -21,3 +21,15 @@ ALTER TABLE "cases" ADD COLUMN "closed_at" timestamp with time zone;--> statemen
 ALTER TABLE "cases" ADD COLUMN "closed_by" uuid;--> statement-breakpoint
 ALTER TABLE "case_closure_events" ADD CONSTRAINT "case_closure_events_case_id_cases_id_fk" FOREIGN KEY ("case_id") REFERENCES "public"."cases"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "case_closure_events_case_occurred_idx" ON "case_closure_events" USING btree ("case_id","occurred_at","id");
+--> statement-breakpoint
+CREATE FUNCTION "reject_case_closure_event_mutation"() RETURNS trigger AS $$
+BEGIN
+	IF TG_OP = 'DELETE' AND pg_trigger_depth() > 1 THEN
+		RETURN OLD;
+	END IF;
+	RAISE EXCEPTION 'Case closure events are immutable' USING ERRCODE = '55000';
+END;
+$$ LANGUAGE plpgsql;--> statement-breakpoint
+CREATE TRIGGER "case_closure_events_immutable"
+BEFORE UPDATE OR DELETE ON "case_closure_events"
+FOR EACH ROW EXECUTE FUNCTION "reject_case_closure_event_mutation"();
