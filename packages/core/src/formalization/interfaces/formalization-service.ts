@@ -11,6 +11,9 @@ import type {
   FormalizationSignatureSendingReviewResponse,
   FormalizationSignatureSendingCancellationResponse,
   FormalizationSignatureSendingStatusResponse,
+  FormalizationCompletionSummary,
+  FormalizationContractingResult,
+  ConfirmFormalizationContractingCommand,
   ConfirmFormalizationSignatureSendingCommand,
   CancelFormalizationSignatureSendingCommand,
 } from '../domain/structures'
@@ -104,6 +107,13 @@ export interface FormalizationService {
   getSignatureSendingStatus(
     formalizationId: string,
   ): Promise<RestResponse<FormalizationSignatureSendingStatusResponse>>
+  getCompletionByIntake(
+    intakeId: string,
+  ): Promise<RestResponse<FormalizationCompletionSummary | null>>
+  confirmContracting(
+    formalizationId: string,
+    input: ConfirmFormalizationContractingCommand,
+  ): Promise<RestResponse<FormalizationContractingResult>>
   cancelSignatureSending(
     formalizationId: string,
     input: CancelFormalizationSignatureSendingCommand,
