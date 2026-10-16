@@ -179,6 +179,18 @@ export class GenerateLegalCaseDocumentUseCase implements UseCase<Request, Respon
         id: this.ids.generate(),
         context: { type: 'case', caseId: legalCase.id },
       }))
+    const packageDocuments =
+      (await this.packageDocuments.findByDocumentPackageId(documentPackage.id)) ?? []
+    if (
+      packageDocuments.some(
+        ({ documentSpecificationId }) =>
+          documentSpecificationId === specification.id,
+      )
+    ) {
+      throw new LegalCaseDocumentGenerationError(
+        'Este modelo já foi adicionado ao caso. Abra a peça existente para gerar uma nova versão.',
+      )
+    }
     const documentId = this.ids.generate()
     const documentGenerationId = this.ids.generate()
     const occurredAt = this.datetime.now()

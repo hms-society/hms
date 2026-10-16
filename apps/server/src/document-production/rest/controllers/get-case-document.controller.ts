@@ -15,6 +15,7 @@ import type {
 import type {
   DocumentGenerationsRepository,
   DocumentPackagesRepository,
+  DocumentVersionHomologationsRepository,
   DocumentsRepository,
   DocumentVersionsRepository,
   PackageDocumentsRepository,
@@ -51,6 +52,8 @@ export class GetCaseDocumentController {
     versions: DocumentVersionsRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.generations)
     generations: DocumentGenerationsRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.versionHomologations)
+    homologations: DocumentVersionHomologationsRepository,
   ) {
     const listCaseDocuments = new ListCaseDocumentsUseCase(
       cases,
@@ -60,6 +63,7 @@ export class GetCaseDocumentController {
       documents,
       versions,
       generations,
+      homologations,
     )
     this.useCase = new GetCaseDocumentUseCase(listCaseDocuments)
   }

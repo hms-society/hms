@@ -30,6 +30,7 @@ class CaseDocumentVersionResponseDto {
   @ApiPropertyOptional() rejectionReason?: string
   @ApiPropertyOptional() content?: DocumentVersion['content']
   @ApiPropertyOptional() storagePath?: string
+  @ApiProperty() homologated!: boolean
   @ApiProperty({ type: [CaseDocumentPendingVariableResponseDto] })
   pendingVariables!: CaseDocumentPendingVariableResponseDto[]
 }
@@ -55,7 +56,7 @@ export class CaseDocumentResponseDto {
 
   static fromDomain(input: {
     document: Document
-    versions: readonly DocumentVersion[]
+    versions: readonly (DocumentVersion & { homologated?: boolean })[]
     generation?: DocumentGeneration
     collaboratorNames?: ReadonlyMap<string, string>
   }): CaseDocumentResponseDto {
@@ -80,6 +81,7 @@ export class CaseDocumentResponseDto {
         rejectionReason: version.rejectionReason,
         content: version.content,
         storagePath: version.storagePath,
+        homologated: version.homologated ?? false,
         pendingVariables: CaseDocumentResponseDto.mapPendingVariables(
           version,
           input.generation && input.generation.id === version.documentGenerationId

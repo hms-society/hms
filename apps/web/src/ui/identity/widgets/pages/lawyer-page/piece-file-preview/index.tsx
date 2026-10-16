@@ -12,6 +12,7 @@ const PDF_MIME_TYPE = 'application/pdf'
 
 export type PieceFilePreviewProps = UsePieceFilePreviewProps & {
   className?: string
+  documentTitle?: string
   versionNumber?: number
 }
 
@@ -22,6 +23,7 @@ export const PieceFilePreview = ({
   storagePath,
   homologated,
   className,
+  documentTitle,
   versionNumber,
 }: PieceFilePreviewProps) => {
   const { docxContainerRef, fileQuery, fileUrl, isRendering, renderError } =
@@ -96,7 +98,7 @@ export const PieceFilePreview = ({
             {homologated && fileUrl ? (
               <a
                 href={fileUrl}
-                download
+                download={`${normalizeDownloadFileName(documentTitle ?? 'documento')}.pdf`}
                 className='text-xs font-medium text-primary underline underline-offset-2'
               >
                 Baixar PDF final
@@ -122,5 +124,16 @@ export const PieceFilePreview = ({
         Baixar arquivo
       </a>
     </div>
+  )
+}
+
+function normalizeDownloadFileName(title: string): string {
+  return (
+    title
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '') || 'documento'
   )
 }

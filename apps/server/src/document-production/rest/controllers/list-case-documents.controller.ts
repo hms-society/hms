@@ -16,6 +16,7 @@ import type { CollaboratorsRepository } from '@hms/core/identity/interfaces'
 import type {
   DocumentGenerationsRepository,
   DocumentPackagesRepository,
+  DocumentVersionHomologationsRepository,
   DocumentsRepository,
   DocumentVersionsRepository,
   PackageDocumentsRepository,
@@ -48,6 +49,8 @@ export class ListCaseDocumentsController {
     versions: DocumentVersionsRepository,
     @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.generations)
     generations: DocumentGenerationsRepository,
+    @Inject(DOCUMENT_PRODUCTION_REPOSITORIES.versionHomologations)
+    homologations: DocumentVersionHomologationsRepository,
     @Inject(CASE_MANAGEMENT_ACCESS.access) caseAccessProvider: CaseAccessProvider,
     @Inject(IDENTITY_REPOSITORIES.collaborators)
     private readonly collaborators: CollaboratorsRepository,
@@ -60,6 +63,7 @@ export class ListCaseDocumentsController {
       documents,
       versions,
       generations,
+      homologations,
     )
   }
 

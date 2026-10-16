@@ -19,6 +19,7 @@ export type CaseDocumentResponse = {
     rejectionReason?: string
     content?: DocumentTemplateContent
     storagePath?: string
+    homologated?: boolean
     pendingVariables: Array<{
       marker: string
       technicalName: string

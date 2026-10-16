@@ -72,6 +72,7 @@ export class DownloadCaseDocumentController {
       documents,
       versions,
       generations,
+      homologationsRepository,
     )
     this.getCaseDocument = new GetCaseDocumentUseCase(listCaseDocuments)
     this.useCase = new DownloadCaseDocumentUseCase(this.getCaseDocument, storage)
@@ -110,7 +111,7 @@ export class DownloadCaseDocumentController {
     @Param('versionId', ParseUUIDPipe) versionId: string,
     @CurrentCollaborator() collaborator: CollaboratorSummary,
   ) {
-    await this.getCaseDocument.execute({
+    const caseDocument = await this.getCaseDocument.execute({
       caseId,
       documentId,
       actorId: collaborator.collaboratorId,
@@ -124,6 +125,18 @@ export class DownloadCaseDocumentController {
     const content = await this.storageProvider.download(homologation.artifactStoragePath)
     return new StreamableFile(Buffer.from(content), {
       type: homologation.artifactContentType ?? 'application/pdf',
+      disposition: `attachment; filename="${this.normalizeDownloadFileName(caseDocument.document.title)}.pdf"`,
     })
+  }
+
+  private normalizeDownloadFileName(title: string): string {
+    return (
+      title
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '') || 'documento'
+    )
   }
 }

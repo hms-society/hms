@@ -289,6 +289,7 @@ export function usePieceWorkflowRoutePage({
       version?.status !== 'approved' ||
       pendingVariables.length > 0 ||
       !isReviewerEligible ||
+      version.homologated ||
       homologatedVersionId === version.id
     ) {
       return
@@ -497,7 +498,7 @@ export function usePieceWorkflowRoutePage({
     isStartingManualVersion,
     isGeneratingRevision,
     isHomologating,
-    isHomologated: homologatedVersionId === version?.id,
+    isHomologated: Boolean(version?.homologated) || homologatedVersionId === version?.id,
     pendingGenerationVersion,
     versionActionError,
     isAuthor,

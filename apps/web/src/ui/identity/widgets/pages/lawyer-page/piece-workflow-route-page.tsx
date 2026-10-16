@@ -293,6 +293,7 @@ export function PieceWorkflowRoutePage({
                   caseId={caseId}
                   documentId={documentId}
                   versionId={version.id}
+                  documentTitle={document.title}
                   versionNumber={version.versionNumber}
                   homologated
                 />
