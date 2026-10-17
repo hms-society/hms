@@ -13,6 +13,7 @@ import { IDENTITY_PROVIDERS } from '@/identity/constants/identity-providers'
 import { IDENTITY_REPOSITORIES } from '@/identity/constants/identity-repositories'
 import { AuthController, CurrentAuth, CurrentUser } from '@/identity/decorators'
 import { AuthGuard } from '@/identity/guards'
+import { RouteAccess } from '@/identity/decorators/route-access.decorator'
 import { CollaboratorSummaryResponseDto } from '@/identity/rest/dtos'
 import { ErrorResponseDto } from '@/shared/rest/dtos'
 import { DatetimeProvider } from '@/shared/provision/datetime/datetime-provider'
@@ -20,6 +21,7 @@ import type { AuthSession } from '@hms/core/identity/domain/structures'
 
 @AuthController()
 @ApiBearerAuth()
+@RouteAccess('public')
 @UseGuards(AuthGuard)
 export class CompleteSignInController {
   private readonly useCase: CompleteSignInUseCase
