@@ -88,7 +88,6 @@ export const SignInPage = () => {
                 id='cpf-email'
                 type='email'
                 placeholder='Digite seu email'
-                defaultValue='admin@hmsadvogados.com.br'
                 disabled={isLoading}
                 {...register('email', { required: true })}
                 className='h-12 rounded-full border-input bg-background px-5 font-sans text-[14px] focus-visible:ring-ring'
@@ -117,7 +116,6 @@ export const SignInPage = () => {
                   id='password'
                   type={showPassword ? 'text' : 'password'}
                   placeholder='Sua senha'
-                  defaultValue='123456'
                   disabled={isLoading}
                   {...register('password', { required: true })}
                   className='h-12 rounded-full border-input bg-background px-5 pr-20 font-sans text-[14px] focus-visible:ring-ring'

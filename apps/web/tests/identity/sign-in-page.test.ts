@@ -88,8 +88,8 @@ playwrightTest('renders the login form for an unauthenticated user', async ({ pa
   await expect(
     page.getByRole('heading', { name: 'Que bom ter você aqui.' }),
   ).toBeVisible()
-  await expect(page.getByLabel('Email:')).toHaveValue('admin@hmsadvogados.com.br')
-  await expect(page.getByRole('textbox', { name: 'Senha' })).toHaveValue('123456')
+  await expect(page.getByLabel('Email:')).toHaveValue('')
+  await expect(page.getByRole('textbox', { name: 'Senha' })).toHaveValue('')
   await expect(page.getByRole('button', { name: 'Entrar na plataforma' })).toBeVisible()
 })
 
@@ -146,6 +146,8 @@ playwrightTest(
     await mockLogout(page)
     await page.goto(ROUTES.login)
 
+    await page.getByLabel('Email:').fill(SUPABASE_USER.email)
+    await page.getByRole('textbox', { name: 'Senha' }).fill('123456')
     await page.getByRole('button', { name: 'Entrar na plataforma' }).click()
 
     const tokenResponse = await tokenResponsePromise
@@ -184,6 +186,8 @@ playwrightTest(
     await mockLogout(page)
     await page.goto(ROUTES.login)
 
+    await page.getByLabel('Email:').fill(SUPABASE_USER.email)
+    await page.getByRole('textbox', { name: 'Senha' }).fill('123456')
     await page.getByRole('button', { name: 'Entrar na plataforma' }).click()
 
     const localSignInResponse = await localSignInResponsePromise

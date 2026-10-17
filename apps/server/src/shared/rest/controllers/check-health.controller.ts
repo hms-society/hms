@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { Controller, Get, HttpStatus, Logger, Res } from '@nestjs/common'
-import { ApiResponse } from '@nestjs/swagger'
+import { Controller, Get, HttpStatus, Logger, Redirect, Res } from '@nestjs/common'
+import { ApiExcludeEndpoint, ApiResponse } from '@nestjs/swagger'
 import type { Response } from 'express'
 
 import { DrizzleClient } from '@/shared/database/drizzle/drizzle-client'
@@ -24,6 +24,11 @@ export class CheckHealthController {
     private readonly drizzleClient: DrizzleClient,
     private readonly envProvider: EnvProvider,
   ) {}
+
+  @Get('/')
+  @Redirect('/health', HttpStatus.FOUND)
+  @ApiExcludeEndpoint()
+  redirectToHealth() {}
 
   @Get('/health')
   @ApiResponse({
