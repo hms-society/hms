@@ -114,6 +114,14 @@ describe('Check Health Controller [GET /health]', () => {
     }
   })
 
+  it('redirects the root path to /health', async () => {
+    if (!fixture) throw new Error('Fixture unavailable')
+    await request(fixture.app.getHttpServer())
+      .get('/')
+      .expect(302)
+      .expect('location', '/health')
+  })
+
   it('records the database health query without exposing its SQL', async () => {
     if (!fixture || !sdk) throw new Error('Health test infrastructure is unavailable')
     const response = await request(fixture.app.getHttpServer()).get('/health').expect(200)
